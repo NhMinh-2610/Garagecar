@@ -1,0 +1,35 @@
+/* Inventory Styles - Enterprise Theme */
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.list-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.list-group li {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    transition: 0.2s;
+}
+.list-group li:hover {
+    background: #f9fafb;
+}
+
+.form-control-sm {
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-right: 8px;
+    width: 60px;
+}

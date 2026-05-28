@@ -1,0 +1,320 @@
+/* Repair Styles - Enterprise Theme */
+
+.repair-workflow {
+    display: flex;
+    gap: 2rem;
+    flex-direction: column;
+}
+
+/* Repair Tabs */
+/* Repair Toolbar - Global Actions */
+/* Repair Toolbar - Global Actions */
+.repair-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    gap: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.toolbar-left {
+    flex: 0 0 auto;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Responsive Wrap for Mobile */
+@media (max-width: 992px) {
+    .repair-toolbar {
+        flex-wrap: wrap;
+    }
+    .toolbar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .search-box-global {
+        width: 100%;
+    }
+}
+
+
+/* Common height for toolbar inputs */
+.search-box-global,
+.filter-select,
+#btnNewRepair {
+    height: 42px; /* Fixed height for perfect alignment */
+    display: flex; /* Helps vertically center content in button/div */
+    align-items: center;
+    box-sizing: border-box;
+}
+
+
+/* Repair Tabs */
+.repair-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 5px;
+    background: transparent; /* Remove background container */
+}
+
+.repair-tab {
+    padding: 12px 30px;
+    border: none;
+    background: #e5e7eb; /* Light gray for inactive */
+    cursor: pointer;
+    border-radius: 50px; /* Pill shape */
+    font-weight: 600;
+    color: #6b7280; /* Muted text */
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.repair-tab:hover {
+    background: #d1d5db;
+    color: #374151;
+    transform: translateY(-1px);
+}
+
+.repair-tab.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+}
+
+/* Filter Controls */
+/* Filter Controls */
+.filter-select {
+    padding: 0 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    font-size: 0.9rem;
+    color: #374151;
+    cursor: pointer;
+    outline: none;
+    min-width: 180px;
+    transition: all 0.2s;
+}
+
+.filter-select:hover {
+    background-color: #fff;
+    border-color: #d1d5db;
+}
+
+.filter-select:focus {
+    border-color: var(--primary-color);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Global Search Box Override */
+.search-box-global {
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 0 1rem;
+    border: 1px solid #e5e7eb;
+    width: 320px;
+    transition: all 0.2s;
+}
+
+.search-box-global:focus-within {
+    background: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.search-box-global input {
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    width: 100%;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.search-box-global i {
+    color: #9ca3af;
+}
+
+/* Action Buttons in Table */
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+}
+
+/* Invoice Preview */
+.invoice-preview {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    border-radius: 8px;
+    padding: 2rem;
+    color: var(--text-main);
+}
+
+.invoice-header {
+    text-align: center;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.invoice-total {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    text-align: right;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Card Container overrides */
+.repair-tab-content .card-header {
+    display: none; /* Hide old headers since we have global toolbar */
+}
+
+.repair-tab-content .table-container {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Ensure tab content visibility */
+.repair-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.repair-tab-content.active {
+    display: block !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Premium New Repair Button */
+#btnNewRepair {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+#btnNewRepair:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+    background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
+}
+
+#btnNewRepair i {
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px;
+    border-radius: 50%;
+    margin-left: -5px;
+}
+
+/* Explicit Card Background for Contrast */
+.repair-tab-content .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+}
+
+/* Expandable Rows */
+tr.expanded-row {
+    background-color: #f9fafb;
+}
+
+tr.expanded-row td {
+    padding: 0 !important;
+    border-top: none;
+}
+
+.repair-details-container {
+    padding: 1rem 2rem;
+    border-left: 4px solid var(--primary-color);
+    margin: 10px 0;
+}
+
+.task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.task-item:hover {
+    border-color: var(--primary-color);
+}
+
+.task-item.completed {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.task-item.completed span {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.btn-expand {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.btn-expand.open {
+    transform: rotate(90deg);
+    color: var(--primary-color);
+}
+
