@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPro Garage Management System</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/reception.css">
+    <link rel="stylesheet" href="css/repair.css?v=3">
+    <link rel="stylesheet" href="css/inventory.css">
+    <link rel="stylesheet" href="css/report.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>Auto<span class="highlight">Pro</span></h2>
+                <p>Management System</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-target="dashboard-section">
+                    <i class="fa-solid fa-gauge"></i> Tổng quan
+                </li>
+                <li class="nav-item" data-target="reception-section">
+                    <i class="fa-solid fa-car"></i> Tiếp nhận xe
+                </li>
+                <li class="nav-item" data-target="repair-section">
+                    <i class="fa-solid fa-wrench"></i> Sửa chữa & Dịch vụ
+                </li>
+                <li class="nav-item" data-target="inventory-section">
+                    <i class="fa-solid fa-boxes-stacked"></i> Kho & Dữ liệu
+                </li>
+                <li class="nav-item" data-target="finance-section">
+                    <i class="fa-solid fa-money-bill-wave"></i> Tài chính (Thu tiền)
+                </li>
+                 <li class="nav-item" data-target="report-section">
+                    <i class="fa-solid fa-chart-line"></i> Báo cáo & Thống kê
+                </li>
+                <li class="nav-item" data-target="hr-section">
+                    <i class="fa-solid fa-users-gear"></i> Quản trị Nhân sự
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="Admin">
+                    <div>
+                        <h4>Admin</h4>
+                        <small>Quản trị viên</small>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn-icon"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="content" class="main-content">
+            <header class="topbar">
+                <div class="toggle-sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <div class="topbar-title">
+                    <h2 id="pageTitle">Tổng quan</h2>
+                </div>
+                <!-- <div class="topbar-actions">
+                    <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tác vụ nhanh</button>
+                </div> -->
+            </header>
+
+            <div class="content-body">
+                
+                <!-- 1. DASHBOARD OVERVIEW -->
+                <section id="dashboard-section" class="active-section">
+                    <div class="dashboard-cards">
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-blue"><i class="fa-solid fa-car"></i></div>
+                            <div class="stat-info">
+                                <h3>12</h3>
+                                <p>Xe tiếp nhận hôm nay</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-orange"><i class="fa-solid fa-wrench"></i></div>
+                            <div class="stat-info">
+                                <h3>5</h3>
+                                <p>Đang sửa chữa</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-green"><i class="fa-solid fa-check-circle"></i></div>
+                            <div class="stat-info">
+                                <h3>8</h3>
+                                <p>Đã hoàn thành</p>
+                            </div>
+                        </div>
+                         <div class="card stat-card">
+                            <div class="stat-icon bg-purple"><i class="fa-solid fa-coins"></i></div>
+                            <div class="stat-info">
+                                <h3>15.2M</h3>
+                                <p>Doanh thu tạm tính</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Dashboard Info -->
+                    <div class="dashboard-extra" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                        <!-- Recent Activities -->
+                        <div class="card">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Hoạt động gần đây</h3>
+                            <div id="recentActivities" style="max-height: 400px; overflow-y: auto;">
+                                <p style="color: #6b7280; text-align: center; padding: 2rem;">Đang tải...</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats & Alerts -->
+                        <div>
+                            <div class="card" style="margin-bottom: 1.5rem;">
+                                <h3><i class="fa-solid fa-chart-line"></i> Tuần này</h3>
+                                <div id="weeklyStats">
+                                    <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
+                                        <span style="color: #6b7280;">Xe tiếp nhận:</span>
+                                        <strong id="weeklyVehicles">0</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
+                                        <span style="color: #6b7280;">Phiếu sửa:</span>
+                                        <strong id="weeklyRepairs">0</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; padding: 0.75rem 0;">
+                                        <span style="color: #6b7280;">Doanh thu:</span>
+                                        <strong id="weeklyRevenue" style="color: #10b981;">0đ</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h3><i class="fa-solid fa-bell"></i> Cảnh báo</h3>
+                                <div id="alerts">
+                                    <p style="color: #6b7280; font-size: 0.875rem;">Không có cảnh báo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- 2. RECEPTION & LOOKUP -->
+                <section id="reception-section">
+                    <!-- Vehicle List (Primary) -->
+                    <div class="card">
+                        <div class="card-header-flex">
+                             <div class="header-title-search">
+                                <h3><i class="fa-solid fa-list"></i> Danh sách xe</h3>
+                                <div class="search-box-inline">
+                                    <input type="text" id="vehicleSearch" placeholder="Tìm biển số, tên, hiệu xe...">
+                                    <button class="btn-icon"><i class="fa-solid fa-search"></i></button>
+                                </div>
+                            </div>
+                            <button id="btnNewReception" class="btn btn-primary">
+                                <i class="fa-solid fa-plus"></i> Tiếp nhận xe mới
+                            </button>
+                        </div>
+                        
+                        <table class="data-table" id="receptionTable">
+                            <thead>
+                                <tr>
+                                    <th>Biển số</th>
+                                    <th>Khách hàng</th>
+                                    <th>Hiệu xe</th>
+                                    <th>Ngày tiếp nhận</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Reception Form Modal -->
+                    <div id="receptionModal" class="modal" style="display: none;">
+                        <div class="modal-content" style="max-width: 600px;">
+                            <span class="close-btn" id="closeReceptionModal">&times;</span>
+                            <h2 class="modal-title"><i class="fa-solid fa-file-circle-plus"></i> Tạo Phiếu Tiếp Nhận</h2>
+                            <form id="receptionForm">
+                                <div class="form-group">
+                                    <label>Tên chủ xe</label>
+                                    <input type="text" name="customerName" required placeholder="Nguyễn Văn A">
+                                </div>
+                                <div class="form-group">
+                                    <label>Số điện thoại</label>
+                                    <input type="tel" name="phone" required placeholder="0909xxxxxx">
+                                </div>
+                                <div class="form-group">
+                                    <label>Địa chỉ</label>
+                                    <input type="text" name="address" placeholder="Quận 1, TP.HCM">
+                                </div>
+                                <div class="form-group two-col-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label>Hiệu xe</label>
+                                        <select name="carBrand" id="brandSelect">
+                                            <option value="">-- Chọn hiệu xe --</option>
+                                            <option value="Toyota">Toyota</option>
+                                            <option value="Honda">Honda</option>
+                                            <option value="Mazda">Mazda</option>
+                                            <option value="Ford">Ford</option>
+                                            <option value="Kia">Kia</option>
+                                            <option value="Hyundai">Hyundai</option>
+                                            <option value="Mercedes">Mercedes</option>
+                                            <option value="BMW">BMW</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Dòng xe</label>
+                                        <select id="modelSelect" disabled>
+                                            <option value="">-- Chọn dòng xe --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Biển số xe</label>
+                                    <input type="text" name="licensePlate" required placeholder="51H-123.45">
+                                </div>
+                                <div class="form-actions right">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('receptionModal').style.display='none'">Hủy</button>
+                                    <button type="submit" class="btn btn-primary">Thêm Xe</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Edit Vehicle Modal -->
+                    <div id="editVehicleModal" class="modal" style="display: none;">
+                        <div class="modal-content" style="max-width: 600px;">
+                            <span class="close-btn" id="closeEditModal">&times;</span>
+                            <h2 class="modal-title"><i class="fa-solid fa-edit"></i> Chỉnh sửa thông tin</h2>
+                            <form id="editVehicleForm">
+                                <input type="hidden" id="editVehicleId">
+                                
+                                <div class="two-col-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="form-group">
+                                        <label>Tên chủ xe</label>
+                                        <input type="text" id="editCustomerName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Số điện thoại</label>
+                                        <input type="tel" id="editPhone" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Địa chỉ</label>
+                                    <input type="text" id="editAddress">
+                                </div>
+
+                                <div class="form-group two-col-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label>Hiệu xe</label>
+                                        <select id="editBrandSelect">
+                                            <option value="">-- Chọn hiệu xe --</option>
+                                            <option value="Toyota">Toyota</option>
+                                            <option value="Honda">Honda</option>
+                                            <option value="Mazda">Mazda</option>
+                                            <option value="Ford">Ford</option>
+                                            <option value="Kia">Kia</option>
+                                            <option value="Hyundai">Hyundai</option>
+                                            <option value="Mercedes">Mercedes</option>
+                                            <option value="BMW">BMW</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Dòng xe</label>
+                                        <select id="editModelSelect">
+                                            <option value="">-- Chọn dòng xe --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Biển số xe</label>
+                                    <input type="text" id="editLicensePlate" required>
+                                </div>
+
+                                <div class="form-actions right">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('editVehicleModal').style.display='none'">Hủy</button>
+                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <section id="repair-section">
+                    
+                    <!-- GLOBAL TOOLBAR -->
+                    <div class="repair-toolbar">
+                        <div class="toolbar-left">
+                            <button class="btn btn-primary" id="btnNewRepair"><i class="fa-solid fa-plus"></i> Tạo Phiếu Mới</button>
+                        </div>
+                        
+                        <div class="toolbar-right">
+                            <!-- Global Search -->
+                            <div class="search-box-global">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" id="globalRepairSearch" placeholder="Tìm biển số, khách hàng, thợ...">
+                            </div>
+
+                            <!-- Filters -->
+                            <select class="filter-select" id="filterMechanic">
+                                <option value="">Tất cả thợ</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tabs for Repair Status -->
+                    <div class="repair-tabs">
+                        <button class="repair-tab active" onclick="switchRepairTab('waiting')">⏳ Chờ sửa</button>
+                        <button class="repair-tab" onclick="switchRepairTab('working')">🔧 Đang sửa</button>
+                        <button class="repair-tab" onclick="switchRepairTab('completed')">✅ Đã sửa xong</button>
+                    </div>
+
+                    <!-- Section: Waiting (Chờ sửa) -->
+                    <div id="tabWaiting" class="repair-tab-content active">
+                        <div class="card">
+                            <div class="table-container">
+                                <table class="table" id="waitingTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Biển Số</th>
+                                            <th>Hiệu Xe</th>
+                                            <th>Hạng Mục</th>
+                                            <th>Thợ</th>
+                                            <th>Trạng Thái</th>
+                                            <th>Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Working (Đang sửa) -->
+                    <div id="tabWorking" class="repair-tab-content" style="display: none;">
+                        <div class="card">
+                            <div class="table-container">
+                                <table class="table" id="workingTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px;"></th> <!-- Expand Btn -->
+                                            <th>Biển Số</th>
+                                            <th>Hiệu Xe</th>
+                                            <th>Thợ</th>
+                                            <th>Tiến Độ</th>
+                                            <th>Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Completed (Đã sửa xong) -->
+                    <div id="tabCompleted" class="repair-tab-content" style="display: none;">
+                        <div class="card">
+                            <div class="table-container">
+                                <table class="table" id="completedTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Biển Số</th>
+                                            <th>Hiệu Xe</th>
+                                            <th>Hạng Mục</th>
+                                            <th>Thợ</th>
+                                            <th>Tổng Tiền</th>
+                                            <th>Trạng Thái</th>
+                                            <th>Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create Repair Ticket Modal -->
+                    <div id="repairModal" class="modal" style="display: none;">
+                        <div class="modal-content" style="max-width: 800px;">
+                            <span class="close-btn" id="closeRepairModal">&times;</span>
+                            <h2 class="modal-title"><i class="fa-solid fa-file-invoice"></i> Tạo Phiếu Sửa Chữa</h2>
+                            
+                            <div class="repair-workflow">
+                                <!-- Step 1: Select Vehicle & Mechanic -->
+                                <div class="worker-step two-col-grid">
+                                    <div class="form-group">
+                                        <label>Chọn xe:</label>
+                                        <select id="repairVehicleSelect" class="form-control">
+                                            <option value="">-- Chọn xe --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Thợ phụ trách:</label>
+                                        <select id="mechanicSelect" class="form-control">
+                                            <option value="">-- Chọn thợ --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">
+
+                                <!-- Step 2: Add Items -->
+                                <div class="repair-items-form">
+                                    <h4><i class="fa-solid fa-list-check"></i> Thêm hạng mục công việc</h4>
+                                    <div class="two-col-grid">
+                                        <div class="form-group">
+                                            <label>Nội dung công việc</label>
+                                            <select id="taskSelect" class="form-control">
+                                                <option value="" data-labor="0" data-part-filter="">-- Chọn công việc --</option>
+                                                <option value="Thay nhớt" data-labor="50000" data-part-filter="nhớt,dầu,oil">Thay nhớt (50k)</option>
+                                                <option value="Thay lọc gió" data-labor="30000" data-part-filter="lọc,filter">Thay lọc gió (30k)</option>
+                                                <option value="Vệ sinh khoang máy" data-labor="150000" data-part-filter="vệ sinh,tẩy,rửa">Vệ sinh khoang máy (150k)</option>
+                                                <option value="Thay bố thắng" data-labor="100000" data-part-filter="bố,thắng,brake,phanh">Thay bố thắng (100k)</option>
+                                                <option value="Kiểm tra hệ thống điện" data-labor="200000" data-part-filter="điện,bình,acquy,đèn,cầu chì">Kiểm tra hệ thống điện (200k)</option>
+                                                <option value="Cân chỉnh thước lái" data-labor="300000" data-part-filter="lái,vô lăng,càng">Cân chỉnh thước lái (300k)</option>
+                                                <option value="Rửa xe" data-labor="80000" data-part-filter="nước rửa,wax,đánh bóng">Rửa xe (80k)</option>
+                                                <option value="Khác" data-labor="0" data-part-filter="*">Khác (Nhập tay bên dưới)</option>
+                                            </select>
+                                            <input type="text" id="customTask" class="form-control mt-2" placeholder="Nhập tên công việc..." style="display: none;">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Vật tư / Phụ tùng</label>
+                                            <select id="partSelect" class="form-control">
+                                                <option value="" data-price="0">-- Không dùng vật tư --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="two-col-grid">
+                                        <div class="form-group">
+                                            <label>Tiền công (VNĐ)</label>
+                                            <input type="number" id="laborPrice" class="form-control" value="0" readonly style="background-color: #f3f4f6;">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tiền vật tư (VNĐ)</label>
+                                            <input type="number" id="partPrice" class="form-control" value="0" readonly style="background-color: #f3f4f6;">
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <button id="btnAddItem" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Thêm mục</button>
+                                    </div>
+                                </div>
+
+                                <!-- Items List -->
+                                <table class="data-table mt-4" id="repairItemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Công việc</th>
+                                            <th>Vật tư</th>
+                                            <th>Thành tiền</th>
+                                            <th>Xóa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+
+                                <div class="total-section text-right mt-4">
+                                    <h3>Tổng cộng: <span id="totalAmount">0</span> VNĐ</h3>
+                                </div>
+                                
+                                <div class="form-actions right mt-4">
+                                    <button class="btn btn-primary" id="btnSaveTicket">Lưu Phiếu Sửa</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- 4. INVENTORY & DATA -->
+                <section id="inventory-section">
+                    <div class="tabs">
+                         <button class="tab-btn active" data-tab="inv-import">Nhập Vật Tư</button>
+                         <button class="tab-btn" data-tab="inv-settings">Cài đặt Dữ liệu</button>
+                    </div>
+
+                    <div class="tab-content active" id="inv-import">
+                         <div class="card">
+                            <h3>Nhập Kho Vật Tư Phụ Tùng</h3>
+                            <form id="importForm" class="two-col-grid">
+                                <div class="form-group">
+                                    <label>Tên vật tư</label>
+                                    <input type="text" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số lượng nhập</label>
+                                    <input type="number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Đơn giá nhập</label>
+                                    <input type="number" required>
+                                </div>
+                                <div class="form-group flex-end">
+                                    <button type="submit" class="btn btn-success">Nhập Kho</button>
+                                </div>
+                            </form>
+                            <hr>
+                            <h4>Lịch sử nhập kho gần đây</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên vật tư</th>
+                                        <th>Số lượng</th>
+                                        <th>Ngày nhập</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Nhớt Castrol</td>
+                                        <td>50</td>
+                                        <td>20/12/2025</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                         </div>
+                    </div>
+
+                    <div class="tab-content" id="inv-settings">
+                        <div class="card-grid">
+                            <div class="card">
+                                <h3>Quản lý Hiệu Xe</h3>
+                                <ul class="list-group">
+                                    <li>Toyota <button class="btn-sm text-red">Xóa</button></li>
+                                    <li>Honda <button class="btn-sm text-red">Xóa</button></li>
+                                </ul>
+                                <div class="add-row mt-2">
+                                    <input type="text" placeholder="Thêm hiệu xe..." class="form-control-sm">
+                                    <button class="btn-sm btn-primary">Thêm</button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h3>Quản lý Tiền Công</h3>
+                                <ul class="list-group">
+                                    <li>Rửa xe - 100k <button class="btn-sm text-red">Xóa</button></li>
+                                </ul>
+                                <div class="add-row mt-2">
+                                    <input type="text" placeholder="Tên công việc" class="form-control-sm">
+                                    <input type="number" placeholder="Giá" class="form-control-sm" style="width:80px">
+                                    <button class="btn-sm btn-primary">Thêm</button>
+                                </div>
+                            </div>
+                             <div class="card full-width">
+                                <h3>Tham Số Quy Định</h3>
+                                <div class="form-group">
+                                    <label>Số xe tối đa / ngày</label>
+                                    <input type="number" value="30">
+                                </div>
+                                <button class="btn btn-primary mt-2">Lưu Thay Đổi</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                 <!-- 5. FINANCE (PAYMENT) -->
+                <section id="finance-section">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-cash-register"></i> Lập Phiếu Thu Tiền</h3>
+                        <div class="payment-selector">
+                            <label>Chọn xe đã sửa xong:</label>
+                            <select class="form-control">
+                                <option>59A-123.45 - Nguyễn Văn X (Xong)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="invoice-preview mt-4">
+                            <div class="invoice-box">
+                                <div class="invoice-header">
+                                    <h4>HÓA ĐƠN THANH TOÁN</h4>
+                                    <p>Ngày: 21/12/2025</p>
+                                </div>
+                                <div class="invoice-details">
+                                    <p><strong>Khách hàng:</strong> Nguyễn Văn X</p>
+                                    <p><strong>Biển số:</strong> 59A-123.45</p>
+                                    <p><strong>Tổng tiền:</strong> 3.500.000 VNĐ</p>
+                                </div>
+                                <div class="invoice-actions text-center mt-4">
+                                    <button class="btn btn-success btn-lg">Xác Nhận Thu Tiền & In</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                 <!-- 6. REPORT -->
+                <section id="report-section">
+                     <div class="report-filters card">
+                        <label>Chọn tháng:</label>
+                        <input type="month" id="reportMonth" class="form-control" style="width: 200px; display: inline-block;">
+                        <button class="btn btn-primary" id="btnViewReport">Xem Báo Cáo</button>
+                    </div>
+
+                    <div class="card mt-4">
+                        <h3>Báo Cáo Doanh Thu Theo Hiệu Xe</h3>
+                        <div class="chart-container" style="position: relative; height:40vh; width:100%; margin-top: 20px;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                        <table class="data-table mt-4" id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>Hiệu xe</th>
+                                    <th>Số lượt sửa</th>
+                                    <th>Doanh thu (VNĐ)</th>
+                                    <th>Tỉ lệ (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+
+                <!-- 7. HR -->
+                <!-- 7. HR -->
+                 <section id="hr-section">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="hr-mechanics">Danh Sách Thợ</button>
+                        <button class="tab-btn" data-tab="hr-users">Tài Khoản Hệ Thống</button>
+                    </div>
+
+                    <!-- Tab 1: Mechanics -->
+                    <div class="tab-content active" id="hr-mechanics">
+                        <div class="card">
+                            <div class="card-header-actions">
+                                <h3><i class="fa-solid fa-users-gear"></i> Đội Ngũ Kỹ Thuật</h3>
+                                <button class="btn btn-primary" id="btnAddMechanic"><i class="fa-solid fa-plus"></i> Thêm Thợ</button>
+                            </div>
+                            <table class="data-table" id="mechanicsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Họ tên</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Chuyên môn</th>
+                                        <th>Trạng thái</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Users -->
+                    <div class="tab-content" id="hr-users">
+                        <div class="card">
+                            <div class="card-header-actions">
+                                <h3><i class="fa-solid fa-user-shield"></i> Tài Khoản Đăng Nhập</h3>
+                                <button class="btn btn-primary" onclick="showToast('Chức năng thêm user đang phát triển', 'info')"><i class="fa-solid fa-plus"></i> Tạo Tài Khoản</button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Họ tên</th>
+                                        <th>Email</th>
+                                        <th>Vai trò</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>admin</td>
+                                        <td>Quản Trị Viên</td>
+                                        <td>admin@autopro.com</td>
+                                        <td><span class="badge badge-done">Admin</span></td>
+                                        <td><button class="btn btn-sm btn-secondary">Sửa</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>staff</td>
+                                        <td>Nhân Viên</td>
+                                        <td>staff@autopro.com</td>
+                                        <td><span class="badge badge-working">Staff</span></td>
+                                        <td><button class="btn btn-sm btn-secondary">Sửa</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Add Mechanic Modal -->
+                    <div id="hrModal" class="modal" style="display: none;">
+                        <div class="modal-content" style="max-width: 500px;">
+                            <span class="close-btn" id="closeHrModal">&times;</span>
+                            <h2 class="modal-title"><i class="fa-solid fa-user-plus"></i> Thêm Thợ Mới</h2>
+                            <form id="hrForm">
+                                <div class="form-group">
+                                    <label>Họ và tên</label>
+                                    <input type="text" id="mechName" required placeholder="Nguyễn Văn A">
+                                </div>
+                                <div class="form-group">
+                                    <label>Số điện thoại</label>
+                                    <input type="tel" id="mechPhone" placeholder="09xxxx">
+                                </div>
+                                <div class="form-group">
+                                    <label>Chuyên môn chính</label>
+                                    <select id="mechSpecialty">
+                                        <option value="Chung">Sửa chữa chung</option>
+                                        <option value="Điện - Điện lạnh">Điện - Điện lạnh</option>
+                                        <option value="Máy gầm">Máy gầm</option>
+                                        <option value="Đồng sơn">Đồng sơn</option>
+                                        <option value="Lốp">Lốp & Mâm</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions right">
+                                    <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- SweetAlert2 (Optional for better alerts) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js for Reports -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- JS Modules -->
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/reception.js"></script>
+    <script src="js/repair.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/finance.js"></script>
+    <script src="js/report.js"></script>
+    <script src="js/hr.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
