@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Auto Garage Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <i class="fa-solid fa-car-burst"></i>
+                <h1>Auto<span class="highlight">Pro</span></h1>
+                <p>Hệ thống quản lý garage chuyên nghiệp</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <h2>Đăng nhập</h2>
+                
+                <div class="form-group">
+                    <label for="loginEmail">
+                        <i class="fa-solid fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="loginEmail" placeholder="admin@autopro.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">
+                        <i class="fa-solid fa-lock"></i> Mật khẩu
+                    </label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
+                </button>
+
+                <p class="switch-text">
+                    Chưa có tài khoản? <a href="#" id="showRegister">Đăng ký ngay</a>
+                </p>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form">
+                <h2>Đăng ký tài khoản</h2>
+                
+                <div class="form-group">
+                    <label for="registerFullName">
+                        <i class="fa-solid fa-user"></i> Họ và tên
+                    </label>
+                    <input type="text" id="registerFullName" placeholder="Nguyễn Văn A" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerUsername">
+                        <i class="fa-solid fa-at"></i> Tên đăng nhập
+                    </label>
+                    <input type="text" id="registerUsername" placeholder="nguyenvana" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">
+                        <i class="fa-solid fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="registerEmail" placeholder="nguyenvana@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">
+                        <i class="fa-solid fa-lock"></i> Mật khẩu
+                    </label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPasswordConfirm">
+                        <i class="fa-solid fa-lock-open"></i> Xác nhận mật khẩu
+                    </label>
+                    <input type="password" id="registerPasswordConfirm" placeholder="••••••••" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-user-plus"></i> Đăng ký
+                </button>
+
+                <p class="switch-text">
+                    Đã có tài khoản? <a href="#" id="showLogin">Đăng nhập</a>
+                </p>
+            </form>
+
+            <!-- Error/Success Messages -->
+            <div id="messageBox" class="message-box"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
