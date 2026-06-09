@@ -127,7 +127,7 @@ registerForm.addEventListener('submit', async (e) => {
                 username,
                 email,
                 password,
-                role: 'staff' // Default role
+                role: 'admin' 
             })
         });
 

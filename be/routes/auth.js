@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
       email,
       password: hashedPassword,
       fullName,
-      role: role || ROLES.USER // Use 'user' as default from constants
+      role: role || ROLES.CUSTOMER // Use customer as default
     });
 
     sendSuccess(res, {
