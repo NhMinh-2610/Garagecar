@@ -46,44 +46,62 @@ AutoPro_Garage/
     └── styles.css          # Stylesheet trang chủ
 ```
 
-## 🚀 Cài Đặt & Chạy Ứng Dụng
+## 🚀 Hướng Dẫn Cài Đặt & Chạy Ứng Dụng
 
-### Yêu cầu hệ thống
+Ứng dụng được chia làm 2 phần độc lập: **Backend** (Xử lý dữ liệu & API) và **Frontend** (Giao diện người dùng). Bạn cần chạy đồng thời cả 2 phần để hệ thống hoạt động.
 
-- **Node.js** (Phiên bản v14.x hoặc mới hơn)
-- **NPM** (Node Package Manager)
+### 📋 Yêu cầu hệ thống
+- **Node.js**: Phiên bản v16.x trở lên.
+- **NPM**: Cài đặt kèm theo Node.js.
+- **Lưu ý cho người dùng WSL (Windows):** Vui lòng chạy lệnh cài đặt (`npm install`) ngay bên trong môi trường WSL. Không copy thư mục `node_modules` từ Windows sang WSL để tránh lỗi tệp thực thi (như `nodemon: not found`).
 
-### Bước 1: Khởi Tạo Backend
+---
 
-1. Di chuyển vào thư mục backend và cài đặt dependencies:
+### Bước 1: Khởi động Backend (Máy chủ API)
+
+1. **Mở Terminal** và di chuyển vào thư mục `be`:
    ```bash
    cd be
+   ```
+
+2. **Cài đặt thư viện (Dependencies):**
+   *(Nếu bạn đang dùng WSL mà trước đó đã lỡ cài bên Windows, hãy chạy `rm -rf node_modules` trước)*
+   ```bash
    npm install
    ```
 
-2. Cấu hình môi trường bằng cách tạo file `.env` trong thư mục `be/`:
+3. **Tạo cấu hình môi trường:**
+   Tạo một file mới tinh có tên chính xác là `.env` (có dấu chấm ở đầu) nằm trong thư mục `be`. Sau đó dán nội dung sau vào file (Tuyệt đối không dán trực tiếp lệnh này vào Terminal):
    ```env
    PORT=3000
    JWT_SECRET=super_secret_jwt_key
    NODE_ENV=development
    ```
 
-3. Khởi chạy máy chủ backend:
+4. **Khởi chạy Backend:**
    ```bash
    npm run dev
    ```
-   *Backend sẽ lắng nghe tại `http://localhost:3000`*
+   ✅ *Thành công: Terminal sẽ hiển thị dòng chữ báo Backend đang lắng nghe tại `http://localhost:3000`.*
 
-### Bước 2: Khởi Tạo Frontend
+---
 
-Frontend không yêu cầu cài đặt gói (No-build). Bạn có thể chạy bằng một trong các cách sau:
+### Bước 2: Khởi động Frontend (Giao diện Web)
 
-- **VS Code Live Server**: Mở `fe/index.html` và click "Go Live".
-- **HTTP Server**:
+Phần Frontend được code bằng HTML/CSS/JS thuần nên không cần phải `npm install`. Bạn có thể chạy ngay bằng 1 trong 3 cách sau:
+
+- **Cách 1: Mở trực tiếp (Dễ nhất)**
+  Sử dụng File Explorer (My Computer), vào thư mục `fe` và click đúp chuột vào tệp `index.html` để mở trên trình duyệt.
+
+- **Cách 2: Dùng VS Code Live Server (Khuyên dùng)**
+  Mở thư mục dự án bằng VS Code. Cài đặt Extension **"Live Server"**. Nhấn chuột phải vào tệp `fe/index.html` và chọn **"Open with Live Server"**. Tính năng này giúp trang web tự động tải lại mỗi khi bạn sửa code.
+
+- **Cách 3: Chạy bằng Terminal (HTTP Server)**
+  Mở một tab Terminal **mới** (vẫn giữ tab Backend đang chạy), đảm bảo bạn đang ở thư mục gốc của dự án và chạy lệnh:
   ```bash
   npx http-server fe -p 8080
   ```
-- **Mở Trực Tiếp**: Mở file `fe/index.html` bằng trình duyệt web.
+  ✅ *Sau đó mở trình duyệt và truy cập đường dẫn: `http://localhost:8080`*
 
 ## 📡 Tài Liệu API (Endpoints)
 
