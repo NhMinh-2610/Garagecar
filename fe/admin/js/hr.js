@@ -1,117 +1,260 @@
-// Module: HR (Human Resources) - Mechanic Management
+// HR Module - Mechanics & User Account Management
+const HR_API = 'http://localhost:3000/api';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('token');
-    
-    // Elements
-    const mechanicsTable = document.querySelector('#mechanicsTable tbody');
+    loadMechanics();
+    loadUsers();
+
+    // Add Mechanic Modal
     const btnAddMechanic = document.getElementById('btnAddMechanic');
     const hrModal = document.getElementById('hrModal');
     const closeHrModal = document.getElementById('closeHrModal');
-    const hrForm = document.getElementById('hrForm');
 
-    // Only run if we are on the page with these elements
-    if (!mechanicsTable) return;
-
-    // Open Modal
     if (btnAddMechanic) {
         btnAddMechanic.addEventListener('click', () => {
-            hrForm.reset();
             hrModal.style.display = 'block';
         });
     }
-
-    // Close Modal
     if (closeHrModal) {
         closeHrModal.addEventListener('click', () => {
             hrModal.style.display = 'none';
         });
     }
 
+    // Add Mechanic Form
+    const hrForm = document.getElementById('hrForm');
     if (hrForm) {
         hrForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const payload = {
-                fullName: document.getElementById('mechName').value,
-                phone: document.getElementById('mechPhone').value,
-                specialty: document.getElementById('mechSpecialty').value
-            };
-
-            try {
-                const response = await fetch('http://localhost:3000/api/mechanics', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    showToast('Đã thêm thợ mới!', 'success');
-                    hrModal.style.display = 'none';
-                    loadMechanics();
-                    // Dispatch event to update other modules if needed
-                } else {
-                    showToast(result.message, 'error');
-                }
-            } catch (error) {
-                console.error('Add mechanic error:', error);
-                showToast('Lỗi kết nối', 'error');
-            }
+            await createMechanic();
         });
     }
 
-    // Load Mechanics
-    async function loadMechanics() {
-        try {
-            const response = await fetch('http://localhost:3000/api/mechanics', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const result = await response.json();
-            
-            if (result.success) {
-                mechanicsTable.innerHTML = '';
-                result.data.forEach(mech => {
-                    mechanicsTable.innerHTML += `
-                        <tr>
-                            <td>${mech.fullName}</td>
-                            <td>${mech.phone || '---'}</td>
-                            <td>${mech.specialty}</td>
-                            <td><span class="badge badge-working">Đang làm việc</span></td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" onclick="deleteMechanic(${mech.id})"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-        } catch (error) {
-            console.error('Load mechanics error:', error);
-        }
+    // Create User Account Modal
+    const btnCreateUser = document.getElementById('btnCreateUser');
+    const userModal = document.getElementById('userModal');
+    const closeUserModal = document.getElementById('closeUserModal');
+
+    if (btnCreateUser) {
+        btnCreateUser.addEventListener('click', () => {
+            userModal.style.display = 'block';
+        });
+    }
+    if (closeUserModal) {
+        closeUserModal.addEventListener('click', () => {
+            userModal.style.display = 'none';
+        });
     }
 
-    // Delete Mechanic
-    window.deleteMechanic = async function(id) {
-        if(!confirm('Bạn có chắc muốn xóa thợ này?')) return;
-        
-        try {
-            const response = await fetch(`http://localhost:3000/api/mechanics/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const result = await response.json();
-            if(result.success) {
-                showToast('Đã xóa thành công', 'success');
-                loadMechanics();
-            }
-        } catch (e) {
-            showToast('Lỗi kết nối', 'error');
-        }
-    };
-
-    // Initial Load
-    loadMechanics();
+    // Create User Form
+    const createUserForm = document.getElementById('createUserForm');
+    if (createUserForm) {
+        createUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createUserAccount();
+        });
+    }
 });
+
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+// ===== MECHANICS =====
+async function loadMechanics() {
+    try {
+        const response = await fetch(`${HR_API}/mechanics`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+        const result = await response.json();
+
+        const tbody = document.querySelector('#mechanicsTable tbody');
+        if (!result.success || !result.data || result.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #6b7280;">Chưa có thợ nào</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = result.data.map(m => `
+            <tr>
+                <td><strong>${m.fullName}</strong></td>
+                <td>${m.phone || '---'}</td>
+                <td>${m.specialty || 'Chung'}</td>
+                <td><span class="badge badge-done">Hoạt động</span></td>
+                <td>
+                    <button class="btn btn-sm btn-secondary" style="color: #ef4444;" onclick="deleteMechanic(${m.id}, '${m.fullName}')">
+                        <i class="fa-solid fa-trash"></i> Xóa
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Load mechanics error:', error);
+    }
+}
+
+async function createMechanic() {
+    const name = document.getElementById('mechName').value.trim();
+    const phone = document.getElementById('mechPhone').value.trim();
+    const specialty = document.getElementById('mechSpecialty').value;
+
+    if (!name) {
+        showToast('Vui lòng nhập tên thợ', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${HR_API}/mechanics`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify({ fullName: name, phone, specialty })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showToast('Thêm thợ thành công!', 'success');
+            document.getElementById('hrForm').reset();
+            document.getElementById('hrModal').style.display = 'none';
+            loadMechanics();
+        } else {
+            showToast(result.message || 'Lỗi thêm thợ', 'error');
+        }
+    } catch (error) {
+        console.error('Create mechanic error:', error);
+        showToast('Lỗi kết nối server', 'error');
+    }
+}
+
+async function deleteMechanic(id, name) {
+    if (!confirm(`Xóa thợ "${name}"?`)) return;
+
+    try {
+        const response = await fetch(`${HR_API}/mechanics/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showToast('Đã xóa thợ', 'success');
+            loadMechanics();
+        } else {
+            showToast(result.message || 'Lỗi xóa thợ', 'error');
+        }
+    } catch (error) {
+        showToast('Lỗi kết nối server', 'error');
+    }
+}
+
+// ===== USER ACCOUNTS =====
+async function loadUsers() {
+    try {
+        const response = await fetch(`${HR_API}/auth/users`, {
+            headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+        const result = await response.json();
+
+        const tbody = document.querySelector('#usersTable tbody');
+        if (!result.success || !result.data || result.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280;">Không có tài khoản</td></tr>';
+            return;
+        }
+
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+        tbody.innerHTML = result.data.map(user => {
+            const roleMap = {
+                'admin': { label: 'Admin', class: 'badge-done' },
+                'mechanic': { label: 'Thợ', class: 'badge-working' },
+                'customer': { label: 'Khách', class: 'badge-pending' },
+                'accountant': { label: 'Kế Toán', class: 'badge-warning' }
+            };
+            const role = roleMap[user.role] || { label: user.role, class: 'badge-pending' };
+            const isSelf = user.id === currentUser.id;
+
+            return `
+                <tr>
+                    <td><strong>${user.username}</strong></td>
+                    <td>${user.fullName}</td>
+                    <td>${user.email}</td>
+                    <td><span class="badge ${role.class}">${role.label}</span></td>
+                    <td>${new Date(user.createdAt).toLocaleDateString('vi-VN')}</td>
+                    <td>
+                        ${isSelf ? '<span style="color: #6b7280; font-size: 0.85rem;">Bạn</span>' : `
+                            <button class="btn btn-sm btn-secondary" style="color: #ef4444;" onclick="deleteUser(${user.id}, '${user.username}')">
+                                <i class="fa-solid fa-trash"></i> Xóa
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Load users error:', error);
+    }
+}
+
+async function createUserAccount() {
+    const username = document.getElementById('newUsername').value.trim();
+    const fullName = document.getElementById('newFullName').value.trim();
+    const email = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+
+    if (!username || !fullName || !email || !password || !role) {
+        showToast('Vui lòng nhập đầy đủ thông tin', 'warning');
+        return;
+    }
+
+    if (password.length < 6) {
+        showToast('Mật khẩu phải có ít nhất 6 ký tự', 'warning');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${HR_API}/auth/register-staff`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}`
+            },
+            body: JSON.stringify({ username, fullName, email, password, role })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showToast(`Tạo tài khoản ${role} thành công!`, 'success');
+            document.getElementById('createUserForm').reset();
+            document.getElementById('userModal').style.display = 'none';
+            loadUsers();
+        } else {
+            showToast(result.message || 'Lỗi tạo tài khoản', 'error');
+        }
+    } catch (error) {
+        console.error('Create user error:', error);
+        showToast('Lỗi kết nối server', 'error');
+    }
+}
+
+async function deleteUser(userId, username) {
+    if (!confirm(`Xóa tài khoản "${username}"? Hành động này không thể hoàn tác!`)) return;
+
+    try {
+        const response = await fetch(`${HR_API}/auth/users/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showToast('Đã xóa tài khoản', 'success');
+            loadUsers();
+        } else {
+            showToast(result.message || 'Lỗi xóa tài khoản', 'error');
+        }
+    } catch (error) {
+        showToast('Lỗi kết nối server', 'error');
+    }
+}
