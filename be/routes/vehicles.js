@@ -1,10 +1,11 @@
 const express = require('express');
 const { Vehicle, RepairTicket } = require('../models');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireRole } = require('../middleware/auth');
 const { sendSuccess, sendError } = require('../utils/response');
 const { isValidLicensePlate, sanitizeString } = require('../utils/validation');
 const statusCodes = require('../constants/statusCodes');
 const errorMessages = require('../constants/errorMessages');
+const { ROLES } = require('../constants/roles');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -12,7 +13,7 @@ const router = express.Router();
 // Apply auth middleware to all routes
 router.use(authMiddleware);
 
-// GET /api/vehicles/my-vehicles - Get vehicles for logged-in user
+// GET /api/vehicles/my-vehicles - Get vehicles for logged-in user (all roles)
 router.get('/my-vehicles', async (req, res) => {
   try {
     const { fullName, role } = req.user;
@@ -56,8 +57,8 @@ router.get('/my-vehicles', async (req, res) => {
   }
 });
 
-// GET /api/vehicles - Get all vehicles with repair info
-router.get('/', async (req, res) => {
+// GET /api/vehicles - Get all vehicles with repair info (Admin only)
+router.get('/', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const vehicles = await Vehicle.findAll({
       include: [{
@@ -75,8 +76,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/vehicles/:id - Get single vehicle
-router.get('/:id', async (req, res) => {
+// GET /api/vehicles/:id - Get single vehicle (Admin only)
+router.get('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const vehicle = await Vehicle.findByPk(req.params.id);
 
@@ -91,8 +92,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/vehicles - Create new vehicle
-router.post('/', async (req, res) => {
+// POST /api/vehicles - Create new vehicle (Admin only)
+router.post('/', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const { licensePlate, customerName, phone, address, carBrand, carModel } = req.body;
 
@@ -130,8 +131,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/vehicles/:id - Update vehicle
-router.put('/:id', async (req, res) => {
+// PUT /api/vehicles/:id - Update vehicle (Admin only)
+router.put('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const vehicle = await Vehicle.findByPk(req.params.id);
 
@@ -148,8 +149,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/vehicles/:id - Delete vehicle
-router.delete('/:id', async (req, res) => {
+// DELETE /api/vehicles/:id - Delete vehicle (Admin only)
+router.delete('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const vehicle = await Vehicle.findByPk(req.params.id);
 

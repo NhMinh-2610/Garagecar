@@ -1,27 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const Mechanic = require('../models/Mechanic');
+const { authMiddleware, requireRole } = require('../middleware/auth');
+const { ROLES } = require('../constants/roles');
+const { sendSuccess, sendError } = require('../utils/response');
+const statusCodes = require('../constants/statusCodes');
+const errorMessages = require('../constants/errorMessages');
+const logger = require('../utils/logger');
 
-// GET /api/mechanics - List all active mechanics
-router.get('/', async (req, res) => {
+// Apply auth to all routes
+router.use(authMiddleware);
+
+// GET /api/mechanics - List all active mechanics (Admin + Mechanic)
+router.get('/', requireRole(ROLES.ADMIN, ROLES.MECHANIC), async (req, res) => {
     try {
         const mechanics = await Mechanic.findAll({
             where: { status: 'active' },
             order: [['createdAt', 'DESC']]
         });
-        res.json({ success: true, data: mechanics });
+        sendSuccess(res, mechanics);
     } catch (error) {
-        console.error('Get mechanics error:', error);
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        logger.error('Get mechanics error:', error);
+        sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
     }
 });
 
-// POST /api/mechanics - Create new mechanic
-router.post('/', async (req, res) => {
+// POST /api/mechanics - Create new mechanic (Admin only)
+router.post('/', requireRole(ROLES.ADMIN), async (req, res) => {
     try {
         const { fullName, phone, specialty } = req.body;
         if (!fullName) {
-            return res.status(400).json({ success: false, message: 'Tên thợ là bắt buộc' });
+            return sendError(res, 'Tên thợ là bắt buộc', statusCodes.BAD_REQUEST);
         }
 
         const newMechanic = await Mechanic.create({
@@ -30,21 +39,22 @@ router.post('/', async (req, res) => {
             specialty
         });
 
-        res.json({ success: true, data: newMechanic });
+        sendSuccess(res, newMechanic, 'Thêm thợ thành công', statusCodes.CREATED);
     } catch (error) {
-        console.error('Create mechanic error:', error);
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        logger.error('Create mechanic error:', error);
+        sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
     }
 });
 
-// DELETE /api/mechanics/:id - Soft delete (set status inactive)
-router.delete('/:id', async (req, res) => {
+// DELETE /api/mechanics/:id - Soft delete (Admin only)
+router.delete('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
     try {
         const { id } = req.params;
         await Mechanic.update({ status: 'inactive' }, { where: { id } });
-        res.json({ success: true, message: 'Đã xóa thợ thành công' });
+        sendSuccess(res, null, 'Đã xóa thợ thành công');
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        logger.error('Delete mechanic error:', error);
+        sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
     }
 });
 

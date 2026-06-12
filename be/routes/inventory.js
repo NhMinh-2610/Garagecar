@@ -1,33 +1,31 @@
 const express = require('express');
 const { Inventory } = require('../models');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireRole } = require('../middleware/auth');
+const { sendSuccess, sendError } = require('../utils/response');
+const statusCodes = require('../constants/statusCodes');
+const errorMessages = require('../constants/errorMessages');
+const { ROLES } = require('../constants/roles');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 router.use(authMiddleware);
 
-// GET /api/inventory - Get all inventory items
-router.get('/', async (req, res) => {
+// GET /api/inventory - Get all inventory items (Admin + Mechanic)
+router.get('/', requireRole(ROLES.ADMIN, ROLES.MECHANIC), async (req, res) => {
   try {
     const items = await Inventory.findAll({
       order: [['name', 'ASC']]
     });
 
-    res.json({
-      success: true,
-      data: items
-    });
+    sendSuccess(res, items);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Lỗi server', 
-      error: error.message 
-    });
+    logger.error('Error fetching inventory:', error);
+    sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
   }
 });
 
-// POST /api/inventory - Add inventory item
-router.post('/', async (req, res) => {
+// POST /api/inventory - Add inventory item (Admin only)
+router.post('/', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const { name, quantity, unitPrice } = req.body;
 
@@ -37,75 +35,46 @@ router.post('/', async (req, res) => {
       unitPrice
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Nhập kho thành công',
-      data: item
-    });
+    sendSuccess(res, item, 'Nhập kho thành công', statusCodes.CREATED);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Lỗi server', 
-      error: error.message 
-    });
+    logger.error('Error creating inventory item:', error);
+    sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
   }
 });
 
-// PUT /api/inventory/:id - Update inventory item
-router.put('/:id', async (req, res) => {
+// PUT /api/inventory/:id - Update inventory item (Admin only)
+router.put('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const item = await Inventory.findByPk(req.params.id);
 
     if (!item) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Không tìm thấy vật tư' 
-      });
+      return sendError(res, errorMessages.NOT_FOUND_INVENTORY, statusCodes.NOT_FOUND);
     }
 
     await item.update(req.body);
 
-    res.json({
-      success: true,
-      message: 'Cập nhật thành công',
-      data: item
-    });
+    sendSuccess(res, item, 'Cập nhật thành công');
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Lỗi server', 
-      error: error.message 
-    });
+    logger.error('Error updating inventory item:', error);
+    sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
   }
 });
 
-// DELETE /api/inventory/:id - Delete inventory item
-router.delete('/:id', async (req, res) => {
+// DELETE /api/inventory/:id - Delete inventory item (Admin only)
+router.delete('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const item = await Inventory.findByPk(req.params.id);
 
     if (!item) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Không tìm thấy vật tư' 
-      });
+      return sendError(res, errorMessages.NOT_FOUND_INVENTORY, statusCodes.NOT_FOUND);
     }
 
     await item.destroy();
 
-    res.json({
-      success: true,
-      message: 'Xóa thành công'
-    });
+    sendSuccess(res, null, 'Xóa thành công');
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Lỗi server', 
-      error: error.message 
-    });
+    logger.error('Error deleting inventory item:', error);
+    sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
   }
 });
 

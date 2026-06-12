@@ -1,16 +1,72 @@
 const express = require('express');
 const { RepairTicket, RepairItem, Vehicle } = require('../models');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requireRole } = require('../middleware/auth');
 const { sendSuccess, sendError } = require('../utils/response');
 const statusCodes = require('../constants/statusCodes');
 const errorMessages = require('../constants/errorMessages');
+const { ROLES } = require('../constants/roles');
 const logger = require('../utils/logger');
 
 const router = express.Router();
 router.use(authMiddleware);
 
-// GET /api/repairs - Get all repair tickets
-router.get('/', async (req, res) => {
+// GET /api/repairs/my-tasks - Get repairs assigned to the logged-in mechanic
+router.get('/my-tasks', requireRole(ROLES.ADMIN, ROLES.MECHANIC), async (req, res) => {
+  try {
+    const { fullName } = req.user;
+
+    const tickets = await RepairTicket.findAll({
+      where: { mechanicName: fullName },
+      include: [
+        { model: Vehicle, as: 'vehicle' },
+        { model: RepairItem, as: 'items' }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    sendSuccess(res, tickets);
+  } catch (error) {
+    logger.error('Error fetching mechanic tasks:', error);
+    sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
+  }
+});
+
+// GET /api/repairs/my-repairs - Get repairs for vehicles belonging to logged-in customer
+router.get('/my-repairs', async (req, res) => {
+  try {
+    const { fullName } = req.user;
+
+    // Find all vehicles belonging to this customer
+    const vehicles = await Vehicle.findAll({
+      where: { customerName: fullName },
+      attributes: ['id']
+    });
+
+    const vehicleIds = vehicles.map(v => v.id);
+
+    if (vehicleIds.length === 0) {
+      return sendSuccess(res, []);
+    }
+
+    // Find all repair tickets for those vehicles
+    const tickets = await RepairTicket.findAll({
+      where: { vehicleId: vehicleIds },
+      include: [
+        { model: Vehicle, as: 'vehicle' },
+        { model: RepairItem, as: 'items' }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    sendSuccess(res, tickets);
+  } catch (error) {
+    logger.error('Error fetching customer repairs:', error);
+    sendError(res, errorMessages.SERVER_ERROR, statusCodes.INTERNAL_SERVER_ERROR, error.message);
+  }
+});
+
+// GET /api/repairs - Get all repair tickets (Admin only)
+router.get('/', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const tickets = await RepairTicket.findAll({
       include: [
@@ -27,8 +83,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/repairs/:id - Get single repair ticket
-router.get('/:id', async (req, res) => {
+// GET /api/repairs/:id - Get single repair ticket (Admin + Mechanic)
+router.get('/:id', requireRole(ROLES.ADMIN, ROLES.MECHANIC, ROLES.CUSTOMER), async (req, res) => {
   try {
     const ticket = await RepairTicket.findByPk(req.params.id, {
       include: [
@@ -41,6 +97,21 @@ router.get('/:id', async (req, res) => {
       return sendError(res, errorMessages.NOT_FOUND_REPAIR, statusCodes.NOT_FOUND);
     }
 
+    // Customer can only view their own vehicle's repairs
+    if (req.user.role === ROLES.CUSTOMER) {
+      const vehicle = ticket.vehicle;
+      if (!vehicle || vehicle.customerName !== req.user.fullName) {
+        return sendError(res, errorMessages.AUTH_UNAUTHORIZED, statusCodes.FORBIDDEN);
+      }
+    }
+
+    // Mechanic can only view repairs assigned to them
+    if (req.user.role === ROLES.MECHANIC) {
+      if (ticket.mechanicName !== req.user.fullName) {
+        return sendError(res, errorMessages.AUTH_UNAUTHORIZED, statusCodes.FORBIDDEN);
+      }
+    }
+
     sendSuccess(res, ticket);
   } catch (error) {
     logger.error(`Error fetching repair ticket ${req.params.id}:`, error);
@@ -48,8 +119,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/repairs - Create repair ticket
-router.post('/', async (req, res) => {
+// POST /api/repairs - Create repair ticket (Admin only)
+router.post('/', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const { vehicleId, items, mechanicName } = req.body;
 
@@ -101,8 +172,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/repairs/:id - Update repair ticket
-router.put('/:id', async (req, res) => {
+// PUT /api/repairs/:id - Update repair ticket (Admin + Mechanic)
+router.put('/:id', requireRole(ROLES.ADMIN, ROLES.MECHANIC), async (req, res) => {
   try {
     const ticket = await RepairTicket.findByPk(req.params.id, {
       include: [{ model: RepairItem, as: 'items' }]
@@ -110,6 +181,17 @@ router.put('/:id', async (req, res) => {
 
     if (!ticket) {
       return sendError(res, errorMessages.NOT_FOUND_REPAIR, statusCodes.NOT_FOUND);
+    }
+
+    // Mechanic can only update repairs assigned to them
+    if (req.user.role === ROLES.MECHANIC) {
+      if (ticket.mechanicName !== req.user.fullName) {
+        return sendError(res, 'Bạn không được phân công phiếu này', statusCodes.FORBIDDEN);
+      }
+      // Mechanic can only change status to 'completed'
+      if (req.body.status && req.body.status !== 'completed') {
+        return sendError(res, 'Thợ chỉ có thể đánh dấu hoàn thành phiếu sửa', statusCodes.FORBIDDEN);
+      }
     }
 
     const newStatus = req.body.status;
@@ -170,8 +252,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/repairs/:id - Delete repair ticket
-router.delete('/:id', async (req, res) => {
+// DELETE /api/repairs/:id - Delete repair ticket (Admin only)
+router.delete('/:id', requireRole(ROLES.ADMIN), async (req, res) => {
   try {
     const ticket = await RepairTicket.findByPk(req.params.id);
 
@@ -193,9 +275,17 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/repairs/:id/items/:itemId/toggle - Toggle repair item completion
-router.put('/:id/items/:itemId/toggle', async (req, res) => {
+// PUT /api/repairs/:id/items/:itemId/toggle - Toggle repair item completion (Admin + Mechanic)
+router.put('/:id/items/:itemId/toggle', requireRole(ROLES.ADMIN, ROLES.MECHANIC), async (req, res) => {
   try {
+    // If mechanic, verify assignment
+    if (req.user.role === ROLES.MECHANIC) {
+      const ticket = await RepairTicket.findByPk(req.params.id);
+      if (!ticket || ticket.mechanicName !== req.user.fullName) {
+        return sendError(res, 'Bạn không được phân công phiếu này', statusCodes.FORBIDDEN);
+      }
+    }
+
     const item = await RepairItem.findOne({
       where: {
         id: req.params.itemId,
@@ -204,7 +294,7 @@ router.put('/:id/items/:itemId/toggle', async (req, res) => {
     });
 
     if (!item) {
-      return sendError(res, errorMessages.NOT_FOUND_INVENTORY, statusCodes.NOT_FOUND); // reusing inventory error or generic not found
+      return sendError(res, errorMessages.NOT_FOUND_INVENTORY, statusCodes.NOT_FOUND);
     }
 
     const isCompleted = req.body.isCompleted;
@@ -221,8 +311,8 @@ router.put('/:id/items/:itemId/toggle', async (req, res) => {
   }
 });
 
-// GET /api/repairs/:id/can-complete - Check if repair can be completed
-router.get('/:id/can-complete', async (req, res) => {
+// GET /api/repairs/:id/can-complete - Check if repair can be completed (Admin + Mechanic)
+router.get('/:id/can-complete', requireRole(ROLES.ADMIN, ROLES.MECHANIC), async (req, res) => {
   try {
     const ticket = await RepairTicket.findByPk(req.params.id, {
       include: [{ model: RepairItem, as: 'items' }]
