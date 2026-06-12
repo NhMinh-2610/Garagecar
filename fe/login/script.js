@@ -8,6 +8,20 @@ const showRegisterLink = document.getElementById('showRegister');
 const showLoginLink = document.getElementById('showLogin');
 const messageBox = document.getElementById('messageBox');
 
+// Role-based redirect mapping
+function getRedirectUrl(role) {
+    switch (role) {
+        case 'admin':
+            return '../admin/';
+        case 'mechanic':
+            return '../mechanic/';
+        case 'customer':
+            return '../customer/';
+        default:
+            return '../login/';
+    }
+}
+
 // Toggle between Login and Register forms
 showRegisterLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -66,11 +80,14 @@ loginForm.addEventListener('submit', async (e) => {
             localStorage.setItem('token', result.data.token);
             localStorage.setItem('user', JSON.stringify(result.data.user));
 
-            showMessage('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+            const role = result.data.user.role;
+            const roleName = getRoleDisplayName(role);
+
+            showMessage(`Đăng nhập thành công! Chào mừng ${roleName}...`, 'success');
             
-            // Redirect to admin dashboard
+            // Redirect based on role
             setTimeout(() => {
-                window.location.href = '../admin/';
+                window.location.href = getRedirectUrl(role);
             }, 1000);
         } else {
             showMessage(result.message || 'Đăng nhập thất bại', 'error');
@@ -85,7 +102,7 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Handle Registration
+// Handle Registration (Customer only)
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideMessage();
@@ -126,8 +143,8 @@ registerForm.addEventListener('submit', async (e) => {
                 fullName,
                 username,
                 email,
-                password,
-                role: 'admin' 
+                password
+                // No role field - server always assigns 'customer'
             })
         });
 
@@ -157,13 +174,30 @@ registerForm.addEventListener('submit', async (e) => {
     }
 });
 
+// Get display name for role
+function getRoleDisplayName(role) {
+    switch (role) {
+        case 'admin': return 'Quản Trị Viên';
+        case 'mechanic': return 'Kỹ Thuật Viên';
+        case 'customer': return 'Khách Hàng';
+        default: return 'Người dùng';
+    }
+}
+
 // Check if already logged in and handle query params
 window.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
-    if (token) {
-        // Redirect to admin if already logged in
-        window.location.href = '../admin/';
-        return;
+    const userStr = localStorage.getItem('user');
+
+    if (token && userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            // Redirect to appropriate portal based on role
+            window.location.href = getRedirectUrl(user.role);
+            return;
+        } catch (e) {
+            localStorage.clear();
+        }
     }
 
     // Check URL parameters for mode
