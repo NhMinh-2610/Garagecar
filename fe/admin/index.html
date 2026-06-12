@@ -665,33 +665,21 @@
                         <div class="card">
                             <div class="card-header-actions">
                                 <h3><i class="fa-solid fa-user-shield"></i> Tài Khoản Đăng Nhập</h3>
-                                <button class="btn btn-primary" onclick="showToast('Chức năng thêm user đang phát triển', 'info')"><i class="fa-solid fa-plus"></i> Tạo Tài Khoản</button>
+                                <button class="btn btn-primary" id="btnCreateUser"><i class="fa-solid fa-plus"></i> Tạo Tài Khoản</button>
                             </div>
-                            <table class="data-table">
+                            <table class="data-table" id="usersTable">
                                 <thead>
                                     <tr>
                                         <th>Username</th>
                                         <th>Họ tên</th>
                                         <th>Email</th>
                                         <th>Vai trò</th>
+                                        <th>Ngày tạo</th>
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>admin</td>
-                                        <td>Quản Trị Viên</td>
-                                        <td>admin@autopro.com</td>
-                                        <td><span class="badge badge-done">Admin</span></td>
-                                        <td><button class="btn btn-sm btn-secondary">Sửa</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>staff</td>
-                                        <td>Nhân Viên</td>
-                                        <td>staff@autopro.com</td>
-                                        <td><span class="badge badge-working">Staff</span></td>
-                                        <td><button class="btn btn-sm btn-secondary">Sửa</button></td>
-                                    </tr>
+                                    <tr><td colspan="6" style="text-align: center; color: #6b7280;">Đang tải...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -723,6 +711,44 @@
                                 </div>
                                 <div class="form-actions right">
                                     <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Create User Account Modal -->
+                    <div id="userModal" class="modal" style="display: none;">
+                        <div class="modal-content" style="max-width: 550px;">
+                            <span class="close-btn" id="closeUserModal">&times;</span>
+                            <h2 class="modal-title"><i class="fa-solid fa-user-shield"></i> Tạo Tài Khoản Nhân Viên</h2>
+                            <form id="createUserForm">
+                                <div class="form-group">
+                                    <label>Họ và tên</label>
+                                    <input type="text" id="newFullName" required placeholder="Nguyễn Văn A">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tên đăng nhập</label>
+                                    <input type="text" id="newUsername" required placeholder="nguyenvana">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="newEmail" required placeholder="nguyenvana@autopro.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Mật khẩu</label>
+                                    <input type="password" id="newPassword" required placeholder="Tối thiểu 6 ký tự" minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label>Vai trò</label>
+                                    <select id="newRole" required>
+                                        <option value="">-- Chọn vai trò --</option>
+                                        <option value="mechanic">Kỹ Thuật Viên (Thợ)</option>
+                                        <option value="admin">Quản Trị Viên</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions right">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('userModal').style.display='none'">Hủy</button>
+                                    <button type="submit" class="btn btn-primary">Tạo Tài Khoản</button>
                                 </div>
                             </form>
                         </div>
