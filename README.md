@@ -1,22 +1,24 @@
 # 🚗 AutoPro Garage Management System
 
 <div align="center">
-  <h3>Hệ thống quản lý garage tự động với giao diện web cao cấp và API backend mạnh mẽ.</h3>
+  <h3>Hệ thống quản lý garage tự động đa vai trò với giao diện web cao cấp và API backend mạnh mẽ.</h3>
 </div>
 
 ---
 
 ## 📋 Giới Thiệu
 
-**AutoPro** là một giải pháp phần mềm quản lý garage ô tô toàn diện được thiết kế với chuẩn mực doanh nghiệp (Enterprise Standard). Hệ thống cung cấp trải nghiệm UI/UX cao cấp, tích hợp biểu đồ động, thao tác mượt mà và quản lý dữ liệu tập trung qua RESTful API.
+**AutoPro** là một giải pháp phần mềm quản lý garage ô tô toàn diện được thiết kế với chuẩn mực doanh nghiệp (Enterprise Standard). Hệ thống cung cấp trải nghiệm UI/UX cao cấp, thao tác mượt mà và quản lý dữ liệu tập trung qua RESTful API, phục vụ chuyên biệt cho 3 đối tượng người dùng chính: **Quản Trị Viên (Admin), Kỹ Thuật Viên (Thợ) và Khách Hàng**.
 
 ### ✨ Các Tính Năng Nổi Bật
 
-- **Giao Diện Cao Cấp (Premium UI/UX)**: Thiết kế Dark Mode hiện đại, sử dụng hiệu ứng Glassmorphism, animations mượt mà và phông chữ Outfit.
-- **Quản Lý Phiếu Sửa Chữa Động**: Thêm công việc, vật tư, tự động tính toán tổng tiền.
-- **Báo Cáo & Thống Kê**: Tích hợp Chart.js để trực quan hóa doanh thu theo hiệu xe và tháng.
-- **Quản Lý Kho & Nhân Sự**: Quản lý xuất nhập phụ tùng, thợ sửa chữa.
-- **API Backend Mạnh Mẽ**: Sử dụng Express.js và Sequelize ORM (SQLite).
+- **Hệ Thống Đa Vai Trò (Multi-Role Portals)**:
+  - 👑 **Admin Portal**: Quản lý toàn diện (Tiếp nhận xe, Phiếu sửa chữa, Kho, Nhân sự, Tài chính, Báo cáo).
+  - 🔧 **Mechanic Portal**: Nhận việc, check tiến độ từng hạng mục, tra cứu vật tư.
+  - 🚗 **Customer Portal**: Quản lý xe cá nhân, theo dõi tiến độ sửa chữa realtime qua thanh progress bar.
+- **Giao Diện Cao Cấp (Premium UI/UX)**: Thiết kế hiện đại (Glassmorphism), animations mượt mà, sử dụng phông chữ Outfit. Mỗi portal mang một tone màu đặc trưng.
+- **Quản Lý Cập Nhật Trực Tiếp**: Thợ tick hoàn thành hạng mục, Admin và Khách hàng lập tức thấy được tiến độ cập nhật.
+- **API Backend Mạnh Mẽ**: Sử dụng Express.js và Sequelize ORM (SQLite) được bảo vệ chặt chẽ bằng Role-Based Access Control (RBAC).
 
 ## 🏗️ Cấu Trúc Dự Án
 
@@ -26,24 +28,21 @@ Dự án được tổ chức chặt chẽ theo mô hình Client-Server:
 AutoPro_Garage/
 ├── be/                     # Backend Server (Node.js/Express)
 │   ├── config/             # Cấu hình kết nối cơ sở dữ liệu
-│   ├── constants/          # Định nghĩa mã lỗi & trạng thái HTTP
+│   ├── constants/          # Định nghĩa phân quyền (roles) & mã lỗi
 │   ├── db/                 # Khởi tạo SQLite
-│   ├── middleware/         # Xác thực JWT & phân quyền
+│   ├── middleware/         # Xác thực JWT & phân quyền (requireRole)
 │   ├── models/             # Sequelize ORM models
 │   ├── routes/             # RESTful API Endpoints
+│   ├── scripts/            # Script tạo dữ liệu mẫu (Seed Data)
 │   ├── utils/              # Tiện ích (Logger, Validation, Response)
 │   ├── server.js           # Entry point của Backend
 │   └── package.json        # Dependencies
 └── fe/                     # Frontend Client (HTML/CSS/JS thuần)
-    ├── admin/              # Trang Dashboard Quản Trị
-    │   ├── css/            # Stylesheet cao cấp cho admin
-    │   ├── js/             # Logic từng module (Dashboard, Repairs, Finance, Report)
-    │   └── index.html      # Giao diện chính admin
-    ├── login/              # Trang Đăng nhập / Đăng ký (Giao diện động)
-    │   ├── index.html
-    │   └── styles.css
-    ├── index.html          # Trang chủ / Landing Page
-    └── styles.css          # Stylesheet trang chủ
+    ├── admin/              # Portal dành cho Quản Trị Viên
+    ├── mechanic/           # Portal dành cho Kỹ Thuật Viên
+    ├── customer/           # Portal dành cho Khách Hàng
+    ├── login/              # Trang Đăng nhập & Điều hướng tự động (Smart Routing)
+    └── index.html          # Trang chủ / Landing Page
 ```
 
 ## 🚀 Hướng Dẫn Cài Đặt & Chạy Ứng Dụng
@@ -53,11 +52,11 @@ AutoPro_Garage/
 ### 📋 Yêu cầu hệ thống
 - **Node.js**: Phiên bản v16.x trở lên.
 - **NPM**: Cài đặt kèm theo Node.js.
-- **Lưu ý cho người dùng WSL (Windows):** Vui lòng chạy lệnh cài đặt (`npm install`) ngay bên trong môi trường WSL. Không copy thư mục `node_modules` từ Windows sang WSL để tránh lỗi tệp thực thi (như `nodemon: not found`).
+- **Lưu ý cho người dùng WSL (Windows):** Vui lòng chạy lệnh cài đặt (`npm install`) ngay bên trong môi trường WSL. Không copy thư mục `node_modules` từ Windows sang WSL để tránh lỗi tệp thực thi.
 
 ---
 
-### Bước 1: Khởi động Backend (Máy chủ API)
+### Bước 1: Khởi động Backend & Tạo dữ liệu mẫu
 
 1. **Mở Terminal** và di chuyển vào thư mục `be`:
    ```bash
@@ -65,79 +64,76 @@ AutoPro_Garage/
    ```
 
 2. **Cài đặt thư viện (Dependencies):**
-   *(Nếu bạn đang dùng WSL mà trước đó đã lỡ cài bên Windows, hãy chạy `rm -rf node_modules` trước)*
    ```bash
    npm install
    ```
 
 3. **Tạo cấu hình môi trường:**
-   Tạo một file mới tinh có tên chính xác là `.env` (có dấu chấm ở đầu) nằm trong thư mục `be`. Sau đó dán nội dung sau vào file (Tuyệt đối không dán trực tiếp lệnh này vào Terminal):
+   Tạo file `.env` nằm trong thư mục `be` với nội dung:
    ```env
    PORT=3000
    JWT_SECRET=super_secret_jwt_key
    NODE_ENV=development
    ```
 
-4. **Khởi chạy Backend:**
+4. **Khởi tạo Database & Dữ liệu mẫu (Tùy chọn nhưng khuyên dùng):**
    ```bash
-   npm run dev
+   npm run seed
    ```
-   ✅ *Thành công: Terminal sẽ hiển thị dòng chữ báo Backend đang lắng nghe tại `http://localhost:3000`.*
+   *Lệnh này sẽ tạo ra các tài khoản test sẵn cho Admin, Thợ và Khách hàng.*
+
+5. **Khởi chạy Backend:**
+   ```bash
+   npm start
+   ```
+   ✅ *Thành công: Terminal sẽ hiển thị Backend đang lắng nghe tại `http://localhost:3000`.*
 
 ---
 
 ### Bước 2: Khởi động Frontend (Giao diện Web)
 
-Phần Frontend được code bằng HTML/CSS/JS thuần nên không cần phải `npm install`. Bạn có thể chạy ngay bằng 1 trong 3 cách sau:
+Phần Frontend được code bằng HTML/CSS/JS thuần nên không cần cài đặt package. Bạn có thể dùng **Live Server**:
 
-- **Cách 1: Mở trực tiếp (Dễ nhất)**
-  Sử dụng File Explorer (My Computer), vào thư mục `fe` và click đúp chuột vào tệp `index.html` để mở trên trình duyệt.
+1. Mở thư mục dự án bằng VS Code.
+2. Cài đặt Extension **"Live Server"**.
+3. Nhấn chuột phải vào tệp `fe/login/index.html` và chọn **"Open with Live Server"**.
+4. Trình duyệt sẽ mở ra. Sử dụng các tài khoản mẫu để trải nghiệm (nếu đã chạy lệnh seed):
+   - **Admin**: `admin@autopro.com` / `123456`
+   - **Kỹ thuật viên**: `mechanic@autopro.com` / `123456`
+   - **Khách hàng**: `customer@autopro.com` / `123456`
 
-- **Cách 2: Dùng VS Code Live Server (Khuyên dùng)**
-  Mở thư mục dự án bằng VS Code. Cài đặt Extension **"Live Server"**. Nhấn chuột phải vào tệp `fe/index.html` và chọn **"Open with Live Server"**. Tính năng này giúp trang web tự động tải lại mỗi khi bạn sửa code.
-
-- **Cách 3: Chạy bằng Terminal (HTTP Server)**
-  Mở một tab Terminal **mới** (vẫn giữ tab Backend đang chạy), đảm bảo bạn đang ở thư mục gốc của dự án và chạy lệnh:
-  ```bash
-  npx http-server fe -p 8080
-  ```
-  ✅ *Sau đó mở trình duyệt và truy cập đường dẫn: `http://localhost:8080`*
+*(Lưu ý: Mọi tài khoản sau khi đăng nhập thành công sẽ tự động được hệ thống chuyển hướng về đúng giao diện Portal của role tương ứng)*
 
 ## 📡 Tài Liệu API (Endpoints)
 
-Dưới đây là danh sách các API đã được chuẩn hóa. Đa số các thao tác (trừ Auth) yêu cầu token JWT qua Header `Authorization: Bearer <token>`.
+Đa số các API đều yêu cầu xác thực qua Header `Authorization: Bearer <token>` và được bảo vệ theo role (RBAC).
 
 ### 🔐 Authentication (`/api/auth`)
 - `POST /login`: Xác thực và nhận Token.
-- `POST /register`: Tạo tài khoản mới.
+- `POST /register`: Tạo tài khoản Khách hàng.
+- `POST /register-staff`: (Admin Only) Tạo tài khoản cho nhân sự hệ thống.
+- `GET /users`, `DELETE /users/:id`: (Admin Only) Quản lý tài khoản.
 
 ### 🚗 Vehicles (`/api/vehicles`)
-- `GET /`: Danh sách toàn bộ xe và trạng thái sửa chữa.
-- `GET /my-vehicles`: Xe thuộc về user đang đăng nhập.
-- `POST /`: Tiếp nhận xe mới.
-- `PUT /:id` / `DELETE /:id`: Cập nhật/Xóa xe.
+- `GET /my-vehicles`: Xe thuộc về khách hàng đang đăng nhập.
+- `GET /`, `POST /`, `PUT /`, `DELETE /`: (Admin Only) Quản lý hệ thống xe.
 
 ### 🛠️ Repairs (`/api/repairs`)
-- `GET /`: Danh sách phiếu sửa chữa (để thanh toán, báo cáo).
-- `POST /`: Tạo phiếu sửa chữa mới (kèm chi tiết hạng mục & vật tư).
-- `PUT /:id`: Cập nhật trạng thái phiếu (ví dụ: `paid`).
+- `GET /my-tasks`: Phiếu sửa được giao cho Thợ đang đăng nhập.
+- `GET /my-repairs`: Phiếu sửa xe của Khách đang đăng nhập.
+- `PUT /:id/items/:itemId/toggle`: (Admin/Mechanic) Cập nhật trạng thái từng hạng mục sửa.
+- `POST /`, `DELETE /`: (Admin Only) Tạo/Xóa phiếu sửa chữa.
 
-### 📦 Inventory (`/api/inventory`)
-- `GET /`: Xem danh sách phụ tùng tồn kho.
-- `POST /`: Nhập kho mới.
-
-### 👷 Mechanics (`/api/mechanics`)
-- `GET /`: Danh sách thợ.
-- `POST /`: Thêm thợ mới.
-- `DELETE /:id`: Xóa thợ.
+### 📦 Inventory & 👷 Mechanics
+- `/api/inventory` & `/api/mechanics`: Các tác vụ Read (GET) cho phép Admin/Mechanic truy cập, các thao tác thay đổi (POST, PUT, DELETE) chỉ dành cho Admin.
 
 ## 🤝 Hướng Dẫn Đóng Góp (Contributing)
 
-Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng! Vui lòng đọc file [CONTRIBUTING.md](CONTRIBUTING.md) để biết chi tiết về quy trình gửi Pull Request, báo cáo lỗi (Issues), và tiêu chuẩn mã nguồn.
+Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng! Vui lòng đọc file `CONTRIBUTING.md` để biết chi tiết.
 
 ## 📄 Bản Quyền (License)
 
-Dự án này được phân phối dưới giấy phép **MIT License**. Bạn được tự do sử dụng, sửa đổi và phân phối. Chi tiết xem tại [LICENSE](LICENSE).
+Dự án này được phân phối dưới giấy phép **MIT License**. Bạn được tự do sử dụng, sửa đổi và phân phối.
 
 ---
 <p align="center">Được phát triển với sự tỉ mỉ dành cho hệ thống dịch vụ ô tô chuẩn tương lai. 🚀</p>
