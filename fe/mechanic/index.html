@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPro - Kỹ Thuật Viên</title>
+    <meta name="description" content="Cổng thông tin kỹ thuật viên AutoPro - Quản lý công việc sửa chữa">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>Auto<span class="highlight">Pro</span></h2>
+                <p>Kỹ Thuật Viên</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-target="tasks-section">
+                    <i class="fa-solid fa-clipboard-list"></i> Công việc của tôi
+                </li>
+                <li class="nav-item" data-target="inventory-section">
+                    <i class="fa-solid fa-boxes-stacked"></i> Kho vật tư
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Mechanic&background=random" alt="Mechanic">
+                    <div>
+                        <h4>Kỹ Thuật Viên</h4>
+                        <small>Thợ sửa chữa</small>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn-icon" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="content" class="main-content">
+            <header class="topbar">
+                <div class="toggle-sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <div class="topbar-title">
+                    <h2 id="pageTitle">Công việc của tôi</h2>
+                </div>
+            </header>
+
+            <div class="content-body">
+
+                <!-- 1. MY TASKS -->
+                <section id="tasks-section" class="active-section">
+                    <!-- Stats -->
+                    <div class="dashboard-cards">
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-amber"><i class="fa-solid fa-clipboard-list"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statTotal">0</h3>
+                                <p>Tổng phiếu được giao</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-blue"><i class="fa-solid fa-wrench"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statWorking">0</h3>
+                                <p>Đang xử lý</p>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon bg-green"><i class="fa-solid fa-check-circle"></i></div>
+                            <div class="stat-info">
+                                <h3 id="statDone">0</h3>
+                                <p>Đã hoàn thành</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="task-tabs">
+                        <button class="task-tab active" onclick="switchTaskTab('working')">🔧 Đang xử lý</button>
+                        <button class="task-tab" onclick="switchTaskTab('completed')">✅ Đã hoàn thành</button>
+                    </div>
+
+                    <!-- Working Tasks -->
+                    <div id="tabWorking" class="task-tab-content active">
+                        <div id="workingTasks">
+                            <p class="empty-state">Đang tải...</p>
+                        </div>
+                    </div>
+
+                    <!-- Completed Tasks -->
+                    <div id="tabCompleted" class="task-tab-content" style="display: none;">
+                        <div id="completedTasks">
+                            <p class="empty-state">Đang tải...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. INVENTORY (Read Only) -->
+                <section id="inventory-section">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-boxes-stacked"></i> Tra cứu kho vật tư</h3>
+                        <div class="search-box" style="margin-bottom: 1rem;">
+                            <input type="text" id="inventorySearch" placeholder="Tìm vật tư..." style="width: 100%; max-width: 400px;">
+                        </div>
+                        <table class="data-table" id="inventoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Tên vật tư</th>
+                                    <th>Số lượng tồn</th>
+                                    <th>Đơn giá</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="3" class="empty-state">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- JS Modules -->
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/inventory.js"></script>
+</body>
+</html>
