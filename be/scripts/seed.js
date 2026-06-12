@@ -235,11 +235,13 @@ const seedDatabase = async () => {
 
     console.log("\n✅ Database seeded successfully!");
     console.log("\n📋 Test Accounts:");
-    console.log("   👑 Admin:      admin@autopro.com / 123456");
-    console.log("   🔧 Mechanic:   mechanic@autopro.com / 123456");
-    console.log("   💰 Accountant: accountant@autopro.com / 123456");
-    console.log("   🚗 Customer:   customer@autopro.com / 123456");
-    console.log("\n🚀 Start server with: cd be && npm start");
+    console.log("   👑 Admin:      admin@autopro.com / 123456     → /fe/admin/");
+    console.log("   🔧 Mechanic:   mechanic@autopro.com / 123456  → /fe/mechanic/");
+    console.log("   🚗 Customer:   customer@autopro.com / 123456   → /fe/customer/");
+    console.log("   🚗 Customer2:  customer2@autopro.com / 123456  → /fe/customer/");
+    console.log("   💰 Accountant: accountant@autopro.com / 123456 (portal chưa có)");
+    console.log("\n🔐 Login Page: /fe/login/");
+    console.log("🚀 Start server with: cd be && npm start");
 
     process.exit(0);
   } catch (error) {
