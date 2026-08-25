@@ -18,43 +18,80 @@
   - 🚗 **Customer Portal**: Quản lý xe cá nhân, theo dõi tiến độ sửa chữa realtime qua thanh progress bar.
 - **Giao Diện Cao Cấp (Premium UI/UX)**: Thiết kế hiện đại (Glassmorphism), animations mượt mà, sử dụng phông chữ Outfit. Mỗi portal mang một tone màu đặc trưng.
 - **Quản Lý Cập Nhật Trực Tiếp**: Thợ tick hoàn thành hạng mục, Admin và Khách hàng lập tức thấy được tiến độ cập nhật.
-- **API Backend Mạnh Mẽ**: Sử dụng Express.js và Sequelize ORM (SQLite) được bảo vệ chặt chẽ bằng Role-Based Access Control (RBAC).
+- **🐍 Python/FastAPI Backend (v2)**: Backend thế hệ mới viết bằng Python — async SQLAlchemy, Pydantic v2 validation, tự động sinh OpenAPI docs tại `/docs`.
+- **🤖 AI Assistant Module**: Tích hợp LLM hỗ trợ chẩn đoán lỗi xe, ước tính chi phí, tóm tắt phiếu sửa chữa, tư vấn bảo dưỡng và chatbot kỹ thuật ô tô.
 
 ## 🏗️ Cấu Trúc Dự Án
 
-Dự án được tổ chức chặt chẽ theo mô hình Client-Server:
-
 ```text
-AutoPro_Garage/
-├── be/                     # Backend Server (Node.js/Express)
-│   ├── config/             # Cấu hình kết nối cơ sở dữ liệu
-│   ├── constants/          # Định nghĩa phân quyền (roles) & mã lỗi
-│   ├── db/                 # Khởi tạo SQLite
-│   ├── middleware/         # Xác thực JWT & phân quyền (requireRole)
-│   ├── models/             # Sequelize ORM models
-│   ├── routes/             # RESTful API Endpoints
-│   ├── scripts/            # Script tạo dữ liệu mẫu (Seed Data)
-│   ├── utils/              # Tiện ích (Logger, Validation, Response)
-│   ├── server.js           # Entry point của Backend
-│   └── package.json        # Dependencies
-└── fe/                     # Frontend Client (HTML/CSS/JS thuần)
-    ├── admin/              # Portal dành cho Quản Trị Viên
-    ├── mechanic/           # Portal dành cho Kỹ Thuật Viên
-    ├── customer/           # Portal dành cho Khách Hàng
-    ├── login/              # Trang Đăng nhập & Điều hướng tự động (Smart Routing)
-    └── index.html          # Trang chủ / Landing Page
+Garagecar/
+├── be/                       # Backend Node.js/Express (legacy v1)
+│   ├── routes/               # RESTful API Endpoints
+│   ├── models/               # Sequelize ORM models
+│   ├── middleware/           # JWT & RBAC middleware
+│   ├── utils/                # Logger, Validation, Response helpers
+│   └── server.js             # Entry point
+├── be_python/                # 🐍 Backend Python/FastAPI (v2) ← MỚI
+│   ├── main.py               # FastAPI app entry point (uvicorn)
+│   ├── config/settings.py    # Pydantic Settings (env vars)
+│   ├── core/                 # Security (bcrypt/JWT), constants, response
+│   ├── database/             # SQLAlchemy async engine + session
+│   ├── models/               # ORM models (User, Vehicle, Repair...)
+│   ├── schemas/              # Pydantic request/response schemas
+│   ├── middleware/auth.py    # JWT Bearer dependency + require_role()
+│   ├── routers/              # Auth, Vehicles, Repairs, Inventory, Mechanics, AI
+│   ├── services/ai_service.py# 🤖 LLM adapter (Mock/OpenAI/Gemini/Ollama)
+│   └── requirements.txt
+├── fe/                       # Frontend Client (HTML/CSS/JS)
+│   ├── admin/                # Admin Portal
+│   ├── mechanic/             # Mechanic Portal
+│   ├── customer/             # Customer Portal
+│   └── login/                # Smart login routing
+└── data/database.sqlite      # Shared SQLite database (used by both backends)
 ```
 
 ## 🚀 Hướng Dẫn Cài Đặt & Chạy Ứng Dụng
 
-Ứng dụng được chia làm 2 phần độc lập: **Backend** (Xử lý dữ liệu & API) và **Frontend** (Giao diện người dùng). Bạn cần chạy đồng thời cả 2 phần để hệ thống hoạt động.
+### 🐍 Python Backend (Khuyên dùng — v2 với AI)
 
-### 📋 Yêu cầu hệ thống
-- **Node.js**: Phiên bản v16.x trở lên.
-- **NPM**: Cài đặt kèm theo Node.js.
-- **Lưu ý cho người dùng WSL (Windows):** Vui lòng chạy lệnh cài đặt (`npm install`) ngay bên trong môi trường WSL. Không copy thư mục `node_modules` từ Windows sang WSL để tránh lỗi tệp thực thi.
+**Yêu cầu**: Python 3.11+
+
+```bash
+cd be_python
+pip install -r requirements.txt
+cp .env.example .env          # chỉnh sửa .env nếu cần
+uvicorn main:app --reload --port 8000
+```
+
+Swagger UI: **http://localhost:8000/docs**
+
+#### Cấu hình AI Provider (tuỳ chọn)
+
+```env
+# .env
+AI_PROVIDER=mock              # mock | openai | gemini | ollama
+OPENAI_API_KEY=sk-...         # nếu dùng OpenAI
+GEMINI_API_KEY=AIza...        # nếu dùng Gemini
+OLLAMA_BASE_URL=http://localhost:11434  # nếu dùng Ollama local
+```
+
+#### 🤖 AI Endpoints
+
+| Method | Path | Mô tả |
+|--------|------|--------|
+| `POST` | `/api/ai/diagnose` | Chẩn đoán lỗi xe từ triệu chứng |
+| `POST` | `/api/ai/estimate-cost` | Ước tính chi phí sửa chữa |
+| `POST` | `/api/ai/summarize-repair` | Tóm tắt phiếu sửa chữa |
+| `POST` | `/api/ai/maintenance-advice` | Lịch bảo dưỡng định kỳ |
+| `POST` | `/api/ai/chat` | Chatbot kỹ thuật ô tô |
 
 ---
+
+### 📦 Node.js Backend (v1 — legacy)
+
+**Yêu cầu**: Node.js v16+, NPM
+
+
 
 ### Bước 1: Khởi động Backend & Tạo dữ liệu mẫu
 
