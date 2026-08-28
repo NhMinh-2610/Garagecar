@@ -1,8 +1,14 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
     port: int = 8000
     jwt_secret: str = "change_this_in_production_garagecar_2026"
     jwt_expire_hours: int = 24
@@ -24,11 +30,6 @@ class Settings(BaseSettings):
     # Ollama (local)
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
 
 
 settings = Settings()

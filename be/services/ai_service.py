@@ -13,6 +13,7 @@ interchangeable without changing router code.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from abc import ABC, abstractmethod
@@ -152,7 +153,9 @@ class GeminiProvider(BaseAIProvider):
 
     async def complete(self, system_prompt: str, user_message: str) -> str:
         prompt = f"{system_prompt}\n\n{user_message}"
-        response = self._model.generate_content(prompt)
+        # generate_content is a blocking call — run in a thread pool to avoid
+        # blocking the FastAPI async event loop.
+        response = await asyncio.to_thread(self._model.generate_content, prompt)
         return response.text or ""
 
 

@@ -62,3 +62,24 @@ temp/
 # Cache
 .cache/
 .parcel-cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
