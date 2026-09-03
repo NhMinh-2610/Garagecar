@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load completed repairs
     async function loadCompletedRepairs() {
         try {
-            const response = await fetch('http://localhost:3000/api/repairs', {
+            const response = await fetch('http://localhost:8000/api/repairs', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Update repair status to paid
-                const response = await fetch(`http://localhost:3000/api/repairs/${repairId}`, {
+                const response = await fetch(`http://localhost:8000/api/repairs/${repairId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

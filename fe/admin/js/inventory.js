@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('http://localhost:3000/api/inventory', {
+                const response = await fetch('http://localhost:8000/api/inventory', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load inventory list
     async function loadInventoryList() {
         try {
-            const response = await fetch('http://localhost:3000/api/inventory', {
+            const response = await fetch('http://localhost:8000/api/inventory', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

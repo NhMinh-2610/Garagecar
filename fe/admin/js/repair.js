@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadInventoryForRepair() {
         if(!partSelect) return;
         try {
-            const response = await fetch('http://localhost:3000/api/inventory', {
+            const response = await fetch('http://localhost:8000/api/inventory', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await response.json();
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadMechanicsForRepair() {
         if(!mechanicSelect) return;
         try {
-            const response = await fetch('http://localhost:3000/api/mechanics', {
+            const response = await fetch('http://localhost:8000/api/mechanics', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await response.json();
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('http://localhost:3000/api/repairs', {
+                const response = await fetch('http://localhost:8000/api/repairs', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!filterMechanic) return;
         
         // Fetch mechanics (using existing API)
-        fetch('http://localhost:3000/api/mechanics', {
+        fetch('http://localhost:8000/api/mechanics', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!waitingTable) return;
         
         try {
-            const response = await fetch('http://localhost:3000/api/repairs', {
+            const response = await fetch('http://localhost:8000/api/repairs', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -629,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // else row.classList.remove('completed');
 
             // Call API
-            const response = await fetch(`http://localhost:3000/api/repairs/${ticketId}/items/${itemId}/toggle`, {
+            const response = await fetch(`http://localhost:8000/api/repairs/${ticketId}/items/${itemId}/toggle`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
@@ -683,7 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteRepair = async function(id) {
         try {
             // Fetch ticket to check status
-            const response = await fetch(`http://localhost:3000/api/repairs/${id}`, {
+            const response = await fetch(`http://localhost:8000/api/repairs/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await response.json();
@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm('Bạn có chắc muốn xóa phiếu này không?')) return;
             
             // Perform deletion
-            const deleteResponse = await fetch(`http://localhost:3000/api/repairs/${id}`, {
+            const deleteResponse = await fetch(`http://localhost:8000/api/repairs/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -734,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // New: View repair details
     window.viewRepairDetails = async function(id) {
         try {
-            const response = await fetch(`http://localhost:3000/api/repairs/${id}`, {
+            const response = await fetch(`http://localhost:8000/api/repairs/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const result = await response.json();
@@ -760,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper: Update Status API
     async function updateRepairStatus(id, newStatus) {
         try {
-            const response = await fetch(`http://localhost:3000/api/repairs/${id}`, {
+            const response = await fetch(`http://localhost:8000/api/repairs/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

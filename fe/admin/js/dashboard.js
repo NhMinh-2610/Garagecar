@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateDashboardStats = async () => {
         try {
             // Fetch vehicles
-            const vehiclesRes = await fetch('http://localhost:3000/api/vehicles', {
+            const vehiclesRes = await fetch('http://localhost:8000/api/vehicles', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 new Date(v.receivedDate).toDateString() === today
             ).length;
             
-            const workingCount = vehicles.filter(v => v.status === 'working').length;
-            const doneCount = vehicles.filter(v => v.status === 'done').length;
+            const workingCount = vehicles.filter(v => v.status === 'repairing').length;
+            const doneCount = vehicles.filter(v => v.status === 'completed').length;
 
             // Fetch repairs for revenue
-            const repairsRes = await fetch('http://localhost:3000/api/repairs', {
+            const repairsRes = await fetch('http://localhost:8000/api/repairs', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             

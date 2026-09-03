@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check auth
     if (!token) {
         alert('Vui lòng đăng nhập lại');
-        window.location.href = '../index.html';
+        window.location.href = '../login/index.html';
         return;
     }
 
@@ -50,14 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch vehicles from API
     const fetchVehicles = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/vehicles', {
+            const response = await fetch('http://localhost:8000/api/vehicles', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.status === 401) {
                 alert('Phiên đăng nhập hết hạn');
                 localStorage.clear();
-                window.location.href = '../index.html';
+                window.location.href = '../login/index.html';
                 return;
             }
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('http://localhost:3000/api/vehicles', {
+                const response = await fetch('http://localhost:8000/api/vehicles', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch(`http://localhost:3000/api/vehicles/${vehicleId}`, {
+                const response = await fetch(`http://localhost:8000/api/vehicles/${vehicleId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -514,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/vehicles/${vehicleId}`, {
+                    const response = await fetch(`http://localhost:8000/api/vehicles/${vehicleId}`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${token}`

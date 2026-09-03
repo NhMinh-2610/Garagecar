@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Fetch all repairs (in a real production app, we would query by date from backend)
-            const response = await fetch('http://localhost:3000/api/repairs', {
+            const response = await fetch('http://localhost:8000/api/repairs', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

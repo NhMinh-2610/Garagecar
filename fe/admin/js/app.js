@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Sidebar Toggle (Mobile)
-    // 2. Sidebar Toggle (Mobile)
     const toggleBtn = document.querySelector('.toggle-sidebar');
     const sidebar = document.getElementById('sidebar');
     const content = document.getElementById('content');

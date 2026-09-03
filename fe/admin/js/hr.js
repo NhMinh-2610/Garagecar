@@ -1,5 +1,5 @@
 // HR Module - Mechanics & User Account Management
-const HR_API = 'http://localhost:3000/api';
+const HR_API = 'http://localhost:8000/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadMechanics();
