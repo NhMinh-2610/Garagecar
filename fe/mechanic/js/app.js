@@ -1,5 +1,5 @@
 // Mechanic Portal - Core Application Logic
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:8000/api';
 
 function getAuthHeaders() {
     const token = localStorage.getItem('token');
