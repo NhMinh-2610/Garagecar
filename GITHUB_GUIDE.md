@@ -1,265 +1,193 @@
-# 📤 Hướng dẫn đẩy code lên GitHub
+# Hướng Dẫn Đẩy Code Lên GitHub
 
-## Bước 1: Tạo repository trên GitHub
+## Bước 1: Tạo Repository Trên GitHub
 
 1. Truy cập [GitHub](https://github.com)
-2. Click vào nút **"New"** hoặc **"+"** ở góc trên bên phải
-3. Chọn **"New repository"**
-4. Điền thông tin:
-   - **Repository name**: `auto-garage` (hoặc tên khác bạn muốn)
-   - **Description**: "Hệ thống quản lý garage AutoPro"
+2. Click **"New"** hoặc **"+"** góc trên phải → **"New repository"**
+3. Điền thông tin:
+   - **Repository name**: `garagecar` (hoặc tên bạn muốn)
+   - **Description**: "Garage Management System - Python/FastAPI"
    - Chọn **Public** hoặc **Private**
-   - **KHÔNG** chọn "Initialize this repository with a README" (vì bạn đã có code)
-5. Click **"Create repository"**
+   - **KHÔNG** chọn "Initialize this repository with a README"
+4. Click **"Create repository"**
 
-## Bước 2: Cấu hình Git cục bộ (nếu lần đầu)
+## Bước 2: Cấu Hình Git Cục Bộ (Lần Đầu)
 
 ```bash
-# Cấu hình tên và email
-git config --global user.name "Tên của bạn"
+git config --global user.name "Ten cua ban"
 git config --global user.email "email@example.com"
 ```
 
-## Bước 3: Khởi tạo Git trong dự án (nếu chưa có .git)
+## Bước 3: Khởi Tạo Git Trong Thư Mục Dự Án
 
 ```bash
-# Di chuyển vào thư mục dự án
-cd c:\Users\nnhat\.gemini\antigravity\scratch\auto_garage
-
-# Khởi tạo git (nếu chưa có)
+cd Garagecar   # di chuyen vao thu muc goc du an
 git init
 ```
 
-## Bước 4: Tạo file .gitignore
+## Bước 4: Kiểm Tra .gitignore
 
-Tạo file `.gitignore` trong thư mục gốc để bỏ qua các file không cần thiết:
+File `.gitignore` đã được cấu hình sẵn để bỏ qua:
+- `.env` — chứa thông tin nhạy cảm
+- `data/database.sqlite` — database local
+- `__pycache__/`, `*.pyc` — Python cache
+- `node_modules/` — (nếu có)
 
 ```bash
-# File .gitignore đã được tạo sẵn, kiểm tra nội dung
+# Kiem tra xem .gitignore hoat dong dung chua
+git status
 ```
 
-## Bước 5: Add và Commit code
+## Bước 5: Add và Commit
 
 ```bash
-# Xem trạng thái hiện tại
-git status
-
-# Thêm tất cả file vào staging
+# Them tat ca file
 git add .
 
-# Hoặc add từng file cụ thể
-git add README.md
-git add be/
-git add fe/
-
-# Commit với message
-git commit -m "Initial commit: AutoPro Garage Management System"
+# Commit
+git commit -m "Initial commit: GarageCar Management System"
 ```
 
-## Bước 6: Kết nối với GitHub repository
+## Bước 6: Kết Nối Với GitHub
 
 ```bash
-# Thêm remote repository (thay <username> và <repository-name> của bạn)
-git remote add origin https://github.com/<username>/<repository-name>.git
+# Thay <username> va <repo-name> bang cua ban
+git remote add origin https://github.com/<username>/<repo-name>.git
 
-# Ví dụ:
-# git remote add origin https://github.com/nnhat/auto-garage.git
-
-# Kiểm tra remote đã add chưa
+# Kiem tra
 git remote -v
 ```
 
-## Bước 7: Đẩy code lên GitHub
+## Bước 7: Push Lên GitHub
 
 ```bash
-# Đẩy code lên branch main (hoặc master)
-git push -u origin main
-
-# Nếu repository sử dụng branch "master"
 git branch -M main
 git push -u origin main
 ```
 
-## Bước 8: Xác thực (nếu được yêu cầu)
+## Bước 8: Xác Thực GitHub
 
-GitHub có thể yêu cầu xác thực. Bạn có 2 cách:
+GitHub yêu cầu Personal Access Token (không còn chấp nhận password):
 
-### Cách 1: Personal Access Token (Khuyến nghị)
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+2. Click **"Generate new token (classic)"**
+3. Note: `GarageCar Project`, chọn scope **repo**
+4. Click **"Generate token"** → **Sao chép token ngay** (chỉ hiện 1 lần!)
+5. Khi push, nhập:
+   - Username: GitHub username của bạn
+   - Password: **Token vừa tạo** (không phải password GitHub)
 
-1. Vào GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
-2. Click **"Generate new token"** → **"Generate new token (classic)"**
-3. Đặt tên note: "AutoGarage Project"
-4. Chọn scopes: **repo** (tất cả các quyền repo)
-5. Click **"Generate token"**
-6. **SAO CHÉP TOKEN** (chỉ hiển thị 1 lần!)
-7. Khi push, nhập:
-   - Username: username GitHub của bạn
-   - Password: **token vừa tạo** (không phải password GitHub)
-
-### Cách 2: GitHub CLI
+Hoặc dùng GitHub CLI:
 
 ```bash
-# Cài đặt GitHub CLI
 winget install --id GitHub.cli
-
-# Đăng nhập
 gh auth login
-
-# Làm theo hướng dẫn
 ```
 
-## 🔄 Cập nhật code sau này
+---
 
-Khi bạn có thay đổi mới:
+## Cập Nhật Code Sau Này
 
 ```bash
-# 1. Kiểm tra trạng thái
+# 1. Xem thay doi
 git status
 
-# 2. Add file đã thay đổi
+# 2. Add file
 git add .
 
-# 3. Commit với message mô tả
-git commit -m "Add: Thêm tính năng quản lý phụ tùng"
+# 3. Commit
+git commit -m "fix: Mo ta ngan gon thay doi"
 
-# 4. Push lên GitHub
+# 4. Push
 git push
 ```
 
-## 📋 Các lệnh Git hữu ích
+## Lệnh Git Hữu Ích
 
 ```bash
-# Xem lịch sử commit
-git log
-
-# Xem lịch sử ngắn gọn
+# Xem lich su commit
 git log --oneline
 
-# Xem branch hiện tại
+# Xem branch hien tai
 git branch
 
-# Tạo branch mới
-git checkout -b feature/new-feature
-
-# Chuyển branch
-git checkout main
-
-# Pull code mới nhất từ GitHub
-git pull
-
-# Xem thay đổi chưa commit
-git diff
-
-# Hủy thay đổi chưa commit
-git checkout -- <file>
-
-# Xem remote repository
-git remote -v
-```
-
-## ⚠️ Lưu ý quan trọng
-
-1. **Không push file `.env`** - Chứa thông tin nhạy cảm
-2. **Không push `node_modules/`** - Quá lớn, cài lại bằng `npm install`
-3. **Không push `database.sqlite`** - Dữ liệu local, tạo lại bằng `npm run seed`
-4. **Luôn kiểm tra `.gitignore`** trước khi push
-5. **Viết commit message rõ ràng** - Giúp người khác hiểu bạn làm gì
-
-## 🔐 File .gitignore mẫu
-
-```gitignore
-# Dependencies
-node_modules/
-package-lock.json
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Database
-*.sqlite
-*.db
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Build
-dist/
-build/
-```
-
-## 🎯 Workflow làm việc nhóm
-
-```bash
-# 1. Pull code mới nhất trước khi làm việc
-git pull
-
-# 2. Tạo branch cho tính năng mới
+# Tao branch moi cho tinh nang
 git checkout -b feature/ten-tinh-nang
 
-# 3. Làm việc và commit thường xuyên
-git add .
-git commit -m "Mô tả ngắn gọn"
-
-# 4. Push branch lên GitHub
-git push -u origin feature/ten-tinh-nang
-
-# 5. Tạo Pull Request trên GitHub để merge vào main
-
-# 6. Sau khi merge, về branch main và pull
-git checkout main
+# Pull code moi nhat
 git pull
 
-# 7. Xóa branch cũ
+# Xem thay doi chua commit
+git diff
+```
+
+---
+
+## Workflow Làm Việc Nhóm
+
+```bash
+# 1. Truoc khi lam viec, pull code moi nhat
+git pull
+
+# 2. Tao branch rieng
+git checkout -b feature/ten-tinh-nang
+
+# 3. Code va commit thuong xuyen
+git add .
+git commit -m "Mo ta ngan gon"
+
+# 4. Push branch len GitHub
+git push -u origin feature/ten-tinh-nang
+
+# 5. Tao Pull Request tren GitHub de merge vao main
+
+# 6. Sau khi merge, quay ve main va cap nhat
+git checkout main
+git pull
 git branch -d feature/ten-tinh-nang
 ```
 
-## 🆘 Xử lý sự cố
+---
 
-### Lỗi: "fatal: remote origin already exists"
+## Xử Lý Sự Cố Thường Gặp
+
+### "fatal: remote origin already exists"
 
 ```bash
 git remote remove origin
-git remote add origin <URL-mới>
+git remote add origin <URL-moi>
 ```
 
-### Lỗi: "Updates were rejected"
+### "Updates were rejected"
 
 ```bash
 git pull --rebase origin main
 git push
 ```
 
-### Quên không thêm .gitignore trước khi commit
+### Quên bỏ file vào .gitignore trước khi commit
 
 ```bash
-# Tạo .gitignore
-# Sau đó:
+# Sau khi cap nhat .gitignore:
 git rm -r --cached .
 git add .
-git commit -m "Update .gitignore"
+git commit -m "fix: Update .gitignore"
 ```
 
-### Undo commit cuối cùng (chưa push)
+### Undo commit cuối (chưa push)
 
 ```bash
 git reset --soft HEAD~1
 ```
+
+---
+
+## Lưu Ý Quan Trọng
+
+1. **Không push `.env`** — chứa JWT secret và API keys
+2. **Không push `data/database.sqlite`** — dữ liệu local, tạo lại bằng `python seed.py`
+3. **Không push `__pycache__/`** — Python cache, tự động sinh ra
+4. **Luôn kiểm tra `git status`** trước khi commit
 
 ---
 

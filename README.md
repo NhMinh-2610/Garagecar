@@ -1,84 +1,179 @@
-# 🚗 AutoPro Garage Management System
+# 🚗 GarageCar — Hệ Thống Quản Lý Garage Ô Tô
 
 <div align="center">
-  <h3>Hệ thống quản lý garage tự động đa vai trò với giao diện web cao cấp và API backend mạnh mẽ.</h3>
+  <h3>Giải pháp quản lý garage đa vai trò với giao diện web hiện đại và API backend Python/FastAPI.</h3>
 </div>
 
 ---
 
 ## 📋 Giới Thiệu
 
-**AutoPro** là một giải pháp phần mềm quản lý garage ô tô toàn diện được thiết kế với chuẩn mực doanh nghiệp (Enterprise Standard). Hệ thống cung cấp trải nghiệm UI/UX cao cấp, thao tác mượt mà và quản lý dữ liệu tập trung qua RESTful API, phục vụ chuyên biệt cho 3 đối tượng người dùng chính: **Quản Trị Viên (Admin), Kỹ Thuật Viên (Thợ) và Khách Hàng**.
+**GarageCar** (AutoPro) là hệ thống quản lý garage ô tô toàn diện, hỗ trợ **3 vai trò** người dùng riêng biệt với giao diện và quyền hạn khác nhau:
 
-### ✨ Các Tính Năng Nổi Bật
+| Vai trò | Mô tả |
+|---------|-------|
+| 👑 **Admin** | Tiếp nhận xe, tạo phiếu sửa chữa, quản lý kho, nhân sự, tài chính, báo cáo |
+| 🔧 **Mechanic (Thợ)** | Xem công việc được giao, cập nhật tiến độ từng hạng mục, tra cứu vật tư |
+| 🚗 **Customer (Khách)** | Quản lý xe cá nhân, theo dõi tiến độ sửa chữa realtime |
 
-- **Hệ Thống Đa Vai Trò (Multi-Role Portals)**:
-  - 👑 **Admin Portal**: Quản lý toàn diện (Tiếp nhận xe, Phiếu sửa chữa, Kho, Nhân sự, Tài chính, Báo cáo).
-  - 🔧 **Mechanic Portal**: Nhận việc, check tiến độ từng hạng mục, tra cứu vật tư.
-  - 🚗 **Customer Portal**: Quản lý xe cá nhân, theo dõi tiến độ sửa chữa realtime qua thanh progress bar.
-- **Giao Diện Cao Cấp (Premium UI/UX)**: Thiết kế hiện đại (Glassmorphism), animations mượt mà, sử dụng phông chữ Outfit. Mỗi portal mang một tone màu đặc trưng.
-- **Quản Lý Cập Nhật Trực Tiếp**: Thợ tick hoàn thành hạng mục, Admin và Khách hàng lập tức thấy được tiến độ cập nhật.
-- **🐍 Python/FastAPI Backend (v2)**: Backend thế hệ mới viết bằng Python — async SQLAlchemy, Pydantic v2 validation, tự động sinh OpenAPI docs tại `/docs`.
-- **🤖 AI Assistant Module**: Tích hợp LLM hỗ trợ chẩn đoán lỗi xe, ước tính chi phí, tóm tắt phiếu sửa chữa, tư vấn bảo dưỡng và chatbot kỹ thuật ô tô.
+### ✨ Tính Năng Nổi Bật
+
+- **Multi-Role Portals** — Mỗi vai trò có giao diện và quyền truy cập riêng, được điều hướng tự động sau đăng nhập
+- **Realtime Progress** — Thợ tick hoàn thành hạng mục, Admin và Khách thấy ngay tiến độ cập nhật
+- **Premium UI/UX** — Glassmorphism, smooth animations, font Outfit, dark mode
+- **Python/FastAPI Backend** — Async SQLAlchemy, Pydantic v2 validation, tự động sinh OpenAPI docs tại `/docs`
+- **🤖 AI Assistant** — Chẩn đoán lỗi xe, ước tính chi phí, tóm tắt phiếu, lịch bảo dưỡng, chatbot kỹ thuật
+
+---
 
 ## 🏗️ Cấu Trúc Dự Án
 
 ```text
 Garagecar/
-├── be/                       # Backend Node.js/Express (legacy v1)
-│   ├── routes/               # RESTful API Endpoints
-│   ├── models/               # Sequelize ORM models
-│   ├── middleware/           # JWT & RBAC middleware
-│   ├── utils/                # Logger, Validation, Response helpers
-│   └── server.js             # Entry point
-├── be_python/                # 🐍 Backend Python/FastAPI (v2) ← MỚI
-│   ├── main.py               # FastAPI app entry point (uvicorn)
-│   ├── config/settings.py    # Pydantic Settings (env vars)
-│   ├── core/                 # Security (bcrypt/JWT), constants, response
-│   ├── database/             # SQLAlchemy async engine + session
-│   ├── models/               # ORM models (User, Vehicle, Repair...)
-│   ├── schemas/              # Pydantic request/response schemas
-│   ├── middleware/auth.py    # JWT Bearer dependency + require_role()
-│   ├── routers/              # Auth, Vehicles, Repairs, Inventory, Mechanics, AI
-│   ├── services/ai_service.py# 🤖 LLM adapter (Mock/OpenAI/Gemini/Ollama)
-│   └── requirements.txt
-├── fe/                       # Frontend Client (HTML/CSS/JS)
-│   ├── admin/                # Admin Portal
-│   ├── mechanic/             # Mechanic Portal
-│   ├── customer/             # Customer Portal
-│   └── login/                # Smart login routing
-└── data/database.sqlite      # Shared SQLite database (used by both backends)
+├── be/                         # 🐍 Backend Python/FastAPI
+│   ├── main.py                 # Entry point (uvicorn)
+│   ├── seed.py                 # Script tạo dữ liệu mẫu
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── config/
+│   │   └── settings.py         # Pydantic Settings (đọc .env)
+│   ├── core/
+│   │   ├── security.py         # bcrypt hash + JWT encode/decode
+│   │   ├── constants.py        # Enum Role, VehicleStatus, RepairStatus
+│   │   └── response.py         # success_response / error_response
+│   ├── database/
+│   │   ├── engine.py           # SQLAlchemy async engine + Base
+│   │   └── session.py          # AsyncSession dependency (get_db)
+│   ├── models/                 # ORM models (SQLAlchemy)
+│   │   ├── user.py
+│   │   ├── vehicle.py
+│   │   ├── mechanic.py
+│   │   ├── repair_ticket.py
+│   │   ├── repair_item.py
+│   │   └── inventory.py
+│   ├── schemas/                # Pydantic request/response schemas
+│   │   ├── auth.py
+│   │   ├── vehicle.py
+│   │   ├── repair.py
+│   │   ├── mechanic.py
+│   │   ├── inventory.py
+│   │   └── ai.py
+│   ├── middleware/
+│   │   └── auth.py             # get_current_user + require_role()
+│   ├── routers/                # API route handlers
+│   │   ├── auth.py             # /api/auth
+│   │   ├── vehicles.py         # /api/vehicles
+│   │   ├── repairs.py          # /api/repairs
+│   │   ├── inventory.py        # /api/inventory
+│   │   ├── mechanics.py        # /api/mechanics
+│   │   └── ai.py               # /api/ai
+│   └── services/
+│       └── ai_service.py       # LLM adapter (Mock/OpenAI/Gemini/Ollama)
+├── fe/                         # Frontend (Vanilla HTML/CSS/JS)
+│   ├── index.html              # Landing page AutoPro
+│   ├── styles.css / script.js
+│   ├── login/                  # Trang đăng nhập & đăng ký
+│   ├── admin/                  # Admin Portal
+│   ├── mechanic/               # Mechanic Portal
+│   └── customer/               # Customer Portal
+└── data/
+    └── database.sqlite         # SQLite database (gitignored)
 ```
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy Ứng Dụng
+---
 
-### 🐍 Python Backend (Khuyên dùng — v2 với AI)
+## 🚀 Hướng Dẫn Cài Đặt & Chạy
 
-**Yêu cầu**: Python 3.11+
+### Yêu cầu
+
+- **Python 3.11+**
+- Trình duyệt hiện đại (Chrome, Firefox, Edge)
+- Extension **Live Server** (VS Code) — để chạy frontend
+
+### Bước 1: Cài đặt Backend
 
 ```bash
-cd be_python
+cd be
 pip install -r requirements.txt
-cp .env.example .env          # chỉnh sửa .env nếu cần
+```
+
+### Bước 2: Cấu hình môi trường
+
+```bash
+# Sao chép file cấu hình mẫu
+cp .env.example .env
+```
+
+Nội dung file `.env` tối thiểu (có thể giữ nguyên mặc định):
+
+```env
+PORT=8000
+JWT_SECRET=your_jwt_secret_here_change_in_production
+DATABASE_PATH=../data/database.sqlite
+AI_PROVIDER=mock
+```
+
+### Bước 3: Tạo dữ liệu mẫu (khuyến nghị)
+
+```bash
+cd be
+python seed.py
+```
+
+Lệnh này tạo các tài khoản test sẵn:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@autopro.com` | `123456` |
+| Mechanic | `mechanic@autopro.com` | `123456` |
+| Customer | `customer@autopro.com` | `123456` |
+
+### Bước 4: Khởi động Backend
+
+```bash
+cd be
 uvicorn main:app --reload --port 8000
 ```
 
-Swagger UI: **http://localhost:8000/docs**
+✅ Backend đang chạy tại: **http://localhost:8000**
+📖 Swagger UI (API docs): **http://localhost:8000/docs**
 
-#### Cấu hình AI Provider (tuỳ chọn)
+### Bước 5: Khởi động Frontend
+
+Frontend được code bằng HTML/CSS/JS thuần, không cần build:
+
+1. Mở thư mục dự án bằng **VS Code**
+2. Cài extension **"Live Server"** (nếu chưa có)
+3. Chuột phải vào `fe/login/index.html` → **"Open with Live Server"**
+4. Trình duyệt tự mở → Dùng tài khoản mẫu ở trên để đăng nhập
+
+> 💡 Sau khi đăng nhập thành công, hệ thống tự động chuyển đến đúng Portal tương ứng với vai trò.
+
+---
+
+## 🤖 Tích Hợp AI (Tùy chọn)
+
+Cấu hình trong file `.env`:
 
 ```env
-# .env
-AI_PROVIDER=mock              # mock | openai | gemini | ollama
-OPENAI_API_KEY=sk-...         # nếu dùng OpenAI
-GEMINI_API_KEY=AIza...        # nếu dùng Gemini
-OLLAMA_BASE_URL=http://localhost:11434  # nếu dùng Ollama local
+# Chọn provider: mock | openai | gemini | ollama
+AI_PROVIDER=mock
+
+# Nếu dùng OpenAI
+OPENAI_API_KEY=sk-...
+
+# Nếu dùng Google Gemini
+GEMINI_API_KEY=AIza...
+
+# Nếu dùng Ollama (local)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
 ```
 
-#### 🤖 AI Endpoints
+**AI Endpoints:**
 
 | Method | Path | Mô tả |
-|--------|------|--------|
+|--------|------|-------|
 | `POST` | `/api/ai/diagnose` | Chẩn đoán lỗi xe từ triệu chứng |
 | `POST` | `/api/ai/estimate-cost` | Ước tính chi phí sửa chữa |
 | `POST` | `/api/ai/summarize-repair` | Tóm tắt phiếu sửa chữa |
@@ -87,90 +182,55 @@ OLLAMA_BASE_URL=http://localhost:11434  # nếu dùng Ollama local
 
 ---
 
-### 📦 Node.js Backend (v1 — legacy)
+## 📡 Tài Liệu API
 
-**Yêu cầu**: Node.js v16+, NPM
-
-
-
-### Bước 1: Khởi động Backend & Tạo dữ liệu mẫu
-
-1. **Mở Terminal** và di chuyển vào thư mục `be`:
-   ```bash
-   cd be
-   ```
-
-2. **Cài đặt thư viện (Dependencies):**
-   ```bash
-   npm install
-   ```
-
-3. **Tạo cấu hình môi trường:**
-   Tạo file `.env` nằm trong thư mục `be` với nội dung:
-   ```env
-   PORT=3000
-   JWT_SECRET=super_secret_jwt_key
-   NODE_ENV=development
-   ```
-
-4. **Khởi tạo Database & Dữ liệu mẫu (Tùy chọn nhưng khuyên dùng):**
-   ```bash
-   npm run seed
-   ```
-   *Lệnh này sẽ tạo ra các tài khoản test sẵn cho Admin, Thợ và Khách hàng.*
-
-5. **Khởi chạy Backend:**
-   ```bash
-   npm start
-   ```
-   ✅ *Thành công: Terminal sẽ hiển thị Backend đang lắng nghe tại `http://localhost:3000`.*
-
----
-
-### Bước 2: Khởi động Frontend (Giao diện Web)
-
-Phần Frontend được code bằng HTML/CSS/JS thuần nên không cần cài đặt package. Bạn có thể dùng **Live Server**:
-
-1. Mở thư mục dự án bằng VS Code.
-2. Cài đặt Extension **"Live Server"**.
-3. Nhấn chuột phải vào tệp `fe/login/index.html` và chọn **"Open with Live Server"**.
-4. Trình duyệt sẽ mở ra. Sử dụng các tài khoản mẫu để trải nghiệm (nếu đã chạy lệnh seed):
-   - **Admin**: `admin@autopro.com` / `123456`
-   - **Kỹ thuật viên**: `mechanic@autopro.com` / `123456`
-   - **Khách hàng**: `customer@autopro.com` / `123456`
-
-*(Lưu ý: Mọi tài khoản sau khi đăng nhập thành công sẽ tự động được hệ thống chuyển hướng về đúng giao diện Portal của role tương ứng)*
-
-## 📡 Tài Liệu API (Endpoints)
-
-Đa số các API đều yêu cầu xác thực qua Header `Authorization: Bearer <token>` và được bảo vệ theo role (RBAC).
+Tất cả API (trừ `/login`, `/register`, `/health`) đều yêu cầu header:
+```
+Authorization: Bearer <token>
+```
 
 ### 🔐 Authentication (`/api/auth`)
-- `POST /login`: Xác thực và nhận Token.
-- `POST /register`: Tạo tài khoản Khách hàng.
-- `POST /register-staff`: (Admin Only) Tạo tài khoản cho nhân sự hệ thống.
-- `GET /users`, `DELETE /users/:id`: (Admin Only) Quản lý tài khoản.
+| Method | Path | Quyền | Mô tả |
+|--------|------|-------|-------|
+| `POST` | `/login` | Public | Đăng nhập, nhận JWT token |
+| `POST` | `/register` | Public | Tạo tài khoản khách hàng |
+| `POST` | `/register-staff` | Admin | Tạo tài khoản Admin/Mechanic |
+| `GET` | `/users` | Admin | Danh sách tài khoản |
+| `DELETE` | `/users/{id}` | Admin | Xóa tài khoản |
 
 ### 🚗 Vehicles (`/api/vehicles`)
-- `GET /my-vehicles`: Xe thuộc về khách hàng đang đăng nhập.
-- `GET /`, `POST /`, `PUT /`, `DELETE /`: (Admin Only) Quản lý hệ thống xe.
+| Method | Path | Quyền | Mô tả |
+|--------|------|-------|-------|
+| `GET` | `/my-vehicles` | Any | Xe của khách đang đăng nhập |
+| `GET` | `/` | Admin | Tất cả xe |
+| `POST` | `/` | Admin | Tiếp nhận xe mới |
+| `PUT` | `/{id}` | Admin | Cập nhật thông tin xe |
+| `DELETE` | `/{id}` | Admin | Xóa xe |
 
 ### 🛠️ Repairs (`/api/repairs`)
-- `GET /my-tasks`: Phiếu sửa được giao cho Thợ đang đăng nhập.
-- `GET /my-repairs`: Phiếu sửa xe của Khách đang đăng nhập.
-- `PUT /:id/items/:itemId/toggle`: (Admin/Mechanic) Cập nhật trạng thái từng hạng mục sửa.
-- `POST /`, `DELETE /`: (Admin Only) Tạo/Xóa phiếu sửa chữa.
+| Method | Path | Quyền | Mô tả |
+|--------|------|-------|-------|
+| `GET` | `/my-repairs` | Customer | Phiếu sửa xe của khách |
+| `GET` | `/my-tasks` | Admin/Mechanic | Phiếu được giao cho thợ |
+| `GET` | `/` | Admin | Tất cả phiếu |
+| `POST` | `/` | Admin | Tạo phiếu mới |
+| `PUT` | `/{id}` | Admin/Mechanic | Cập nhật trạng thái |
+| `PUT` | `/{id}/items/{itemId}/toggle` | Admin/Mechanic | Tick hoàn thành hạng mục |
+| `DELETE` | `/{id}` | Admin | Xóa phiếu (chỉ khi draft/working) |
 
-### 📦 Inventory & 👷 Mechanics
-- `/api/inventory` & `/api/mechanics`: Các tác vụ Read (GET) cho phép Admin/Mechanic truy cập, các thao tác thay đổi (POST, PUT, DELETE) chỉ dành cho Admin.
-
-## 🤝 Hướng Dẫn Đóng Góp (Contributing)
-
-Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng! Vui lòng đọc file `CONTRIBUTING.md` để biết chi tiết.
-
-## 📄 Bản Quyền (License)
-
-Dự án này được phân phối dưới giấy phép **MIT License**. Bạn được tự do sử dụng, sửa đổi và phân phối.
+### 📦 Inventory (`/api/inventory`) & 👷 Mechanics (`/api/mechanics`)
+- `GET` — Admin và Mechanic xem được
+- `POST`, `PUT`, `DELETE` — Chỉ Admin
 
 ---
-<p align="center">Được phát triển với sự tỉ mỉ dành cho hệ thống dịch vụ ô tô chuẩn tương lai. 🚀</p>
+
+## 🤝 Đóng Góp
+
+Vui lòng đọc [CONTRIBUTING.md](CONTRIBUTING.md) trước khi đóng góp.
+
+## 📄 Bản Quyền
+
+Phân phối theo **MIT License** — tự do sử dụng, sửa đổi và phân phối.
+
+---
+<p align="center">Được phát triển với sự tỉ mỉ dành cho hệ thống dịch vụ ô tô 🚀</p>
