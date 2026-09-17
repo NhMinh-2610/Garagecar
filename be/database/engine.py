@@ -1,18 +1,16 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from sqlalchemy.orm import DeclarativeBase
-from pathlib import Path
 
-# Resolve the SQLite file path relative to the monorepo root
-# be_python/ is one level inside the repo root, data/ is at the root
-_db_path = Path(__file__).resolve().parent.parent.parent / "data" / "database.sqlite"
-_db_path.parent.mkdir(parents=True, exist_ok=True)
+from config.settings import settings
 
-DATABASE_URL = f"sqlite+aiosqlite:///{_db_path}"
-
+# PostgreSQL async engine via asyncpg driver
+# Connection URL comes from .env: DATABASE_URL=postgresql+asyncpg://user:pass@host:port/db
 engine: AsyncEngine = create_async_engine(
-    DATABASE_URL,
+    settings.database_url,
     echo=False,
-    connect_args={"check_same_thread": False},
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True,   # reconnect automatically if connection drops
 )
 
 

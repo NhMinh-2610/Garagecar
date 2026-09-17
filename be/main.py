@@ -4,8 +4,9 @@ Entry point: uvicorn main:app --reload
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
@@ -76,10 +77,20 @@ async def health():
 
 
 # ── Serve static frontend (optional) ──────────────────────────────────────────
+# Mount static assets at /static to avoid shadowing API routes.
+# A catch-all route serves index.html for SPA client-side routing.
 
 _fe_dir = Path(__file__).parent.parent / "fe"
 if _fe_dir.exists():
-    app.mount("/", StaticFiles(directory=str(_fe_dir), html=True), name="frontend")
+    app.mount("/static", StaticFiles(directory=str(_fe_dir)), name="frontend-static")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(request: Request, full_path: str):
+        """Serve index.html for all non-API paths (SPA client-side routing)."""
+        index = _fe_dir / "index.html"
+        if index.exists():
+            return FileResponse(str(index))
+        return {"detail": "Frontend not found"}
 
 
 # ── Dev entry point ────────────────────────────────────────────────────────────

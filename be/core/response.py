@@ -1,4 +1,5 @@
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from typing import Any, Optional
 
 
@@ -10,7 +11,7 @@ def success_response(
     """Return a standardised success JSON payload — mirrors Node.js sendSuccess()."""
     return JSONResponse(
         status_code=status_code,
-        content={"success": True, "data": data, "message": message},
+        content=jsonable_encoder({"success": True, "data": data, "message": message}),
     )
 
 
@@ -23,4 +24,4 @@ def error_response(
     content: dict[str, Any] = {"success": False, "message": message}
     if error:
         content["error"] = error
-    return JSONResponse(status_code=status_code, content=content)
+    return JSONResponse(status_code=status_code, content=jsonable_encoder(content))
