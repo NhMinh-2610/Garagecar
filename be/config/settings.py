@@ -12,7 +12,11 @@ class Settings(BaseSettings):
     port: int = 8000
     jwt_secret: str = "change_this_in_production_garagecar_2026"
     jwt_expire_hours: int = 24
-    database_path: str = "../data/database.sqlite"
+
+    # PostgreSQL connection URL (primary)
+    # Format: postgresql+asyncpg://user:password@host:port/dbname
+    database_url: str = "postgresql+asyncpg://garagecar:garagecar@localhost:5432/garagecar"
+
     cors_origin: str = "*"
     log_level: str = "INFO"
 

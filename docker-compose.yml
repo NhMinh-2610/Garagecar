@@ -1,0 +1,51 @@
+services:
+  # ── PostgreSQL Database ──────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: garagecar_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: garagecar
+      POSTGRES_PASSWORD: garagecar
+      POSTGRES_DB: garagecar
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U garagecar -d garagecar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── FastAPI Backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./be
+      dockerfile: Dockerfile
+    container_name: garagecar_backend
+    restart: unless-stopped
+    env_file:
+      - ./be/.env.docker
+    environment:
+      DATABASE_URL: postgresql+asyncpg://garagecar:garagecar@db:5432/garagecar
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Nginx Frontend ───────────────────────────────────────────────────────────
+  frontend:
+    image: nginx:alpine
+    container_name: garagecar_frontend
+    restart: unless-stopped
+    volumes:
+      - ./fe:/usr/share/nginx/html:ro
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
