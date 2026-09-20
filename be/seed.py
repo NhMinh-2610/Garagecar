@@ -82,9 +82,9 @@ VEHICLES = [
 ]
 
 INVENTORY = [
-    {"name": "Dau dong co 5W-30", "unit": "lit", "quantity": 50, "unitPrice": 85000},
-    {"name": "Loc dau", "unit": "cai", "quantity": 30, "unitPrice": 65000},
-    {"name": "Bugi NGK", "unit": "bo", "quantity": 20, "unitPrice": 180000},
+    {"name": "Dau dong co 5W-30", "quantity": 50, "unitPrice": 85000},
+    {"name": "Loc dau", "quantity": 30, "unitPrice": 65000},
+    {"name": "Bugi NGK", "quantity": 20, "unitPrice": 180000},
 ]
 
 
