@@ -25,7 +25,7 @@ async def my_vehicles(
     return success_response(data)
 
 
-@router.get("/", summary="List all vehicles (admin only)")
+@router.get("", summary="List all vehicles (admin only)")
 async def list_vehicles(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN)),
@@ -50,7 +50,7 @@ async def get_vehicle(
     return success_response(VehicleResponse.model_validate(vehicle).model_dump())
 
 
-@router.post("/", summary="Register a new vehicle (admin only)")
+@router.post("", summary="Register a new vehicle (admin only)")
 async def create_vehicle(
     body: VehicleCreate,
     db: AsyncSession = Depends(get_db),

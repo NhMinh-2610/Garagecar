@@ -12,7 +12,7 @@ from middleware.auth import require_role
 router = APIRouter(prefix="/api/mechanics", tags=["Mechanics"])
 
 
-@router.get("/", summary="List active mechanics (admin + mechanic)")
+@router.get("", summary="List active mechanics (admin + mechanic)")
 async def list_mechanics(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC)),
@@ -23,7 +23,7 @@ async def list_mechanics(
     return success_response([MechanicResponse.model_validate(m).model_dump() for m in mechanics])
 
 
-@router.post("/", summary="Add a new mechanic profile (admin only)")
+@router.post("", summary="Add a new mechanic profile (admin only)")
 async def create_mechanic(
     body: MechanicCreate,
     db: AsyncSession = Depends(get_db),

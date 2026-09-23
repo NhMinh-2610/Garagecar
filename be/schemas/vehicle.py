@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, List, Any
 from datetime import datetime
 
 
@@ -35,3 +35,4 @@ class VehicleResponse(BaseModel):
     status: str
     receivedDate: Optional[datetime]
     createdAt: Optional[datetime]
+    repairTickets: Optional[List[Any]] = []

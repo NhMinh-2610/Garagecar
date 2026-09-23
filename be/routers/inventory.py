@@ -12,7 +12,7 @@ from middleware.auth import require_role
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
 
-@router.get("/", summary="List all inventory items (admin + mechanic)")
+@router.get("", summary="List all inventory items (admin + mechanic)")
 async def list_inventory(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC)),
@@ -23,7 +23,7 @@ async def list_inventory(
     return success_response([InventoryResponse.model_validate(i).model_dump() for i in items])
 
 
-@router.post("/", summary="Add an inventory item (admin only)")
+@router.post("", summary="Add an inventory item (admin only)")
 async def create_inventory(
     body: InventoryCreate,
     db: AsyncSession = Depends(get_db),

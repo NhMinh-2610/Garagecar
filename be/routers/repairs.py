@@ -68,7 +68,7 @@ async def my_repairs(
 
 # ── Admin view: all tickets ────────────────────────────────────────────────────
 
-@router.get("/", summary="List all repair tickets (admin only)")
+@router.get("", summary="List all repair tickets (admin only)")
 async def list_repairs(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN)),
@@ -114,7 +114,7 @@ async def get_repair(
 
 # ── Create ─────────────────────────────────────────────────────────────────────
 
-@router.post("/", summary="Create a repair ticket (admin only)")
+@router.post("", summary="Create a repair ticket (admin only)")
 async def create_repair(
     body: RepairTicketCreate,
     db: AsyncSession = Depends(get_db),

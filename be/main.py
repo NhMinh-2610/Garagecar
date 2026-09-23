@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         # create_all is safe: it skips tables that already exist
         await conn.run_sync(Base.metadata.create_all)
-    print("✓ Database tables ready")
+    print("[OK] Database tables ready")
     yield
     # Teardown (optional cleanup)
     await engine.dispose()
@@ -77,20 +77,12 @@ async def health():
 
 
 # ── Serve static frontend (optional) ──────────────────────────────────────────
-# Mount static assets at /static to avoid shadowing API routes.
-# A catch-all route serves index.html for SPA client-side routing.
+# Mounted at /static so it never shadows API routes.
+# Access frontend via: http://localhost:8000/static/admin/index.html
 
 _fe_dir = Path(__file__).parent.parent / "fe"
 if _fe_dir.exists():
     app.mount("/static", StaticFiles(directory=str(_fe_dir)), name="frontend-static")
-
-    @app.get("/{full_path:path}", include_in_schema=False)
-    async def spa_fallback(request: Request, full_path: str):
-        """Serve index.html for all non-API paths (SPA client-side routing)."""
-        index = _fe_dir / "index.html"
-        if index.exists():
-            return FileResponse(str(index))
-        return {"detail": "Frontend not found"}
 
 
 # ── Dev entry point ────────────────────────────────────────────────────────────
