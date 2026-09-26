@@ -459,17 +459,19 @@
                                 </div>
 
                                 <!-- Items List -->
-                                <table class="data-table mt-4" id="repairItemsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Công việc</th>
-                                            <th>Vật tư</th>
-                                            <th>Thành tiền</th>
-                                            <th>Xóa</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
+                                <div class="table-container mt-4">
+                                    <table class="table" id="repairItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Công việc</th>
+                                                <th>Vật tư</th>
+                                                <th>Thành tiền</th>
+                                                <th>Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
 
                                 <div class="total-section text-right mt-4">
                                     <h3>Tổng cộng: <span id="totalAmount">0</span> VNĐ</h3>
@@ -486,26 +488,26 @@
 
                 <!-- 4. INVENTORY & DATA -->
                 <section id="inventory-section">
-                    <div class="tabs">
-                         <button class="tab-btn active" data-tab="inv-import">Nhập Vật Tư</button>
-                         <button class="tab-btn" data-tab="inv-settings">Cài đặt Dữ liệu</button>
+                    <div class="repair-tabs" style="margin-bottom: 20px;">
+                         <button class="repair-tab tab-btn active" data-tab="inv-import">📦 Nhập Vật Tư</button>
+                         <button class="repair-tab tab-btn" data-tab="inv-settings">⚙️ Cài đặt Dữ liệu</button>
                     </div>
 
-                    <div class="tab-content active" id="inv-import">
+                    <div class="repair-tab-content tab-content active" id="inv-import">
                          <div class="card">
                             <h3>Nhập Kho Vật Tư Phụ Tùng</h3>
                             <form id="importForm" class="two-col-grid">
                                 <div class="form-group">
                                     <label>Tên vật tư</label>
-                                    <input type="text" required>
+                                    <input type="text" class="form-control" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Số lượng nhập</label>
-                                    <input type="number" required>
+                                    <input type="number" class="form-control" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Đơn giá nhập</label>
-                                    <input type="number" required>
+                                    <input type="number" class="form-control" required>
                                 </div>
                                 <div class="form-group flex-end">
                                     <button type="submit" class="btn btn-success">Nhập Kho</button>
@@ -513,26 +515,28 @@
                             </form>
                             <hr>
                             <h4>Lịch sử nhập kho gần đây</h4>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Tên vật tư</th>
-                                        <th>Số lượng</th>
-                                        <th>Ngày nhập</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Nhớt Castrol</td>
-                                        <td>50</td>
-                                        <td>20/12/2025</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên vật tư</th>
+                                            <th>Số lượng</th>
+                                            <th>Ngày nhập</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Nhớt Castrol</td>
+                                            <td>50</td>
+                                            <td>20/12/2025</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                          </div>
                     </div>
 
-                    <div class="tab-content" id="inv-settings">
+                    <div class="repair-tab-content tab-content" id="inv-settings">
                         <div class="card-grid">
                             <div class="card">
                                 <h3>Quản lý Hiệu Xe</h3>
@@ -560,7 +564,7 @@
                                 <h3>Tham Số Quy Định</h3>
                                 <div class="form-group">
                                     <label>Số xe tối đa / ngày</label>
-                                    <input type="number" value="30">
+                                    <input type="number" value="30" class="form-control">
                                 </div>
                                 <button class="btn btn-primary mt-2">Lưu Thay Đổi</button>
                             </div>
