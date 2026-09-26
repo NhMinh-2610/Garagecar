@@ -6,7 +6,7 @@ Entry point: uvicorn main:app --reload
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
@@ -76,12 +76,36 @@ async def health():
     }
 
 
-# ── Serve static frontend (optional) ──────────────────────────────────────────
-# Mounted at /static so it never shadows API routes.
-# Access frontend via: http://localhost:8000/static/admin/index.html
+# ── Serve static frontend ─────────────────────────────────────────────────────
+# Frontend được serve tại /static/
+# Các route dưới đây redirect để người dùng có thể truy cập trực tiếp
+# thay vì phải mở file:// (gây lỗi localStorage & CORS)
 
 _fe_dir = Path(__file__).parent.parent / "fe"
+
 if _fe_dir.exists():
+    # Convenience redirects — giúp frontend chạy đúng origin http://localhost:8000
+    @app.get("/", include_in_schema=False)
+    async def root():
+        return RedirectResponse(url="/static/login/index.html")
+
+    @app.get("/login", include_in_schema=False)
+    async def login_page():
+        return RedirectResponse(url="/static/login/index.html")
+
+    @app.get("/admin", include_in_schema=False)
+    async def admin_page():
+        return RedirectResponse(url="/static/admin/index.html")
+
+    @app.get("/mechanic", include_in_schema=False)
+    async def mechanic_page():
+        return RedirectResponse(url="/static/mechanic/index.html")
+
+    @app.get("/customer", include_in_schema=False)
+    async def customer_page():
+        return RedirectResponse(url="/static/customer/index.html")
+
+    # Mount static files last so API routes take priority
     app.mount("/static", StaticFiles(directory=str(_fe_dir)), name="frontend-static")
 
 

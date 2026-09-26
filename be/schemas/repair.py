@@ -34,6 +34,19 @@ class RepairItemResponse(BaseModel):
     createdAt: Optional[datetime]
 
 
+# ── Nested vehicle info embedded in repair response ───────────────────────────
+
+class VehicleInRepair(BaseModel):
+    """Minimal vehicle info embedded inside a repair ticket response."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    licensePlate: str
+    carBrand: str
+    customerName: str
+    phone: str
+
+
 # ── Repair Ticket schemas ──────────────────────────────────────────────────────
 
 class RepairTicketCreate(BaseModel):
@@ -63,3 +76,4 @@ class RepairTicketResponse(BaseModel):
     paidAt: Optional[datetime]
     createdAt: Optional[datetime]
     items: List[RepairItemResponse] = []
+    vehicle: Optional[VehicleInRepair] = None  # nested vehicle info for frontend

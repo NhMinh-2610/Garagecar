@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('user');
                 localStorage.removeItem('mechanicActiveSection');
                 localStorage.removeItem('mechanicActiveTitle');
-                window.location.href = '../login/index.html';
+                window.location.href = '/static/login/index.html';
             }
         });
     }
@@ -22,7 +22,7 @@ function checkAuth() {
     const userStr = localStorage.getItem('user');
 
     if (!token || !userStr) {
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
         return;
     }
 
@@ -32,10 +32,10 @@ function checkAuth() {
         // Check role - only mechanics allowed here
         if (user.role !== 'mechanic') {
             const redirectMap = {
-                'admin': '../admin/',
-                'customer': '../customer/',
+                'admin': '/static/admin/index.html',
+                'customer': '/static/customer/index.html',
             };
-            window.location.href = redirectMap[user.role] || '../login/index.html';
+            window.location.href = redirectMap[user.role] || '/static/login/index.html';
             return;
         }
 
@@ -51,6 +51,6 @@ function checkAuth() {
     } catch (e) {
         console.error('Error parsing user data:', e);
         localStorage.clear();
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
     }
 }

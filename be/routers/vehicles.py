@@ -89,7 +89,7 @@ async def update_vehicle(
     return success_response(VehicleResponse.model_validate(vehicle).model_dump(), "Cập nhật thành công")
 
 
-@router.delete("/{vehicle_id}", summary="Delete a vehicle (admin only)")
+@router.delete("/{vehicle_id}", summary="Delete a vehicle and all its repair tickets (admin only)")
 async def delete_vehicle(
     vehicle_id: int,
     db: AsyncSession = Depends(get_db),
@@ -100,6 +100,21 @@ async def delete_vehicle(
     vehicle = result.scalar_one_or_none()
     if not vehicle:
         return error_response("Không tìm thấy xe", 404)
-    await db.delete(vehicle)
-    await db.commit()
-    return success_response(None, "Xóa thành công")
+
+    ticket_count = len(vehicle.repairTickets)
+
+    try:
+        await db.delete(vehicle)
+        await db.commit()
+    except sa_exc.IntegrityError:
+        await db.rollback()
+        return error_response(
+            "Không thể xóa xe vì còn dữ liệu liên quan. Vui lòng xóa các phiếu sửa chữa trước.",
+            409,
+        )
+
+    msg = "Xóa thành công"
+    if ticket_count > 0:
+        msg = f"Đã xóa xe và {ticket_count} phiếu sửa chữa liên quan"
+    return success_response(None, msg)
+

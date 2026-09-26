@@ -7,8 +7,7 @@ from database.engine import Base
 class User(Base):
     """
     User account — supports multiple roles: admin, mechanic, accountant, customer.
-    Column names intentionally mirror the existing Sequelize schema (camelCase)
-    so the Python and Node.js backends share the same SQLite database.
+    Column names use camelCase to match the existing database schema.
     """
 
     __tablename__ = "users"

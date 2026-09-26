@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check auth
     if (!token) {
         alert('Vui lòng đăng nhập lại');
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
         return;
     }
 
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 401) {
                 alert('Phiên đăng nhập hết hạn');
                 localStorage.clear();
-                window.location.href = '../login/index.html';
+                window.location.href = '/static/login/index.html';
                 return;
             }
 
@@ -508,8 +508,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const vehicle = vehicles.find(v => v.id == vehicleId);
                 
                 if (!vehicle) return;
+
+                // Warn if vehicle has repair tickets
+                const ticketCount = vehicle.repairTickets ? vehicle.repairTickets.length : 0;
+                let confirmMsg = `Bạn có chắc muốn xóa xe ${vehicle.licensePlate}?\nHành động này không thể hoàn tác.`;
+                if (ticketCount > 0) {
+                    confirmMsg = `Xe ${vehicle.licensePlate} có ${ticketCount} phiếu sửa chữa liên quan.\nXóa xe sẽ XÓA LUÔN tất cả phiếu sửa chữa này!\n\nBạn có chắc muốn tiếp tục?`;
+                }
                 
-                if (!confirm(`Bạn có chắc muốn xóa xe ${vehicle.licensePlate}? Hành động này không thể hoàn tác.`)) {
+                if (!confirm(confirmMsg)) {
                     return;
                 }
 
@@ -523,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const result = await response.json();
                     if (result.success) {
-                        showToast('Đã xóa xe thành công!', 'success');
+                        showToast(result.message || 'Đã xóa xe thành công!', 'success');
                         fetchVehicles();
                     } else {
                         showToast('Lỗi: ' + result.message, 'error');

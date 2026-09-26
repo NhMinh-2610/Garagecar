@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('user');
                 localStorage.removeItem('activeSection');
                 localStorage.removeItem('activeTitle');
-                window.location.href = '../login/index.html'; 
+                window.location.href = '/static/login/index.html';
             }
         });
     }
@@ -23,7 +23,7 @@ function checkAuth() {
 
     if (!token || !userStr) {
         alert('Vui lòng đăng nhập để truy cập!');
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
         return;
     }
 
@@ -34,10 +34,10 @@ function checkAuth() {
         if (user.role !== 'admin') {
             // Redirect to correct portal
             const redirectMap = {
-                'mechanic': '../mechanic/',
-                'customer': '../customer/',
+                'mechanic': '/static/mechanic/',
+                'customer': '/static/customer/',
             };
-            const redirectUrl = redirectMap[user.role] || '../login/index.html';
+            const redirectUrl = redirectMap[user.role] || '/static/login/index.html';
             window.location.href = redirectUrl;
             return;
         }
@@ -54,7 +54,7 @@ function checkAuth() {
     } catch (e) {
         console.error('Error parsing user data:', e);
         localStorage.clear();
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
     }
 }
 

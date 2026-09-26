@@ -12,6 +12,7 @@ from schemas.repair import (
     RepairTicketUpdate,
     RepairTicketResponse,
     RepairItemToggle,
+    VehicleInRepair,
 )
 from core.constants import Role
 from core.response import success_response, error_response
@@ -21,7 +22,14 @@ router = APIRouter(prefix="/api/repairs", tags=["Repairs"])
 
 
 def _serialize_ticket(ticket: RepairTicket) -> dict:
-    return RepairTicketResponse.model_validate(ticket).model_dump()
+    """Serialize a RepairTicket ORM object to dict, including nested vehicle info."""
+    data = RepairTicketResponse.model_validate(ticket).model_dump()
+    # Explicitly embed vehicle data so frontend can access r.vehicle.licensePlate
+    if ticket.vehicle:
+        data["vehicle"] = VehicleInRepair.model_validate(ticket.vehicle).model_dump()
+    else:
+        data["vehicle"] = None
+    return data
 
 
 # ── Mechanic view: tasks assigned to me ───────────────────────────────────────

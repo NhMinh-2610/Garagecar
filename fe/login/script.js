@@ -12,13 +12,13 @@ const messageBox = document.getElementById('messageBox');
 function getRedirectUrl(role) {
     switch (role) {
         case 'admin':
-            return '../admin/';
+            return '/static/admin/index.html';
         case 'mechanic':
-            return '../mechanic/';
+            return '/static/mechanic/index.html';
         case 'customer':
-            return '../customer/';
+            return '/static/customer/index.html';
         default:
-            return '../login/';
+            return '/static/login/index.html';
     }
 }
 

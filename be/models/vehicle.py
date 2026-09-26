@@ -25,5 +25,5 @@ class Vehicle(Base):
     createdAt = Column("createdAt", DateTime, server_default=func.now())
     updatedAt = Column("updatedAt", DateTime, server_default=func.now(), onupdate=func.now())
 
-    # Relationships
-    repairTickets = relationship("RepairTicket", back_populates="vehicle", lazy="selectin")
+    # Relationships — cascade ensures repair tickets are deleted with the vehicle
+    repairTickets = relationship("RepairTicket", back_populates="vehicle", lazy="selectin", cascade="all, delete-orphan")

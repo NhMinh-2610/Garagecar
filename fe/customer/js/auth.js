@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('user');
                 localStorage.removeItem('customerActiveSection');
                 localStorage.removeItem('customerActiveTitle');
-                window.location.href = '../login/index.html';
+                window.location.href = '/static/login/index.html';
             }
         });
     }
@@ -22,7 +22,7 @@ function checkAuth() {
     const userStr = localStorage.getItem('user');
 
     if (!token || !userStr) {
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
         return;
     }
 
@@ -33,10 +33,10 @@ function checkAuth() {
         if (user.role !== 'customer') {
             // Redirect to correct portal
             const redirectMap = {
-                'admin': '../admin/',
-                'mechanic': '../mechanic/',
+                'admin': '/static/admin/index.html',
+                'mechanic': '/static/mechanic/index.html',
             };
-            window.location.href = redirectMap[user.role] || '../login/index.html';
+            window.location.href = redirectMap[user.role] || '/static/login/index.html';
             return;
         }
 
@@ -52,6 +52,6 @@ function checkAuth() {
     } catch (e) {
         console.error('Error parsing user data:', e);
         localStorage.clear();
-        window.location.href = '../login/index.html';
+        window.location.href = '/static/login/index.html';
     }
 }
