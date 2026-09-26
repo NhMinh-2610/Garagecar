@@ -15,6 +15,7 @@ from database.engine import engine, Base
 import models  # noqa: F401 — registers all ORM models with metadata
 
 from routers import auth, vehicles, repairs, inventory, mechanics, ai
+from routers import settings as settings_router
 
 
 # ── Lifespan: create tables on startup ────────────────────────────────────────
@@ -62,6 +63,7 @@ app.include_router(repairs.router)
 app.include_router(inventory.router)
 app.include_router(mechanics.router)
 app.include_router(ai.router)
+app.include_router(settings_router.router)
 
 
 # ── Health check ───────────────────────────────────────────────────────────────
