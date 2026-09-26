@@ -489,51 +489,61 @@
                 <!-- 4. INVENTORY & DATA -->
                 <section id="inventory-section">
                     <div class="repair-tabs" style="margin-bottom: 20px;">
-                         <button class="repair-tab tab-btn active" data-tab="inv-import">📦 Nhập Vật Tư</button>
+                         <button class="repair-tab tab-btn active" data-tab="inv-import">📦 Kho Vật Tư</button>
                          <button class="repair-tab tab-btn" data-tab="inv-settings">⚙️ Cài đặt Dữ liệu</button>
                     </div>
 
                     <div class="repair-tab-content tab-content active" id="inv-import">
                          <div class="card">
-                            <h3>Nhập Kho Vật Tư Phụ Tùng</h3>
-                            <form id="importForm" class="two-col-grid">
-                                <div class="form-group">
-                                    <label>Tên vật tư</label>
-                                    <input type="text" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Số lượng nhập</label>
-                                    <input type="number" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Đơn giá nhập</label>
-                                    <input type="number" class="form-control" required>
-                                </div>
-                                <div class="form-group flex-end">
-                                    <button type="submit" class="btn btn-success">Nhập Kho</button>
-                                </div>
-                            </form>
-                            <hr>
-                            <h4>Lịch sử nhập kho gần đây</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3>Danh sách Kho Vật Tư</h3>
+                                <button class="btn btn-primary" id="btnShowAddInventoryModal"><i class="fa-solid fa-plus"></i> Nhập kho</button>
+                            </div>
+                            
                             <div class="table-container">
-                                <table class="table">
+                                <table class="table" id="inventoryTable">
                                     <thead>
                                         <tr>
+                                            <th>ID</th>
                                             <th>Tên vật tư</th>
-                                            <th>Số lượng</th>
-                                            <th>Ngày nhập</th>
+                                            <th>Số lượng tồn</th>
+                                            <th>Đơn giá</th>
+                                            <th>Lần nhập cuối</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Nhớt Castrol</td>
-                                            <td>50</td>
-                                            <td>20/12/2025</td>
-                                        </tr>
+                                        <!-- Rendered via JS -->
                                     </tbody>
                                 </table>
                             </div>
                          </div>
+                    </div>
+
+                    <!-- Add Inventory Modal -->
+                    <div id="addInventoryModal" class="modal" style="display: none;">
+                        <div class="modal-content" style="max-width: 500px;">
+                            <span class="close-btn" id="closeAddInventoryModal">&times;</span>
+                            <h2 class="modal-title"><i class="fa-solid fa-box"></i> Nhập Kho Vật Tư</h2>
+                            
+                            <form id="importForm" class="mt-4">
+                                <div class="form-group mb-3">
+                                    <label>Tên vật tư</label>
+                                    <input type="text" id="invName" name="name" class="form-control" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label>Số lượng nhập</label>
+                                    <input type="number" id="invQuantity" name="quantity" class="form-control" min="1" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label>Đơn giá nhập</label>
+                                    <input type="number" id="invPrice" name="unitPrice" class="form-control" min="0" required>
+                                </div>
+                                <div class="form-actions text-right mt-4">
+                                    <button type="submit" class="btn btn-success">Xác nhận</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <div class="repair-tab-content tab-content" id="inv-settings">
