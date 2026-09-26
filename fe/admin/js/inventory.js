@@ -86,13 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const date = item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('vi-VN') : new Date(item.createdAt).toLocaleDateString('vi-VN');
                     
                     const row = `
-                        <tr>
-                            <td>#${item.id}</td>
-                            <td style="font-weight: 500;">${item.name}</td>
-                            <td><span class="badge ${item.quantity > 5 ? 'badge-completed' : 'badge-pending'}">${item.quantity}</span></td>
-                            <td>${price}</td>
-                            <td>${date}</td>
-                            <td>
+                        <tr style="border: 1px solid #ddd;">
+                            <td style="border: 1px solid #ddd; padding: 10px;">#${item.id}</td>
+                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500;">${item.name}</td>
+                            <td style="border: 1px solid #ddd; padding: 10px;"><span class="badge ${item.quantity > 5 ? 'badge-completed' : 'badge-pending'}">${item.quantity}</span></td>
+                            <td style="border: 1px solid #ddd; padding: 10px;">${price}</td>
+                            <td style="border: 1px solid #ddd; padding: 10px;">${date}</td>
+                            <td style="border: 1px solid #ddd; padding: 10px;">
                                 <button class="btn-icon btn-delete-inv" data-id="${item.id}" title="Xóa">
                                     <i class="fa-solid fa-trash-can text-red"></i>
                                 </button>
