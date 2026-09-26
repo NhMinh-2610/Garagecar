@@ -376,8 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if(activeTabBtn) activeTabBtn.classList.add('active');
 
         // Update content
-        document.querySelectorAll('.repair-tab-content').forEach(c => c.style.display = 'none');
-        document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).style.display = 'block';
+        document.querySelectorAll('.repair-tab-content').forEach(c => {
+            c.style.display = 'none';
+            c.classList.remove('active'); // Remove active class to prevent !important CSS override
+        });
+        
+        const targetTab = document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+        if(targetTab) {
+            targetTab.style.display = 'block';
+            targetTab.classList.add('active'); // Add active class to target
+        }
     }
 
     // Filter Logic
