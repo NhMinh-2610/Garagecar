@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -188,7 +188,7 @@ async def update_repair(
                 return error_response("Không thể hoàn thành! Vẫn còn hạng mục chưa hoàn thành.", 400)
 
         # Auto-set timestamps on status transitions
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()  # naive UTC — matches TIMESTAMP WITHOUT TIME ZONE columns
         if new_status == "working" and not ticket.startedAt:
             ticket.startedAt = now
         if new_status == "completed" and not ticket.completedAt:
@@ -260,7 +260,7 @@ async def toggle_item(
         return error_response("Không tìm thấy hạng mục", 404)
 
     item.isCompleted = body.isCompleted
-    item.completedAt = datetime.now(timezone.utc) if body.isCompleted else None
+    item.completedAt = datetime.utcnow() if body.isCompleted else None  # naive UTC
     await db.commit()
     await db.refresh(item)
     return success_response(
