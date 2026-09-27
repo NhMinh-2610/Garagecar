@@ -9,6 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from sqlalchemy.exc import IntegrityError
+from core.response import error_response
 
 from config.settings import settings
 from database.engine import engine, Base
@@ -16,16 +20,20 @@ import models  # noqa: F401 — registers all ORM models with metadata
 
 from routers import auth, vehicles, repairs, inventory, mechanics, ai
 from routers import settings as settings_router
+from routers import reports
+from routers import bookings
 
 
 # ── Lifespan: create tables on startup ────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        # create_all is safe: it skips tables that already exist
-        await conn.run_sync(Base.metadata.create_all)
-    print("[OK] Database tables ready")
+    # Schema changes are explicit: python -m alembic upgrade head.
+    from sqlalchemy import inspect
+    async with engine.connect() as conn:
+        columns = await conn.run_sync(lambda sync: {c["name"] for c in inspect(sync).get_columns("vehicles")})
+        if "customerId" not in columns:
+            raise RuntimeError("Database needs migration: cd be && python -m alembic upgrade head")
     yield
     # Teardown (optional cleanup)
     await engine.dispose()
@@ -55,6 +63,22 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error(request, exc):
+    return error_response(str(exc.detail), exc.status_code)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request, exc):
+    errors = [f"{'.'.join(str(p) for p in e['loc'][1:])}: {e['msg']}" for e in exc.errors()]
+    return error_response("; ".join(errors), 422)
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_error(request, exc):
+    return error_response("Dữ liệu bị trùng hoặc đang được sử dụng. Vui lòng tải lại và kiểm tra.", 409)
+
 # ── Routers ────────────────────────────────────────────────────────────────────
 
 app.include_router(auth.router)
@@ -64,6 +88,8 @@ app.include_router(inventory.router)
 app.include_router(mechanics.router)
 app.include_router(ai.router)
 app.include_router(settings_router.router)
+app.include_router(reports.router)
+app.include_router(bookings.router)
 
 
 # ── Health check ───────────────────────────────────────────────────────────────

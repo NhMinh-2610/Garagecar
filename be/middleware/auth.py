@@ -2,6 +2,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
 from typing import Callable
+from sqlalchemy.ext.asyncio import AsyncSession
+from database.session import get_db
+from models.user import User
 
 from core.security import decode_token
 from core.constants import Role
@@ -11,6 +14,7 @@ _bearer = HTTPBearer()
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     FastAPI dependency: extract and validate the JWT Bearer token.
@@ -18,7 +22,10 @@ async def get_current_user(
     """
     try:
         payload = decode_token(credentials.credentials)
-        return payload
+        user = await db.get(User, payload.get("id"))
+        if user is None:
+            raise JWTError("Account no longer exists")
+        return {"id": user.id, "email": user.email, "role": user.role, "fullName": user.fullName}
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

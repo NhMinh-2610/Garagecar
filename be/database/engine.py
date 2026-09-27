@@ -11,6 +11,7 @@ engine: AsyncEngine = create_async_engine(
     pool_size=10,
     max_overflow=20,
     pool_pre_ping=True,   # reconnect automatically if connection drops
+    connect_args={"server_settings": {"timezone": "UTC"}},
 )
 
 
