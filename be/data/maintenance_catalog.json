@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 2,
+  "reviewedOn": "2026-10-07",
+  "policy": "Danh mục giúp lựa chọn công việc và vật tư; không xác nhận mã phụ tùng tương thích. Tra VIN, sách đúng đời xe/động cơ/hộp số và tài liệu nhà sản xuất trước khi duyệt lịch. Không dùng một chu kỳ thay thế cho mọi hãng.",
+  "components": [
+    {
+      "code": "engine_oil",
+      "name": "Dầu động cơ",
+      "group": "Động cơ",
+      "applicability": "Xăng / diesel / hybrid có động cơ đốt trong",
+      "inspection": "Kiểm tra mức, rò rỉ; thay dầu đúng độ nhớt và chuẩn hãng, không chỉ dựa SAE.",
+      "materials": "Dầu đúng SAE/API/ACEA hoặc chuẩn riêng OEM; vòng đệm nút xả",
+      "caution": "Cảnh báo áp suất dầu, rò rỉ hoặc IOLM cần kiểm tra sớm; không chờ lịch."
+    },
+    {
+      "code": "oil_filter",
+      "name": "Lọc dầu động cơ",
+      "group": "Động cơ",
+      "applicability": "Động cơ đốt trong",
+      "inspection": "Thay lọc; kiểm tra gioăng, van và rò rỉ sau khi chạy thử.",
+      "materials": "Lọc đúng mã VIN, gioăng/đệm",
+      "caution": "Không coi thay dầu là tự động đã thay lọc: phải ghi riêng."
+    },
+    {
+      "code": "engine_air_filter",
+      "name": "Lọc gió động cơ",
+      "group": "Động cơ",
+      "applicability": "Động cơ đốt trong",
+      "inspection": "Kiểm tra bẩn/rách; vệ sinh hoặc thay theo sách và tình trạng.",
+      "materials": "Lọc gió đúng hình dạng, kích thước",
+      "caution": "Đi đường bụi có thể cần kiểm tra sớm hơn."
+    },
+    {
+      "code": "cabin_filter",
+      "name": "Lọc điều hòa",
+      "group": "Điều hòa",
+      "applicability": "Xe có trang bị",
+      "inspection": "Kiểm tra lưu lượng gió, bụi/mùi; vệ sinh khoang hoặc thay lọc.",
+      "materials": "Lọc cabin thường/than hoạt tính đúng mã",
+      "caution": "Không tự suy ra cần nạp gas khi lọc bẩn."
+    },
+    {
+      "code": "spark_plugs",
+      "name": "Bugi đánh lửa",
+      "group": "Động cơ",
+      "applicability": "Động cơ xăng; không áp dụng diesel",
+      "inspection": "Kiểm tra mã, vật liệu điện cực, khe hở và lực siết; thay đúng loại.",
+      "materials": "Bugi thường / platinum / iridium theo động cơ",
+      "caution": "Bugi thường và iridium có thể có chu kỳ rất khác nhau."
+    },
+    {
+      "code": "fuel_filter",
+      "name": "Lọc nhiên liệu",
+      "group": "Nhiên liệu",
+      "applicability": "Theo trang bị, phân biệt xăng và diesel",
+      "inspection": "Kiểm tra/thay; diesel có thể phải xả nước theo cảnh báo.",
+      "materials": "Lọc, gioăng; nhiên liệu theo quy trình mồi hệ thống",
+      "caution": "Lọc xăng nằm trong bình và lọc diesel không dùng chung quy trình."
+    },
+    {
+      "code": "coolant",
+      "name": "Nước làm mát",
+      "group": "Làm mát",
+      "applicability": "Theo động cơ / hệ thống làm mát trang bị",
+      "inspection": "Kiểm tra mức, rò rỉ và tình trạng; thay/xả khí đúng quy trình.",
+      "materials": "Dung dịch đúng chuẩn, tỷ lệ pha; vòng đệm khi cần",
+      "caution": "Lần thay đầu có thể dài hơn chu kỳ lặp. Không mở nắp khi nóng."
+    },
+    {
+      "code": "brake_fluid",
+      "name": "Dầu phanh / ly hợp",
+      "group": "Phanh",
+      "applicability": "Theo hệ thống thủy lực",
+      "inspection": "Kiểm tra mức, rò rỉ; thay và xả khí đúng chuẩn hãng.",
+      "materials": "Dầu DOT đúng sách; không trộn tùy tiện",
+      "caution": "Đừng dùng kiểm tra mức dầu để reset mốc thay dầu."
+    },
+    {
+      "code": "brake_pads",
+      "name": "Má phanh",
+      "group": "Phanh",
+      "applicability": "Phanh đĩa",
+      "inspection": "Đo bề dày, kiểm tra mòn lệch, tiếng kêu và đèn báo.",
+      "materials": "Má đúng cầu trước/sau; bộ phụ kiện theo thiết kế",
+      "caution": "Thay theo đo kiểm/giới hạn hãng, không đặt tuổi thọ km chung."
+    },
+    {
+      "code": "brake_discs",
+      "name": "Đĩa phanh",
+      "group": "Phanh",
+      "applicability": "Phanh đĩa",
+      "inspection": "Đo chiều dày, độ đảo; kiểm tra xước/nứt.",
+      "materials": "Đĩa đúng kích thước và mã; dụng cụ đo",
+      "caution": "Ghi số đo và giới hạn MIN TH từ tài liệu/chi tiết."
+    },
+    {
+      "code": "drum_brakes",
+      "name": "Guốc phanh / trống phanh",
+      "group": "Phanh",
+      "applicability": "Xe có phanh tang trống",
+      "inspection": "Đo mòn, kiểm tra xi lanh và rò rỉ; điều chỉnh khi cần.",
+      "materials": "Guốc, lò xo, xi lanh theo chẩn đoán",
+      "caution": "Không áp dụng cho cầu chỉ dùng phanh đĩa."
+    },
+    {
+      "code": "tires",
+      "name": "Lốp xe",
+      "group": "Gầm / bánh xe",
+      "applicability": "Tất cả xe",
+      "inspection": "Đo độ sâu gai, áp suất, kiểm tra nứt/phồng; đối chiếu cỡ và tải.",
+      "materials": "Lốp đúng cỡ, chỉ số tải/tốc độ; van",
+      "caution": "Thay theo tình trạng và hướng dẫn hãng lốp/xe; không cố định km."
+    },
+    {
+      "code": "tire_rotation",
+      "name": "Đảo lốp",
+      "group": "Gầm / bánh xe",
+      "applicability": "Tùy cấu hình lốp",
+      "inspection": "Đảo đúng sơ đồ; kiểm tra lốp định hướng, cỡ trước/sau và TPMS.",
+      "materials": "Dụng cụ siết lực; van khi cần",
+      "caution": "Lốp khác cỡ trước/sau có thể không đảo theo sơ đồ thông thường."
+    },
+    {
+      "code": "battery_12v",
+      "name": "Ắc quy 12 V",
+      "group": "Điện",
+      "applicability": "Theo trang bị",
+      "inspection": "Đo tình trạng/khả năng khởi động, kiểm tra cực và giá đỡ.",
+      "materials": "Ắc quy thường / EFB / AGM đúng thiết kế",
+      "caution": "Start-stop cần loại phù hợp, có thể cần đăng ký/reset sau thay."
+    },
+    {
+      "code": "drive_belt",
+      "name": "Dây đai phụ",
+      "group": "Động cơ",
+      "applicability": "Xe có trang bị",
+      "inspection": "Kiểm tra nứt, sờn, độ căng và puly.",
+      "materials": "Dây đai, tăng đai/puly theo chẩn đoán",
+      "caution": "Khác dây đai cam; không gộp chu kỳ."
+    },
+    {
+      "code": "timing_belt",
+      "name": "Dây đai cam",
+      "group": "Động cơ",
+      "applicability": "Chỉ động cơ dùng đai cam",
+      "inspection": "Xác định động cơ dùng đai khô/đai trong dầu; thay đúng quy trình.",
+      "materials": "Bộ đai cam, tăng đai, phụ kiện theo sách",
+      "caution": "Không áp mốc đai cam cho động cơ dùng xích cam."
+    },
+    {
+      "code": "transmission_fluid",
+      "name": "Dầu hộp số",
+      "group": "Truyền động",
+      "applicability": "Phân biệt MT / AT / CVT / DCT",
+      "inspection": "Kiểm tra rò rỉ; thay đúng chuẩn, nhiệt độ và cách kiểm tra mức.",
+      "materials": "ATF/CVTF/MTF/DCTF đúng chuẩn; lọc/gioăng khi sách yêu cầu",
+      "caution": "Không dùng dầu CVT cho AT; điều kiện kéo tải có thể đổi lịch."
+    },
+    {
+      "code": "differential_fluid",
+      "name": "Dầu cầu / vi sai",
+      "group": "Truyền động",
+      "applicability": "Xe có cụm vi sai cần bảo dưỡng",
+      "inspection": "Kiểm tra rò rỉ, thay theo cấu hình dẫn động.",
+      "materials": "Dầu đúng độ nhớt/chuẩn, đệm nút",
+      "caution": "Chỉ áp dụng đúng cầu và bộ vi sai của xe."
+    },
+    {
+      "code": "transfer_fluid",
+      "name": "Dầu hộp số phụ",
+      "group": "Truyền động",
+      "applicability": "4WD/AWD có trang bị",
+      "inspection": "Kiểm tra/thay theo tài liệu hộp phân phối.",
+      "materials": "Dầu đúng chuẩn hộp phân phối",
+      "caution": "Không thêm hạng mục này mặc định cho xe FWD."
+    },
+    {
+      "code": "steering_suspension",
+      "name": "Lái, rô tuyn, giảm xóc",
+      "group": "Gầm",
+      "applicability": "Tất cả xe theo cấu hình",
+      "inspection": "Kiểm tra độ rơ, chụp bụi, rò rỉ giảm xóc; đo góc khi cần.",
+      "materials": "Rô tuyn/cao su/giảm xóc chỉ sau chẩn đoán",
+      "caution": "Cân chỉnh sau sửa chữa có ảnh hưởng hình học bánh xe."
+    },
+    {
+      "code": "wipers_lights",
+      "name": "Gạt mưa, đèn, còi",
+      "group": "An toàn / tầm nhìn",
+      "applicability": "Tất cả xe",
+      "inspection": "Kiểm tra gạt, phun rửa, đèn tín hiệu và còi.",
+      "materials": "Lưỡi gạt, bóng đèn đúng loại; nước rửa kính",
+      "caution": "Theo tình trạng; không đặt lịch thay đồng loạt."
+    },
+    {
+      "code": "air_conditioning",
+      "name": "Hệ thống điều hòa",
+      "group": "Điều hòa",
+      "applicability": "Xe có trang bị",
+      "inspection": "Đo nhiệt độ, kiểm tra rò rỉ và lượng môi chất theo chẩn đoán.",
+      "materials": "Môi chất/lubricant đúng nhãn xe, gioăng phù hợp",
+      "caution": "Không nạp gas định kỳ nếu chưa xác định thiếu hoặc rò."
+    },
+    {
+      "code": "diesel_emissions",
+      "name": "DPF / EGR / SCR",
+      "group": "Khí thải",
+      "applicability": "Diesel có đúng trang bị",
+      "inspection": "Đọc lỗi, kiểm tra điều kiện tái sinh, dùng dung dịch đúng SCR nếu có.",
+      "materials": "Dung dịch SCR đúng chuẩn; phụ tùng sau chẩn đoán",
+      "caution": "Không coi mọi xe diesel đều có SCR; không tự xóa/cắt hệ thống."
+    },
+    {
+      "code": "hybrid_cooling",
+      "name": "Làm mát pin / inverter",
+      "group": "Hybrid",
+      "applicability": "Hybrid có trang bị",
+      "inspection": "Kiểm tra cửa hút gió/lọc và mạch làm mát đúng hướng dẫn.",
+      "materials": "Lọc, nước làm mát đúng mạch",
+      "caution": "Công việc điện áp cao cần kỹ thuật viên và quy trình hãng."
+    }
+  ],
+  "brands": [
+    {
+      "brand": "Honda",
+      "models": [
+        "City",
+        "Civic",
+        "CR-V",
+        "HR-V",
+        "BR-V"
+      ],
+      "sourceUrl": "https://www.honda.com.vn/o-to/dich-vu-sau-ban-hang/huong-dan-su-dung",
+      "notes": "Xác định xăng/hybrid và loại bugi. Lịch City Malaysia không tự áp dụng cho City Việt Nam; thông báo CR-V e:HEV phải đối chiếu phạm vi sản xuất."
+    },
+    {
+      "brand": "Toyota",
+      "models": [
+        "Vios",
+        "Corolla Altis",
+        "Corolla Cross",
+        "Camry",
+        "Innova",
+        "Fortuner"
+      ],
+      "sourceUrl": "https://www.toyota.com.vn/hdsd/vios/2024",
+      "notes": "Vios có MT/AT/CVT theo đời xe; các loại dầu khác nhau. Nước làm mát và bugi phải tra đúng phiên bản. Hybrid có hạng mục làm mát pin riêng."
+    },
+    {
+      "brand": "Hyundai",
+      "models": [
+        "Accent",
+        "Grand i10",
+        "Elantra",
+        "Creta",
+        "Tucson",
+        "Santa Fe"
+      ],
+      "sourceUrl": "https://baohanhdientu.hyundai.thanhcong.vn/warranty",
+      "notes": "Accent PE 2021 phân biệt bugi thường 40.000 km và iridium/platinum 100.000 km; chú thích dầu SP-IV 90.000 km/48 tháng cần ưu tiên khi đúng cấu hình. Không sao chép mục 4WD/đai cam của bảng chung sang mọi Accent."
+    },
+    {
+      "brand": "Kia",
+      "models": [
+        "Morning",
+        "Soluto",
+        "K3",
+        "Seltos",
+        "Sonet",
+        "Sportage",
+        "Sorento",
+        "Carnival"
+      ],
+      "sourceUrl": "https://www.kiavietnam.com.vn/bao-duong-dinh-ki",
+      "notes": "Cấp bảo dưỡng gồm kiểm tra phanh, lọc, đai và các hệ thống; đây không phải bằng chứng tất cả bộ phận phải thay ở một mốc. Xác định MPI/GDI/diesel, AT/DCT/MT và sách đúng mẫu."
+    },
+    {
+      "brand": "Mazda",
+      "models": [
+        "Mazda2",
+        "Mazda3",
+        "Mazda6",
+        "CX-3",
+        "CX-30",
+        "CX-5",
+        "CX-8"
+      ],
+      "sourceUrl": "https://mazdamotors.vn/maintenance",
+      "notes": "Trang hãng có cấp 1: 5.000 km/3 tháng và kiểm tra dầu, nước làm mát, phanh, bình điện, đai. Bảo dưỡng cấp không có nghĩa thay toàn bộ. Xác định Skyactiv và bình điện phù hợp i-stop."
+    },
+    {
+      "brand": "Ford",
+      "models": [
+        "Ranger",
+        "Everest",
+        "Territory",
+        "Explorer"
+      ],
+      "sourceUrl": "https://www.ford.com.vn/content/dam/Ford/website-assets/ap/vn/Owner-Dashboard/Service%20%26%20Maintainance/maintenance-schedule-plan/lich-bao-duong-ranger.pdf",
+      "notes": "Lịch Ranger 2022- tách IOLM, đai cam Panther 2.0L, lọc nhiên liệu và dầu các hộp số/cầu. Bảng PDF nhiều cột phải kiểm tra trực quan trước khi nhập mốc. IOLM có thể yêu cầu thay dầu sớm; không áp lịch Ranger cho Territory."
+    },
+    {
+      "brand": "Mitsubishi",
+      "models": [
+        "Attrage",
+        "Xpander",
+        "Xforce",
+        "Triton",
+        "Pajero Sport"
+      ],
+      "sourceUrl": "https://www.mitsubishi-motors.com.vn/dich-vu/bao-duong-dinh-ky",
+      "notes": "Hãng nêu kỳ dịch vụ 5.000 km/3 tháng, riêng All New Triton động cơ 4N16: 10.000 km/6 tháng. Đây là kỳ vào xưởng; từng bộ phận vẫn phân biệt I (kiểm tra), R (thay), L (bôi trơn)."
+    }
+  ],
+  "presets": [
+    {
+      "title": "Honda City 1.5 · Malaysia · 2023–2026 · mẫu tham khảo",
+      "scope": {
+        "brand": "Honda",
+        "model": "City",
+        "yearFrom": 2023,
+        "yearTo": 2026,
+        "engine": "1.5",
+        "gearbox": "CVT",
+        "market": "MY",
+        "usage": "normal"
+      },
+      "sourceUrl": "https://www.honda.com.my/doc/maintenance/2496",
+      "sourcePage": "PDF trang 1; kiểm tra đúng biến thể trước khi duyệt",
+      "version": "City 1.5 2023YM–2026YM",
+      "rules": [
+        {
+          "component": "engine_oil",
+          "action": "replace",
+          "firstKm": 10000,
+          "firstMonths": 6,
+          "repeatKm": 10000,
+          "repeatMonths": 6,
+          "note": "Không dùng cho thị trường VN nếu chưa có sách VN xác nhận."
+        },
+        {
+          "component": "oil_filter",
+          "action": "replace",
+          "firstKm": 20000,
+          "firstMonths": 12,
+          "repeatKm": 20000,
+          "repeatMonths": 12,
+          "note": "Ghi riêng với thay dầu."
+        },
+        {
+          "component": "transmission_fluid",
+          "action": "replace",
+          "firstKm": 40000,
+          "firstMonths": 24,
+          "repeatKm": 40000,
+          "repeatMonths": 24,
+          "note": "Xác minh loại hộp số và dầu từ sách."
+        },
+        {
+          "component": "spark_plugs",
+          "action": "replace",
+          "firstKm": 100000,
+          "firstMonths": 60,
+          "repeatKm": 100000,
+          "repeatMonths": 60,
+          "note": "Bugi iridium."
+        },
+        {
+          "component": "coolant",
+          "action": "replace",
+          "firstKm": 200000,
+          "firstMonths": 120,
+          "repeatKm": null,
+          "repeatMonths": null,
+          "note": "Chưa xác định chu kỳ lặp; sau lần thay đầu yêu cầu đối chiếu sách."
+        }
+      ]
+    },
+    {
+      "title": "Hyundai Accent PE 2021 · mốc cần xác minh",
+      "scope": {
+        "brand": "Hyundai",
+        "model": "Accent",
+        "yearFrom": 2021,
+        "yearTo": 2021,
+        "engine": "CẦN XÁC MINH",
+        "gearbox": "AT SP-IV — CẦN XÁC MINH",
+        "market": "VN",
+        "usage": "normal"
+      },
+      "sourceUrl": "https://baohanhdientu.hyundai.thanhcong.vn/web/content/362/Accent%20PE%202021.pdf?unique=914fda49679483d1ccb931206a3830b1635a4a02",
+      "sourcePage": "PDF 185 (7-10/7-11), chú thích *5; PDF 227 thông số",
+      "version": "Accent PE 2021, bảng điều kiện thường",
+      "rules": [
+        {
+          "component": "brake_fluid",
+          "action": "replace",
+          "firstKm": 40000,
+          "firstMonths": 24,
+          "repeatKm": 40000,
+          "repeatMonths": 24,
+          "note": "Dầu phanh/ly hợp theo trang bị."
+        },
+        {
+          "component": "transmission_fluid",
+          "action": "replace",
+          "firstKm": 90000,
+          "firstMonths": 48,
+          "repeatKm": 90000,
+          "repeatMonths": 48,
+          "note": "Chỉ áp dụng dầu SP-IV theo chú thích *5 khi đúng hộp số."
+        }
+      ]
+    }
+  ],
+  "sourceLimitations": "Các mẫu tham khảo chưa được duyệt. Không có mã phụ tùng/VIN hay toàn bộ lịch của mọi mẫu xe. Một bảng thiếu mốc lặp sẽ hiện Cần xác minh thay vì tự bịa chu kỳ."
+}

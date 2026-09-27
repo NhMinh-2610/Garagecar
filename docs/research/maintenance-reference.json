@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Research references only; not a production maintenance catalogue.",
+  "researchedAt": "2026-10-07",
+  "productionImportAllowed": false,
+  "sources": [
+    {
+      "id": "honda-vn-recall-crv-manual",
+      "publisher": "Honda Việt Nam",
+      "market": "VN",
+      "title": "Đính chính sách hướng dẫn nhanh CR-V e:HEV RS",
+      "url": "https://www.honda.com.vn/o-to/trieu-hoi",
+      "locator": "Thông báo thay sách; nhóm sản xuất 24/08/2023–12/03/2024",
+      "verification": "official_notice_read"
+    },
+    {
+      "id": "hyundai-vn-accent-pe2021",
+      "publisher": "Hyundai Thành Công Việt Nam",
+      "market": "VN",
+      "title": "Sách được thư viện hãng gắn nhãn Accent PE 2021",
+      "url": "https://baohanhdientu.hyundai.thanhcong.vn/web/content/362/Accent%20PE%202021.pdf?unique=914fda49679483d1ccb931206a3830b1635a4a02",
+      "pdfPage": 185,
+      "printedPages": [
+        "7-10",
+        "7-11"
+      ],
+      "verification": "text_table_read_visual_review_pending",
+      "note": "Chú thích và trang bị tùy chọn cần đối chiếu cấu hình xe thực tế."
+    },
+    {
+      "id": "honda-my-city-2023-2026",
+      "publisher": "Honda Malaysia",
+      "market": "MY",
+      "title": "City 1.5 2023YM–2026YM maintenance",
+      "url": "https://www.honda.com.my/doc/maintenance/2496",
+      "pdfPage": 1,
+      "verification": "text_table_read_visual_review_pending",
+      "note": "Nguồn thị trường Malaysia; chưa áp dụng cho xe Việt Nam."
+    },
+    {
+      "id": "toyota-my-vios-ngc102",
+      "publisher": "Toyota Malaysia",
+      "market": "MY",
+      "title": "Vios maintenance packages; NGC102 on page 1",
+      "url": "https://www.toyota.com.my/content/dam/malaysia/price-list-maintenance-packages/periodic-maintenance/september-2024/Vios-September-2024.pdf",
+      "pdfPage": 1,
+      "effectiveDate": "2024-09-01",
+      "verification": "text_page_read_visual_review_pending",
+      "note": "Ngày hiệu lực không phải năm mẫu xe; tài liệu có nhiều mã xe."
+    }
+  ],
+  "profiles": [
+    {
+      "id": "vn-crv-ehev-notice",
+      "enabled": false,
+      "sourceId": "honda-vn-recall-crv-manual",
+      "vehicle": {
+        "brand": "Honda",
+        "model": "CR-V",
+        "trim": "e:HEV RS",
+        "market": "VN",
+        "productionFrom": "2023-08-24",
+        "productionTo": "2024-03-12",
+        "modelYearFrom": null,
+        "modelYearTo": null,
+        "engineCode": null,
+        "transmissionCode": null
+      },
+      "reviewStatus": "pending_garage_review",
+      "rules": [
+        {
+          "id": "oil-change",
+          "component": "engine_oil",
+          "action": "replace",
+          "recurringKm": 5000,
+          "recurringMonths": 6,
+          "firstKm": null,
+          "firstMonths": null,
+          "scheduleAnchor": "requires_manual_confirmation",
+          "usageMode": "unspecified",
+          "note": "Chỉ mô tả mốc được đính chính; không phải toàn bộ lịch."
+        }
+      ]
+    },
+    {
+      "id": "vn-accent-pe2021-reference",
+      "enabled": false,
+      "sourceId": "hyundai-vn-accent-pe2021",
+      "vehicle": {
+        "brand": "Hyundai",
+        "model": "Accent",
+        "documentLabel": "PE 2021",
+        "market": "VN",
+        "modelYearFrom": null,
+        "modelYearTo": null,
+        "engineCode": null,
+        "transmissionCode": null
+      },
+      "reviewStatus": "pending_variant_and_footnote_review",
+      "rules": [
+        {
+          "id": "ordinary-spark-plugs",
+          "component": "spark_plugs",
+          "action": "replace",
+          "partSpecification": "ordinary_electrode",
+          "recurringKm": 40000,
+          "recurringMonths": null,
+          "scheduleAnchor": "requires_manual_confirmation"
+        },
+        {
+          "id": "iridium-platinum-spark-plugs",
+          "component": "spark_plugs",
+          "action": "replace",
+          "partSpecification": "iridium_or_platinum",
+          "recurringKm": 100000,
+          "recurringMonths": null,
+          "scheduleAnchor": "requires_manual_confirmation"
+        },
+        {
+          "id": "at-spiv-fluid",
+          "component": "transmission_fluid",
+          "action": "replace",
+          "partSpecification": "SP-IV",
+          "recurringKm": 90000,
+          "recurringMonths": 48,
+          "scheduleAnchor": "requires_manual_confirmation",
+          "sourceNote": "Chú thích *5; không dùng dòng chung 40.000 km."
+        },
+        {
+          "id": "brake-clutch-fluid",
+          "component": "brake_clutch_fluid",
+          "action": "replace",
+          "recurringKm": 40000,
+          "recurringMonths": 24,
+          "scheduleAnchor": "requires_manual_confirmation"
+        },
+        {
+          "id": "brakes-condition",
+          "component": "brake_pads_discs_drums",
+          "action": "inspect",
+          "recurringKm": null,
+          "recurringMonths": null,
+          "scheduleAnchor": "scheduled_service_visit",
+          "replacementIntervalEstablished": false
+        }
+      ]
+    },
+    {
+      "id": "my-city-15-2023-2026-reference",
+      "enabled": false,
+      "sourceId": "honda-my-city-2023-2026",
+      "vehicle": {
+        "brand": "Honda",
+        "model": "City",
+        "engineLabel": "1.5",
+        "market": "MY",
+        "modelYearFrom": 2023,
+        "modelYearTo": 2026,
+        "engineCode": null,
+        "transmissionCode": null
+      },
+      "reviewStatus": "reference_foreign_market",
+      "rules": [
+        {
+          "id": "engine-oil",
+          "component": "engine_oil",
+          "action": "replace",
+          "recurringKm": 10000,
+          "recurringMonths": 6,
+          "scheduleAnchor": "published_odometer_calendar_grid"
+        },
+        {
+          "id": "oil-filter",
+          "component": "oil_filter",
+          "action": "replace",
+          "recurringKm": 20000,
+          "recurringMonths": 12,
+          "scheduleAnchor": "published_odometer_calendar_grid"
+        },
+        {
+          "id": "transmission-fluid",
+          "component": "transmission_fluid",
+          "action": "replace",
+          "recurringKm": 40000,
+          "recurringMonths": 24,
+          "scheduleAnchor": "published_odometer_calendar_grid"
+        },
+        {
+          "id": "iridium-spark-plugs",
+          "component": "spark_plugs",
+          "action": "replace",
+          "partSpecification": "iridium",
+          "recurringKm": 100000,
+          "recurringMonths": 60,
+          "scheduleAnchor": "published_odometer_calendar_grid"
+        },
+        {
+          "id": "coolant-visible-first-marker",
+          "component": "coolant",
+          "action": "replace",
+          "firstKm": 200000,
+          "firstMonths": 120,
+          "recurringKm": null,
+          "recurringMonths": null,
+          "scheduleAnchor": "published_odometer_calendar_grid",
+          "note": "Chưa suy ra chu kỳ ngoài phạm vi bảng."
+        }
+      ]
+    },
+    {
+      "id": "my-vios-ngc102-reference",
+      "enabled": false,
+      "sourceId": "toyota-my-vios-ngc102",
+      "vehicle": {
+        "brand": "Toyota",
+        "model": "Vios",
+        "trim": "1.5G / 1.5E Auto",
+        "modelCode": "NGC102",
+        "market": "MY",
+        "modelYearFrom": null,
+        "modelYearTo": null,
+        "engineCode": null,
+        "transmissionCode": null
+      },
+      "reviewStatus": "reference_foreign_market",
+      "rules": [
+        {
+          "id": "cvt-fluid",
+          "component": "transmission_fluid",
+          "action": "replace",
+          "partSpecification": "CVT",
+          "recurringKm": 100000,
+          "recurringMonths": null,
+          "scheduleAnchor": "requires_manual_confirmation"
+        },
+        {
+          "id": "iridium-spark-plugs",
+          "component": "spark_plugs",
+          "action": "replace",
+          "partSpecification": "iridium",
+          "recurringKm": 100000,
+          "recurringMonths": null,
+          "scheduleAnchor": "requires_manual_confirmation"
+        },
+        {
+          "id": "fuel-filter",
+          "component": "fuel_filter",
+          "action": "replace",
+          "recurringKm": 80000,
+          "recurringMonths": null,
+          "scheduleAnchor": "requires_manual_confirmation"
+        },
+        {
+          "id": "sllc-coolant",
+          "component": "coolant",
+          "action": "replace",
+          "partSpecification": "SLLC",
+          "firstKm": 160000,
+          "firstMonths": null,
+          "recurringKm": 80000,
+          "recurringMonths": null,
+          "scheduleAnchor": "first_from_new_then_replacement_event"
+        }
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "brand": "Honda",
+      "model": "City",
+      "market": "VN",
+      "url": "https://www.honda.com.vn/o-to/dich-vu-sau-ban-hang/huong-dan-su-dung",
+      "status": "exact_variant_manual_not_fully_read"
+    },
+    {
+      "brand": "Toyota",
+      "model": "Vios",
+      "modelYear": 2024,
+      "market": "VN",
+      "url": "https://www.toyota.com.vn/hdsd/vios/2024",
+      "status": "embedded_manual_schedule_not_fully_read"
+    },
+    {
+      "brand": "Hyundai",
+      "model": "Accent",
+      "documentLabel": "BN7 2024",
+      "market": "VN",
+      "url": "https://baohanhdientu.hyundai.thanhcong.vn/warranty",
+      "status": "manual_found_pdf_exceeded_reader_size_limit"
+    }
+  ],
+  "activationRequirements": [
+    "Confirm vehicle market, exact model/engine/transmission and equipment.",
+    "Review full normal/severe schedule, footnotes and corrections with printed/PDF page references.",
+    "Confirm first and repeat thresholds plus the schedule anchor without inventing missing values.",
+    "Record garage technical reviewer, reviewedAt and immutable approved revision.",
+    "Import through a separate validated workflow; this file must remain reference-only."
+  ]
+}
