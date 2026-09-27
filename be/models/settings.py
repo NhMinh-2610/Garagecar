@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Numeric
 from database.engine import Base
 
 class Brand(Base):
@@ -13,7 +13,7 @@ class Wage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True, nullable=False)
-    price = Column(Float, nullable=False, default=0.0)
+    price = Column(Numeric(14, 2), nullable=False, default=0)
 
 
 class SystemParameter(Base):

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 
 from database.engine import Base
@@ -13,6 +13,7 @@ class Mechanic(Base):
     __tablename__ = "mechanics"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    userId = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), unique=True, nullable=True)
     fullName = Column("fullName", String, nullable=False)
     phone = Column(String, nullable=True)
     specialty = Column(String, nullable=True, default="Chung")  # e.g. Máy gầm, Điện, Đồng sơn

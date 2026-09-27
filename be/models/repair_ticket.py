@@ -14,10 +14,11 @@ class RepairTicket(Base):
     __tablename__ = "repair_tickets"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    mechanicId = Column(Integer, ForeignKey("mechanics.id", ondelete="RESTRICT"), index=True, nullable=True)
     vehicleId = Column(
         "vehicleId", Integer, ForeignKey("vehicles.id"), nullable=False, index=True
     )
-    totalAmount = Column("totalAmount", Numeric(10, 2), nullable=False, default=0)
+    totalAmount = Column("totalAmount", Numeric(14, 2), nullable=False, default=0)
     mechanicName = Column("mechanicName", String, nullable=True, default="Chưa phân công")
     status = Column(String, nullable=False, default="draft")  # draft|working|completed|paid
     startedAt = Column("startedAt", DateTime, nullable=True)

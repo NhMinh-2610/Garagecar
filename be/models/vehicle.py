@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -14,6 +14,7 @@ class Vehicle(Base):
     __tablename__ = "vehicles"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    customerId = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=True)
     licensePlate = Column("licensePlate", String, unique=True, nullable=False, index=True)
     customerName = Column("customerName", String, nullable=False)
     phone = Column(String, nullable=False)
@@ -26,4 +27,4 @@ class Vehicle(Base):
     updatedAt = Column("updatedAt", DateTime, server_default=func.now(), onupdate=func.now())
 
     # Relationships — cascade ensures repair tickets are deleted with the vehicle
-    repairTickets = relationship("RepairTicket", back_populates="vehicle", lazy="selectin", cascade="all, delete-orphan")
+    repairTickets = relationship("RepairTicket", back_populates="vehicle", lazy="selectin")

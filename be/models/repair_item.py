@@ -14,15 +14,16 @@ class RepairItem(Base):
     __tablename__ = "repair_items"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    inventoryId = Column(Integer, ForeignKey("inventories.id", ondelete="RESTRICT"), index=True, nullable=True)
     repairTicketId = Column(
         "repairTicketId", Integer, ForeignKey("repair_tickets.id"), nullable=False, index=True
     )
     taskName = Column("taskName", String, nullable=False)
     partName = Column("partName", String, nullable=True, default="---")
     quantity = Column(Integer, nullable=False, default=1)
-    partPrice = Column("partPrice", Numeric(10, 2), nullable=False, default=0)
-    laborPrice = Column("laborPrice", Numeric(10, 2), nullable=False, default=0)
-    totalPrice = Column("totalPrice", Numeric(10, 2), nullable=False, default=0)
+    partPrice = Column("partPrice", Numeric(14, 2), nullable=False, default=0)
+    laborPrice = Column("laborPrice", Numeric(14, 2), nullable=False, default=0)
+    totalPrice = Column("totalPrice", Numeric(14, 2), nullable=False, default=0)
     isCompleted = Column("isCompleted", Boolean, nullable=False, default=False)
     completedAt = Column("completedAt", DateTime, nullable=True)
     createdAt = Column("createdAt", DateTime, server_default=func.now())

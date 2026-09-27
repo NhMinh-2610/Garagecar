@@ -10,5 +10,7 @@ from models.repair_ticket import RepairTicket
 from models.repair_item import RepairItem
 from models.inventory import Inventory
 from models.settings import Brand, Wage, SystemParameter
+from models.inventory_movement import InventoryMovement
+from models.booking import Booking
 
 __all__ = ["User", "Vehicle", "Mechanic", "RepairTicket", "RepairItem", "Inventory", "Brand", "Wage", "SystemParameter"]
