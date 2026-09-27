@@ -96,6 +96,8 @@ async def upsert_param(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN)),
 ):
+    if body.key != "max_cars_per_day" or not body.value.isdigit() or not 1 <= int(body.value) <= 10000:
+        return error_response("Số xe tối đa mỗi ngày phải từ 1 đến 10000", 422)
     result = await db.execute(select(SystemParameter).where(SystemParameter.key == body.key))
     param = result.scalar_one_or_none()
     

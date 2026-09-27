@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, func
 
 from database.session import get_db
 from models.user import User
+from models.mechanic import Mechanic
 from schemas.auth import RegisterRequest, StaffRegisterRequest, LoginRequest, UserResponse, TokenResponse
 from core.security import hash_password, verify_password, create_access_token
 from core.constants import Role, STAFF_ROLES
@@ -22,7 +23,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     # Duplicate check
     stmt = select(User).where(or_(User.email == body.email, User.username == body.username))
     result = await db.execute(stmt)
-    if result.scalar_one_or_none():
+    if result.scalars().first():
         return error_response("Email hoặc username đã tồn tại", 400)
 
     user = User(
@@ -60,7 +61,7 @@ async def register_staff(
 
     stmt = select(User).where(or_(User.email == body.email, User.username == body.username))
     result = await db.execute(stmt)
-    if result.scalar_one_or_none():
+    if result.scalars().first():
         return error_response("Email hoặc username đã tồn tại", 400)
 
     user = User(
@@ -71,6 +72,16 @@ async def register_staff(
         role=body.role,
     )
     db.add(user)
+    await db.flush()
+    if user.role == Role.MECHANIC.value:
+        if body.mechanicId:
+            mechanic = await db.scalar(select(Mechanic).where(Mechanic.id == body.mechanicId).with_for_update())
+            if not mechanic or mechanic.userId or mechanic.status != "active":
+                await db.rollback()
+                return error_response("Hồ sơ thợ không hợp lệ hoặc đã có tài khoản", 409)
+            mechanic.userId = user.id
+        else:
+            db.add(Mechanic(userId=user.id, fullName=user.fullName))
     await db.commit()
     await db.refresh(user)
 
@@ -83,7 +94,7 @@ async def register_staff(
 
 @router.post("/login", summary="Login and receive JWT")
 async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
-    stmt = select(User).where(User.email == body.email)
+    stmt = select(User).where(func.lower(User.email) == body.email.lower())
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
