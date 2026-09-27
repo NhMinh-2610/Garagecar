@@ -59,6 +59,7 @@ class RepairTicketUpdate(BaseModel):
 class RepairTicketResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    serviceVisitId: Optional[int] = None
     vehicleId: int
     mechanicId: Optional[int] = None
     totalAmount: float

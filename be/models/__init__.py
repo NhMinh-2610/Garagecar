@@ -15,3 +15,5 @@ from models.booking import Booking
 from models.login_attempt import LoginAttempt
 
 __all__ = ["User", "Vehicle", "Mechanic", "RepairTicket", "RepairItem", "Inventory", "Brand", "Wage", "SystemParameter", "LoginAttempt"]
+
+from models.garage_care import MaintenanceProfile, VehicleCare, MaintenanceRecord, MaintenanceReminder, ServiceVisit, ServiceQuote, EmployeeProfile

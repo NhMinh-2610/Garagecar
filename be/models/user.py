@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, text
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, text, JSON
 from sqlalchemy.sql import func
 
 from database.engine import Base
@@ -6,7 +6,7 @@ from database.engine import Base
 
 class User(Base):
     """
-    User account — supports multiple roles: admin, mechanic, accountant, customer.
+    User account — supports multiple roles: admin, advisor, accountant, hr, mechanic, customer.
     Column names use camelCase to match the existing database schema.
     """
 
@@ -20,6 +20,7 @@ class User(Base):
     role = Column(String, nullable=False, default="customer")
     isActive = Column(Boolean, nullable=False, default=True, server_default=text("true"))
     sessionVersion = Column(Integer, nullable=False, default=0, server_default="0")
+    disabledPermissions = Column(JSON, nullable=False, default=list, server_default=text("'[]'"))
     lastLoginAt = Column(DateTime, nullable=True)
     createdAt = Column("createdAt", DateTime, server_default=func.now())
     updatedAt = Column("updatedAt", DateTime, server_default=func.now(), onupdate=func.now())

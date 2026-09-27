@@ -15,6 +15,7 @@ class RepairTicket(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     mechanicId = Column(Integer, ForeignKey("mechanics.id", ondelete="RESTRICT"), index=True, nullable=True)
+    serviceVisitId = Column(Integer, ForeignKey("service_visits.id", ondelete="RESTRICT"), unique=True, nullable=True)
     vehicleId = Column(
         "vehicleId", Integer, ForeignKey("vehicles.id"), nullable=False, index=True
     )
