@@ -1,17 +1,15 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
-from datetime import datetime
+﻿from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field
+from core.constants import RepairStatus
+from schemas.common import Money, Name, PositiveId
 
-
-# ── Repair Item schemas ────────────────────────────────────────────────────────
 
 class RepairItemCreate(BaseModel):
-    taskName: str
-    partName: Optional[str] = "---"
-    quantity: int = 1
-    partPrice: float = 0
-    laborPrice: float = 0
-    totalPrice: float = 0
+    taskName: Name
+    inventoryId: Optional[PositiveId] = None
+    quantity: int = Field(default=1, gt=0, le=100000)
+    laborPrice: Money = 0
 
 
 class RepairItemToggle(BaseModel):
@@ -20,9 +18,9 @@ class RepairItemToggle(BaseModel):
 
 class RepairItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
     id: int
     repairTicketId: int
+    inventoryId: Optional[int] = None
     taskName: str
     partName: Optional[str]
     quantity: int
@@ -34,40 +32,35 @@ class RepairItemResponse(BaseModel):
     createdAt: Optional[datetime]
 
 
-# ── Nested vehicle info embedded in repair response ───────────────────────────
-
 class VehicleInRepair(BaseModel):
-    """Minimal vehicle info embedded inside a repair ticket response."""
     model_config = ConfigDict(from_attributes=True)
-
     id: int
     licensePlate: str
     carBrand: str
+    carModel: Optional[str] = None
     customerName: str
     phone: str
+    status: str
 
-
-# ── Repair Ticket schemas ──────────────────────────────────────────────────────
 
 class RepairTicketCreate(BaseModel):
-    vehicleId: int
-    mechanicName: Optional[str] = "Chưa phân công"
-    items: Optional[List[RepairItemCreate]] = []
+    vehicleId: PositiveId
+    mechanicId: Optional[PositiveId] = None
+    items: list[RepairItemCreate] = Field(min_length=1, max_length=100)
 
 
 class RepairTicketUpdate(BaseModel):
-    mechanicName: Optional[str] = None
-    status: Optional[str] = None          # draft|working|completed|paid
-    startedAt: Optional[datetime] = None
-    completedAt: Optional[datetime] = None
-    paidAt: Optional[datetime] = None
+    model_config = ConfigDict(extra="forbid")
+    mechanicId: Optional[PositiveId] = None
+    status: Optional[RepairStatus] = None
+    items: Optional[list[RepairItemCreate]] = Field(default=None, min_length=1, max_length=100)
 
 
 class RepairTicketResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
     id: int
     vehicleId: int
+    mechanicId: Optional[int] = None
     totalAmount: float
     mechanicName: Optional[str]
     status: str
@@ -75,5 +68,6 @@ class RepairTicketResponse(BaseModel):
     completedAt: Optional[datetime]
     paidAt: Optional[datetime]
     createdAt: Optional[datetime]
-    items: List[RepairItemResponse] = []
-    vehicle: Optional[VehicleInRepair] = None  # nested vehicle info for frontend
+    items: list[RepairItemResponse] = Field(default_factory=list)
+    vehicle: Optional[VehicleInRepair] = None
+

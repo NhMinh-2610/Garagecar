@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from schemas.common import Money, Name
 
 class BrandBase(BaseModel):
-    name: str
+    name: Name
 
 class BrandCreate(BrandBase):
     pass
@@ -9,12 +10,11 @@ class BrandCreate(BrandBase):
 class BrandResponse(BrandBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class WageBase(BaseModel):
-    name: str
-    price: float
+    name: Name
+    price: Money
 
 class WageCreate(WageBase):
     pass
@@ -22,8 +22,7 @@ class WageCreate(WageBase):
 class WageResponse(WageBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SystemParameterBase(BaseModel):
     key: str
@@ -35,5 +34,4 @@ class SystemParameterCreate(SystemParameterBase):
 class SystemParameterResponse(SystemParameterBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
