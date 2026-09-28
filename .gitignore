@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Environment variables
 .env
@@ -83,3 +82,5 @@ dist/
 .ruff_cache/
 htmlcov/
 .coverage
+.backups/
+.env.docker
