@@ -12,5 +12,6 @@ from models.inventory import Inventory
 from models.settings import Brand, Wage, SystemParameter
 from models.inventory_movement import InventoryMovement
 from models.booking import Booking
+from models.login_attempt import LoginAttempt
 
-__all__ = ["User", "Vehicle", "Mechanic", "RepairTicket", "RepairItem", "Inventory", "Brand", "Wage", "SystemParameter"]
+__all__ = ["User", "Vehicle", "Mechanic", "RepairTicket", "RepairItem", "Inventory", "Brand", "Wage", "SystemParameter", "LoginAttempt"]
