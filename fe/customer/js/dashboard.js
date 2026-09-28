@@ -6,12 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadDashboard() {
     try {
         // Load vehicles
-        const vehiclesRes = await fetch(`${API_URL}/vehicles/my-vehicles`, { headers: getAuthHeaders() });
+        const vehiclesRes = await Garage.apiFetch(`${API_URL}/vehicles/my-vehicles`, { headers: getAuthHeaders() });
         const vehiclesData = await vehiclesRes.json();
         const vehicles = vehiclesData.success ? vehiclesData.data : [];
 
         // Load repairs
-        const repairsRes = await fetch(`${API_URL}/repairs/my-repairs`, { headers: getAuthHeaders() });
+        const repairsRes = await Garage.apiFetch(`${API_URL}/repairs/my-repairs`, { headers: getAuthHeaders() });
         const repairsData = await repairsRes.json();
         const repairs = repairsData.success ? repairsData.data : [];
 
@@ -41,7 +41,7 @@ function renderRecentRepairs(repairs) {
         const statusMap = {
             'draft': { label: 'Chờ xử lý', class: 'badge-pending' },
             'working': { label: 'Đang sửa', class: 'badge-working' },
-            'completed': { label: 'Hoàn thành', class: 'badge-done' },
+            'completed': { label: 'Chờ thanh toán', class: 'badge-done' },
             'paid': { label: 'Đã thanh toán', class: 'badge-paid' }
         };
         const status = statusMap[repair.status] || { label: repair.status, class: 'badge-pending' };
@@ -52,7 +52,7 @@ function renderRecentRepairs(repairs) {
         return `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #f1f5f9;">
                 <div>
-                    <strong style="color: var(--text-main);">${vehicleInfo}</strong>
+                    <strong style="color: var(--text-main);">${escapeHtml(vehicleInfo)}</strong>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
                         ${totalItems} hạng mục · ${completedItems}/${totalItems} hoàn thành · ${formatDate(repair.createdAt)}
                     </p>
@@ -62,3 +62,5 @@ function renderRecentRepairs(repairs) {
         `;
     }).join('');
 }
+
+Garage.subscribe(loadDashboard);

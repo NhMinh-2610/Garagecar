@@ -26,7 +26,7 @@ function switchTaskTab(tab) {
 
 async function loadMyTasks() {
     try {
-        const response = await fetch(`${API_URL}/repairs/my-tasks`, { headers: getAuthHeaders() });
+        const response = await Garage.apiFetch(`${API_URL}/repairs/my-tasks`, { headers: getAuthHeaders() });
         const result = await response.json();
 
         if (!result.success) {
@@ -68,7 +68,7 @@ function renderWorkingTasks(tasks) {
         const completedItems = items.filter(i => i.isCompleted).length;
         const totalItems = items.length;
         const progressPct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-        const canComplete = totalItems > 0 && completedItems === totalItems;
+        const canComplete = task.status === "working" && totalItems > 0 && completedItems === totalItems;
 
         const statusBadge = task.status === 'draft' 
             ? '<span class="badge badge-pending">Chờ bắt đầu</span>'
@@ -77,12 +77,12 @@ function renderWorkingTasks(tasks) {
         return `
             <div class="task-card" id="task-${task.id}">
                 <div class="task-card-header">
-                    <h4>${vehicle ? vehicle.licensePlate : 'N/A'} - ${vehicle ? vehicle.carBrand + ' ' + (vehicle.carModel || '') : ''}</h4>
+                    <h4>${escapeHtml(vehicle ? vehicle.licensePlate : 'N/A')} - ${escapeHtml(vehicle ? vehicle.carBrand + ' ' + (vehicle.carModel || '') : '')}</h4>
                     ${statusBadge}
                 </div>
 
                 <div class="task-card-meta">
-                    <span><i class="fa-solid fa-user"></i> ${vehicle ? vehicle.customerName : 'N/A'}</span>
+                    <span><i class="fa-solid fa-user"></i> ${escapeHtml(vehicle ? vehicle.customerName : 'N/A')}</span>
                     <span><i class="fa-solid fa-calendar"></i> ${formatDate(task.createdAt)}</span>
                     <span><i class="fa-solid fa-coins"></i> ${formatCurrency(task.totalAmount)}</span>
                 </div>
@@ -101,11 +101,11 @@ function renderWorkingTasks(tasks) {
                 <!-- Checklist -->
                 <div class="checklist">
                     ${items.map(item => `
-                        <div class="checklist-item ${item.isCompleted ? 'done' : ''}" onclick="toggleItem(${task.id}, ${item.id}, ${!item.isCompleted})">
-                            <input type="checkbox" ${item.isCompleted ? 'checked' : ''} 
+                        <div class="checklist-item ${item.isCompleted ? 'done' : ''}" onclick="${task.status === 'working' ? `toggleItem(${task.id}, ${item.id}, ${!item.isCompleted})` : ''}">
+                            <input type="checkbox" ${task.status !== 'working' ? 'disabled' : ''} ${item.isCompleted ? 'checked' : ''} 
                                 onclick="event.stopPropagation(); toggleItem(${task.id}, ${item.id}, ${!item.isCompleted})">
-                            <span class="item-name">${item.taskName}</span>
-                            <span class="item-price">${item.partName !== '---' ? item.partName + ' · ' : ''}${formatCurrency(item.totalPrice)}</span>
+                            <span class="item-name">${escapeHtml(item.taskName)}</span>
+                            <span class="item-price">${escapeHtml(item.partName !== '---' ? item.partName + ' · ' : '')}${formatCurrency(item.totalPrice)}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -142,11 +142,11 @@ function renderCompletedTasks(tasks) {
         return `
             <div class="task-card completed">
                 <div class="task-card-header">
-                    <h4>${vehicle ? vehicle.licensePlate : 'N/A'} - ${vehicle ? vehicle.carBrand + ' ' + (vehicle.carModel || '') : ''}</h4>
+                    <h4>${escapeHtml(vehicle ? vehicle.licensePlate : 'N/A')} - ${escapeHtml(vehicle ? vehicle.carBrand + ' ' + (vehicle.carModel || '') : '')}</h4>
                     <span class="badge ${statusClass}">${statusLabel}</span>
                 </div>
                 <div class="task-card-meta">
-                    <span><i class="fa-solid fa-user"></i> ${vehicle ? vehicle.customerName : 'N/A'}</span>
+                    <span><i class="fa-solid fa-user"></i> ${escapeHtml(vehicle ? vehicle.customerName : 'N/A')}</span>
                     <span><i class="fa-solid fa-calendar"></i> Hoàn thành: ${formatDate(task.completedAt)}</span>
                     <span><i class="fa-solid fa-coins"></i> ${formatCurrency(task.totalAmount)}</span>
                     <span><i class="fa-solid fa-list-check"></i> ${items.length} hạng mục</span>
@@ -157,8 +157,9 @@ function renderCompletedTasks(tasks) {
 }
 
 async function toggleItem(ticketId, itemId, isCompleted) {
+    if (allTasks.find(t => t.id === ticketId)?.status !== 'working') return;
     try {
-        const response = await fetch(`${API_URL}/repairs/${ticketId}/items/${itemId}/toggle`, {
+        const response = await Garage.apiFetch(`${API_URL}/repairs/${ticketId}/items/${itemId}/toggle`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify({ isCompleted })
@@ -172,6 +173,7 @@ async function toggleItem(ticketId, itemId, isCompleted) {
             await loadMyTasks();
         } else {
             showToast(result.message || 'Lỗi cập nhật', 'error');
+            await loadMyTasks();
         }
     } catch (error) {
         console.error('Toggle item error:', error);
@@ -181,7 +183,7 @@ async function toggleItem(ticketId, itemId, isCompleted) {
 
 async function startRepair(ticketId) {
     try {
-        const response = await fetch(`${API_URL}/repairs/${ticketId}`, {
+        const response = await Garage.apiFetch(`${API_URL}/repairs/${ticketId}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify({ status: 'working' })
@@ -205,7 +207,7 @@ async function completeRepair(ticketId) {
     if (!confirm('Xác nhận hoàn thành phiếu sửa chữa này?')) return;
 
     try {
-        const response = await fetch(`${API_URL}/repairs/${ticketId}`, {
+        const response = await Garage.apiFetch(`${API_URL}/repairs/${ticketId}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify({ status: 'completed' })
@@ -224,3 +226,5 @@ async function completeRepair(ticketId) {
         showToast('Lỗi kết nối server', 'error');
     }
 }
+
+Garage.subscribe(loadMyTasks);

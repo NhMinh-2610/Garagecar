@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadMyVehicles() {
     try {
-        const response = await fetch(`${API_URL}/vehicles/my-vehicles`, { headers: getAuthHeaders() });
+        const response = await Garage.apiFetch(`${API_URL}/vehicles/my-vehicles`, { headers: getAuthHeaders() });
         const result = await response.json();
 
         const tbody = document.querySelector('#vehiclesTable tbody');
@@ -28,9 +28,9 @@ async function loadMyVehicles() {
 
             return `
                 <tr>
-                    <td><strong>${vehicle.licensePlate}</strong></td>
-                    <td>${vehicle.carBrand || '---'}</td>
-                    <td>${vehicle.carModel || '---'}</td>
+                    <td><strong>${escapeHtml(vehicle.licensePlate)}</strong></td>
+                    <td>${escapeHtml(vehicle.carBrand || '---')}</td>
+                    <td>${escapeHtml(vehicle.carModel || '---')}</td>
                     <td><span class="badge ${status.class}">${status.label}</span></td>
                     <td>${formatDate(vehicle.receivedDate)}</td>
                 </tr>
@@ -42,3 +42,5 @@ async function loadMyVehicles() {
         showToast('Lỗi tải danh sách xe', 'error');
     }
 }
+
+Garage.subscribe(loadMyVehicles);

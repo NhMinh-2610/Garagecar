@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadMyRepairs() {
     try {
-        const response = await fetch(`${API_URL}/repairs/my-repairs`, { headers: getAuthHeaders() });
+        const response = await Garage.apiFetch(`${API_URL}/repairs/my-repairs`, { headers: getAuthHeaders() });
         const result = await response.json();
 
         const tbody = document.querySelector('#repairsTable tbody');
@@ -35,7 +35,7 @@ async function loadMyRepairs() {
             const statusMap = {
                 'draft': { label: 'Chờ xử lý', class: 'badge-pending' },
                 'working': { label: 'Đang sửa', class: 'badge-working' },
-                'completed': { label: 'Hoàn thành', class: 'badge-done' },
+                'completed': { label: 'Chờ thanh toán', class: 'badge-done' },
                 'paid': { label: 'Đã thanh toán', class: 'badge-paid' }
             };
             const status = statusMap[repair.status] || { label: repair.status, class: 'badge-pending' };
@@ -49,8 +49,8 @@ async function loadMyRepairs() {
             return `
                 <tr>
                     <td><strong>#${repair.id}</strong></td>
-                    <td>${vehicleInfo}</td>
-                    <td>${repair.mechanicName || '---'}</td>
+                    <td>${escapeHtml(vehicleInfo)}</td>
+                    <td>${escapeHtml(repair.mechanicName || '---')}</td>
                     <td>
                         <div style="min-width: 120px;">
                             <span style="font-size: 0.85rem; color: var(--text-muted);">${completedItems}/${totalItems} (${progressPct}%)</span>
@@ -76,9 +76,11 @@ async function loadMyRepairs() {
     }
 }
 
+let selectedRepairId = null;
 async function viewRepairDetail(repairId) {
+    selectedRepairId = repairId;
     try {
-        const response = await fetch(`${API_URL}/repairs/${repairId}`, { headers: getAuthHeaders() });
+        const response = await Garage.apiFetch(`${API_URL}/repairs/${repairId}`, { headers: getAuthHeaders() });
         const result = await response.json();
 
         if (!result.success) {
@@ -91,7 +93,7 @@ async function viewRepairDetail(repairId) {
         const statusMap = {
             'draft': 'Chờ xử lý',
             'working': 'Đang sửa',
-            'completed': 'Hoàn thành',
+            'completed': 'Chờ thanh toán',
             'paid': 'Đã thanh toán'
         };
 
@@ -102,8 +104,8 @@ async function viewRepairDetail(repairId) {
         content.innerHTML = `
             <div class="repair-detail-info">
                 <p><strong>Mã phiếu:</strong> <span>#${repair.id}</span></p>
-                <p><strong>Xe:</strong> <span>${vehicle ? vehicle.licensePlate + ' - ' + vehicle.carBrand + ' ' + (vehicle.carModel || '') : 'N/A'}</span></p>
-                <p><strong>Thợ phụ trách:</strong> <span>${repair.mechanicName || 'Chưa phân công'}</span></p>
+                <p><strong>Xe:</strong> <span>${escapeHtml(vehicle ? vehicle.licensePlate + ' - ' + vehicle.carBrand + ' ' + (vehicle.carModel || '') : 'N/A')}</span></p>
+                <p><strong>Thợ phụ trách:</strong> <span>${escapeHtml(repair.mechanicName || 'Chưa phân công')}</span></p>
                 <p><strong>Trạng thái:</strong> <span>${statusMap[repair.status] || repair.status}</span></p>
                 <p><strong>Tiến độ:</strong> <span>${completedItems}/${totalItems} hạng mục hoàn thành</span></p>
                 <p><strong>Tổng tiền:</strong> <span style="color: var(--primary-color); font-weight: 700;">${formatCurrency(repair.totalAmount)}</span></p>
@@ -118,9 +120,9 @@ async function viewRepairDetail(repairId) {
                 ${repair.items && repair.items.length > 0 ? repair.items.map(item => `
                     <div class="repair-item-row ${item.isCompleted ? 'completed' : 'pending'}">
                         <div>
-                            <strong>${item.taskName}</strong>
+                            <strong>${escapeHtml(item.taskName)}</strong>
                             <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.5rem;">
-                                (Vật tư: ${item.partName || '---'})
+                                (Vật tư: ${escapeHtml(item.partName || '---')})
                             </span>
                         </div>
                         <div style="text-align: right;">
@@ -142,3 +144,8 @@ async function viewRepairDetail(repairId) {
         showToast('Lỗi tải chi tiết phiếu', 'error');
     }
 }
+
+Garage.subscribe(async () => {
+    await loadMyRepairs();
+    if (selectedRepairId && document.getElementById('repairDetailModal').style.display === 'block') await viewRepairDetail(selectedRepairId);
+});

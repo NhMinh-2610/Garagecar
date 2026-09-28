@@ -15,7 +15,7 @@ let inventoryData = [];
 
 async function loadInventory() {
     try {
-        const response = await fetch(`${API_URL}/inventory`, { headers: getAuthHeaders() });
+        const response = await Garage.apiFetch(`${API_URL}/inventory`, { headers: getAuthHeaders() });
         const result = await response.json();
 
         const tbody = document.querySelector('#inventoryTable tbody');
@@ -46,7 +46,7 @@ function renderInventory(items) {
         const qtyClass = item.quantity <= 5 ? 'color: #ef4444; font-weight: 700;' : '';
         return `
             <tr>
-                <td><strong>${item.name}</strong></td>
+                <td><strong>${escapeHtml(item.name)}</strong></td>
                 <td style="${qtyClass}">${item.quantity} ${item.quantity <= 5 ? '⚠️' : ''}</td>
                 <td>${formatCurrency(item.unitPrice)}</td>
             </tr>
@@ -62,3 +62,5 @@ function filterInventory(query) {
     const filtered = inventoryData.filter(item => item.name.toLowerCase().includes(query));
     renderInventory(filtered);
 }
+
+Garage.subscribe(loadInventory);
