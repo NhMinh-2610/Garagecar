@@ -1,5 +1,5 @@
 // API Base URL
-const API_URL = 'http://localhost:8000/api';
+const API_URL = Garage.base;
 
 // DOM Elements
 const loginForm = document.getElementById('loginForm');
@@ -12,13 +12,13 @@ const messageBox = document.getElementById('messageBox');
 function getRedirectUrl(role) {
     switch (role) {
         case 'admin':
-            return '/static/admin/index.html';
+            return '../admin/index.html';
         case 'mechanic':
-            return '/static/mechanic/index.html';
+            return '../mechanic/index.html';
         case 'customer':
-            return '/static/customer/index.html';
+            return '../customer/index.html';
         default:
-            return '/static/login/index.html';
+            return '../login/index.html';
     }
 }
 
@@ -65,7 +65,7 @@ loginForm.addEventListener('submit', async (e) => {
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng nhập...';
 
     try {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await Garage.apiFetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -134,7 +134,7 @@ registerForm.addEventListener('submit', async (e) => {
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng ký...';
 
     try {
-        const response = await fetch(`${API_URL}/auth/register`, {
+        const response = await Garage.apiFetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -196,7 +196,7 @@ window.addEventListener('DOMContentLoaded', () => {
             window.location.href = getRedirectUrl(user.role);
             return;
         } catch (e) {
-            localStorage.clear();
+            localStorage.removeItem('token'); localStorage.removeItem('user');
         }
     }
 

@@ -38,23 +38,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Form Submission Handler
   const form = document.getElementById("bookingForm");
   if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const btn = form.querySelector("button");
-      const originalText = btn.innerHTML;
-
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
-      btn.disabled = true;
-
-      // Simulate API call
-      setTimeout(() => {
-        alert(
-          "Cảm ơn bạn! Yêu cầu đặt lịch đã được gửi thành công. Chúng tôi sẽ liên hệ trong ít phút tới."
-        );
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = form.querySelector('button');
+      button.disabled = true;
+      try {
+        const data = await Garage.request('/bookings',{method:'POST',body:Object.fromEntries(new FormData(form))});
+        Garage.toast('Đã nhận yêu cầu #' + data.id + '. Garage sẽ liên hệ xác nhận lịch hẹn.','success');
         form.reset();
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }, 1500);
+      } catch(error) { Garage.toast(error.message,'error'); }
+      finally { button.disabled = false; }
     });
   }
 

@@ -19,7 +19,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-  </head>
+  <link rel="stylesheet" href="shared/ui.css"><script src="shared/core.js"></script></head>
   <body>
     <!-- Navbar -->
     <nav class="navbar">
@@ -277,16 +277,16 @@
             <a href="#"><i class="fa-brands fa-tiktok"></i></a>
           </div>
         </div>
-        <form class="booking-form" id="bookingForm">
+        <form class="booking-form" id="bookingForm"><div class="form-group"><label for="preferredDate">Ngày mong muốn</label><input id="preferredDate" name="preferredDate" type="date" required></div>
           <h3>Đặt Lịch Hẹn</h3>
           <div class="form-group">
-            <input type="text" placeholder="Họ và tên" required />
+            <input type="text" name="customerName" placeholder="Họ và tên" required />
           </div>
           <div class="form-group">
-            <input type="tel" placeholder="Số điện thoại" required />
+            <input type="tel" name="phone" placeholder="Số điện thoại" required />
           </div>
           <div class="form-group">
-            <select>
+            <select name="service" required>
               <option value="">Chọn dịch vụ</option>
               <option value="maintenance">Bảo dưỡng</option>
               <option value="repair">Sửa chữa</option>
@@ -295,7 +295,7 @@
             </select>
           </div>
           <div class="form-group">
-            <textarea
+            <textarea name="note" maxlength="2000"
               placeholder="Ghi chú thêm (Dòng xe, đời xe...)"
               rows="4"
             ></textarea>
