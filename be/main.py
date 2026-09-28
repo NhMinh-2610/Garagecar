@@ -21,10 +21,10 @@ import models  # noqa: F401 — registers all ORM models with metadata
 from routers import auth, vehicles, repairs, inventory, mechanics, ai
 from routers import settings as settings_router
 from routers import reports
-from routers import bookings
+from routers import bookings, accounts
 
 
-# ── Lifespan: create tables on startup ────────────────────────────────────────
+# ── Lifespan: verify schema readiness ─────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,6 +34,9 @@ async def lifespan(app: FastAPI):
         columns = await conn.run_sync(lambda sync: {c["name"] for c in inspect(sync).get_columns("vehicles")})
         if "customerId" not in columns:
             raise RuntimeError("Database needs migration: cd be && python -m alembic upgrade head")
+        user_columns = await conn.run_sync(lambda sync: {c["name"] for c in inspect(sync).get_columns("users")})
+        if not {"isActive", "sessionVersion", "lastLoginAt"}.issubset(user_columns):
+            raise RuntimeError("Database needs account migration: python be/manage.py upgrade")
     yield
     # Teardown (optional cleanup)
     await engine.dispose()
@@ -82,6 +85,7 @@ async def integrity_error(request, exc):
 # ── Routers ────────────────────────────────────────────────────────────────────
 
 app.include_router(auth.router)
+app.include_router(accounts.router)
 app.include_router(vehicles.router)
 app.include_router(repairs.router)
 app.include_router(inventory.router)
@@ -115,7 +119,11 @@ if _fe_dir.exists():
     # Convenience redirects — giúp frontend chạy đúng origin http://localhost:8000
     @app.get("/", include_in_schema=False)
     async def root():
-        return RedirectResponse(url="/static/login/index.html")
+        return RedirectResponse(url="/static/index.html")
+
+    @app.get("/home", include_in_schema=False)
+    async def home_page():
+        return RedirectResponse(url="/static/index.html")
 
     @app.get("/login", include_in_schema=False)
     async def login_page():
