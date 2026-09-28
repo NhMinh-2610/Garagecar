@@ -1,236 +1,148 @@
-# 🚗 GarageCar — Hệ Thống Quản Lý Garage Ô Tô
+﻿# GarageCar — Quản lý garage ô tô
 
-<div align="center">
-  <h3>Giải pháp quản lý garage đa vai trò với giao diện web hiện đại và API backend Python/FastAPI.</h3>
-</div>
+FastAPI + SQLAlchemy async + PostgreSQL; frontend HTML/CSS/JavaScript thuần cho admin, thợ và khách hàng.
 
----
+## Yêu cầu
 
-## 📋 Giới Thiệu
+- Python 3.11+
+- PostgreSQL (đang chạy, đã tạo database `garagecar`)
+- `pg_dump` trong PATH (để backup trước migration)
+- Node.js (chỉ cần khi chạy kiểm thử frontend)
 
-**GarageCar** (AutoPro) là hệ thống quản lý garage ô tô toàn diện, hỗ trợ **3 vai trò** người dùng riêng biệt với giao diện và quyền hạn khác nhau:
+## Cài đặt và chạy
 
-| Vai trò | Mô tả |
-|---------|-------|
-| 👑 **Admin** | Tiếp nhận xe, tạo phiếu sửa chữa, quản lý kho, nhân sự, tài chính, báo cáo |
-| 🔧 **Mechanic (Thợ)** | Xem công việc được giao, cập nhật tiến độ từng hạng mục, tra cứu vật tư |
-| 🚗 **Customer (Khách)** | Quản lý xe cá nhân, theo dõi tiến độ sửa chữa realtime |
-
-### ✨ Tính Năng Nổi Bật
-
-- **Multi-Role Portals** — Mỗi vai trò có giao diện và quyền truy cập riêng, được điều hướng tự động sau đăng nhập
-- **Realtime Progress** — Thợ tick hoàn thành hạng mục, Admin và Khách thấy ngay tiến độ cập nhật
-- **Premium UI/UX** — Glassmorphism, smooth animations, font Outfit, dark mode
-- **Python/FastAPI Backend** — Async SQLAlchemy, Pydantic v2 validation, tự động sinh OpenAPI docs tại `/docs`
-- **🤖 AI Assistant** — Chẩn đoán lỗi xe, ước tính chi phí, tóm tắt phiếu, lịch bảo dưỡng, chatbot kỹ thuật
-
----
-
-## 🏗️ Cấu Trúc Dự Án
-
-```text
-Garagecar/
-├── be/                         # 🐍 Backend Python/FastAPI
-│   ├── main.py                 # Entry point (uvicorn)
-│   ├── seed.py                 # Script tạo dữ liệu mẫu
-│   ├── requirements.txt
-│   ├── .env.example
-│   ├── config/
-│   │   └── settings.py         # Pydantic Settings (đọc .env)
-│   ├── core/
-│   │   ├── security.py         # bcrypt hash + JWT encode/decode
-│   │   ├── constants.py        # Enum Role, VehicleStatus, RepairStatus
-│   │   └── response.py         # success_response / error_response
-│   ├── database/
-│   │   ├── engine.py           # SQLAlchemy async engine + Base
-│   │   └── session.py          # AsyncSession dependency (get_db)
-│   ├── models/                 # ORM models (SQLAlchemy)
-│   │   ├── user.py
-│   │   ├── vehicle.py
-│   │   ├── mechanic.py
-│   │   ├── repair_ticket.py
-│   │   ├── repair_item.py
-│   │   └── inventory.py
-│   ├── schemas/                # Pydantic request/response schemas
-│   │   ├── auth.py
-│   │   ├── vehicle.py
-│   │   ├── repair.py
-│   │   ├── mechanic.py
-│   │   ├── inventory.py
-│   │   └── ai.py
-│   ├── middleware/
-│   │   └── auth.py             # get_current_user + require_role()
-│   ├── routers/                # API route handlers
-│   │   ├── auth.py             # /api/auth
-│   │   ├── vehicles.py         # /api/vehicles
-│   │   ├── repairs.py          # /api/repairs
-│   │   ├── inventory.py        # /api/inventory
-│   │   ├── mechanics.py        # /api/mechanics
-│   │   └── ai.py               # /api/ai
-│   └── services/
-│       └── ai_service.py       # LLM adapter (Mock/OpenAI/Gemini/Ollama)
-├── fe/                         # Frontend (Vanilla HTML/CSS/JS)
-│   ├── index.html              # Landing page AutoPro
-│   ├── styles.css / script.js
-│   ├── login/                  # Trang đăng nhập & đăng ký
-│   ├── admin/                  # Admin Portal
-│   ├── mechanic/               # Mechanic Portal
-│   └── customer/               # Customer Portal
-└── data/
-    └── database.sqlite         # SQLite database (gitignored)
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r be/requirements.txt
 ```
 
----
+Tạo file cấu hình (nếu chưa có):
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy
-
-### Yêu cầu
-
-- **Python 3.11+**
-- Trình duyệt hiện đại (Chrome, Firefox, Edge)
-- Extension **Live Server** (VS Code) — để chạy frontend
-
-### Bước 1: Cài đặt Backend
-
-```bash
-cd be
-pip install -r requirements.txt
+```powershell
+Copy-Item be/.env.example be/.env
 ```
 
-### Bước 2: Cấu hình môi trường
+Nội dung `be/.env`:
 
-```bash
-# Sao chép file cấu hình mẫu
-cp .env.example .env
-```
-
-Nội dung file `.env` tối thiểu (có thể giữ nguyên mặc định):
-
-```env
+```dotenv
+DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@localhost:5432/garagecar
+JWT_SECRET=replace-with-a-long-random-secret
 PORT=8000
-JWT_SECRET=your_jwt_secret_here_change_in_production
-DATABASE_PATH=../data/database.sqlite
 AI_PROVIDER=mock
 ```
 
-### Bước 3: Tạo dữ liệu mẫu (khuyến nghị)
+Chạy migration và seed dữ liệu demo (chỉ khi bảng `users` chưa có tài khoản):
 
-```bash
+```powershell
 cd be
+python -m alembic upgrade head
 python seed.py
 ```
 
-Lệnh này tạo các tài khoản test sẵn:
+Khởi động server:
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | `admin@autopro.com` | `123456` |
-| Mechanic | `mechanic@autopro.com` | `123456` |
-| Customer | `customer@autopro.com` | `123456` |
-
-### Bước 4: Khởi động Backend
-
-```bash
-cd be
+```powershell
 uvicorn main:app --reload --port 8000
 ```
 
-✅ Backend đang chạy tại: **http://localhost:8000**
-📖 Swagger UI (API docs): **http://localhost:8000/docs**
+Hoặc dùng script tắt nhanh ở thư mục gốc:
 
-### Bước 5: Khởi động Frontend
-
-Frontend được code bằng HTML/CSS/JS thuần, không cần build:
-
-1. Mở thư mục dự án bằng **VS Code**
-2. Cài extension **"Live Server"** (nếu chưa có)
-3. Chuột phải vào `fe/login/index.html` → **"Open with Live Server"**
-4. Trình duyệt tự mở → Dùng tài khoản mẫu ở trên để đăng nhập
-
-> 💡 Sau khi đăng nhập thành công, hệ thống tự động chuyển đến đúng Portal tương ứng với vai trò.
-
----
-
-## 🤖 Tích Hợp AI (Tùy chọn)
-
-Cấu hình trong file `.env`:
-
-```env
-# Chọn provider: mock | openai | gemini | ollama
-AI_PROVIDER=mock
-
-# Nếu dùng OpenAI
-OPENAI_API_KEY=sk-...
-
-# Nếu dùng Google Gemini
-GEMINI_API_KEY=AIza...
-
-# Nếu dùng Ollama (local)
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2
+```powershell
+start.cmd
 ```
 
-**AI Endpoints:**
+Mở trình duyệt:
 
-| Method | Path | Mô tả |
-|--------|------|-------|
-| `POST` | `/api/ai/diagnose` | Chẩn đoán lỗi xe từ triệu chứng |
-| `POST` | `/api/ai/estimate-cost` | Ước tính chi phí sửa chữa |
-| `POST` | `/api/ai/summarize-repair` | Tóm tắt phiếu sửa chữa |
-| `POST` | `/api/ai/maintenance-advice` | Lịch bảo dưỡng định kỳ |
-| `POST` | `/api/ai/chat` | Chatbot kỹ thuật ô tô |
+| Trang | URL |
+|---|---|
+| Trang chủ / đặt lịch | http://localhost:8000 |
+| Đăng nhập | http://localhost:8000/login |
+| Admin | http://localhost:8000/admin |
+| Thợ | http://localhost:8000/mechanic |
+| Khách hàng | http://localhost:8000/customer |
+| Tài liệu API | http://localhost:8000/docs |
 
----
+Tài khoản demo: `admin@autopro.com`, `mechanic@autopro.com`, `customer@autopro.com` — mật khẩu `123456`.
 
-## 📡 Tài Liệu API
+## Nâng cấp database (có dữ liệu cũ)
 
-Tất cả API (trừ `/login`, `/register`, `/health`) đều yêu cầu header:
+```powershell
+python be/manage.py upgrade
 ```
-Authorization: Bearer <token>
+
+Lệnh tự động backup PostgreSQL vào `.backups/` trước khi chạy Alembic. Nếu backup thất bại, migration không chạy.
+
+Kiểm tra các liên kết còn thiếu sau nâng cấp:
+
+```powershell
+python be/manage.py audit
 ```
 
-### 🔐 Authentication (`/api/auth`)
-| Method | Path | Quyền | Mô tả |
-|--------|------|-------|-------|
-| `POST` | `/login` | Public | Đăng nhập, nhận JWT token |
-| `POST` | `/register` | Public | Tạo tài khoản khách hàng |
-| `POST` | `/register-staff` | Admin | Tạo tài khoản Admin/Mechanic |
-| `GET` | `/users` | Admin | Danh sách tài khoản |
-| `DELETE` | `/users/{id}` | Admin | Xóa tài khoản |
+## Docker
 
-### 🚗 Vehicles (`/api/vehicles`)
-| Method | Path | Quyền | Mô tả |
-|--------|------|-------|-------|
-| `GET` | `/my-vehicles` | Any | Xe của khách đang đăng nhập |
-| `GET` | `/` | Admin | Tất cả xe |
-| `POST` | `/` | Admin | Tiếp nhận xe mới |
-| `PUT` | `/{id}` | Admin | Cập nhật thông tin xe |
-| `DELETE` | `/{id}` | Admin | Xóa xe |
+```powershell
+docker compose up --build
+```
 
-### 🛠️ Repairs (`/api/repairs`)
-| Method | Path | Quyền | Mô tả |
-|--------|------|-------|-------|
-| `GET` | `/my-repairs` | Customer | Phiếu sửa xe của khách |
-| `GET` | `/my-tasks` | Admin/Mechanic | Phiếu được giao cho thợ |
-| `GET` | `/` | Admin | Tất cả phiếu |
-| `POST` | `/` | Admin | Tạo phiếu mới |
-| `PUT` | `/{id}` | Admin/Mechanic | Cập nhật trạng thái |
-| `PUT` | `/{id}/items/{itemId}/toggle` | Admin/Mechanic | Tick hoàn thành hạng mục |
-| `DELETE` | `/{id}` | Admin | Xóa phiếu (chỉ khi draft/working) |
+| Cổng | Dịch vụ |
+|---|---|
+| 3000 | Frontend (Nginx) |
+| 8000 | Backend (FastAPI) |
+| 5432 | PostgreSQL |
 
-### 📦 Inventory (`/api/inventory`) & 👷 Mechanics (`/api/mechanics`)
-- `GET` — Admin và Mechanic xem được
-- `POST`, `PUT`, `DELETE` — Chỉ Admin
+Nginx proxy `/api` về backend. Container backend chạy migration tự động khi khởi động.
 
----
+> **Lưu ý:** Không chạy `docker compose down -v` nếu cần giữ dữ liệu.
 
-## 🤝 Đóng Góp
+## Quy tắc nghiệp vụ
 
-Vui lòng đọc [CONTRIBUTING.md](CONTRIBUTING.md) trước khi đóng góp.
+- **Vòng đời phiếu:** `draft → working → completed → paid`. Phải phân công thợ trước khi bắt đầu; hoàn tất mọi hạng mục trước khi chuyển trạng thái.
+- **Tồn kho:** Vật tư bị trừ khi tạo phiếu; hoàn kho khi xóa phiếu chờ. Tồn kho được khóa giao dịch để tránh xuất quá số dư.
+- **Doanh thu:** Chỉ tính phiếu đã `paid`, theo `paidAt`, múi giờ Việt Nam.
+- **Đặt lịch:** Yêu cầu từ trang chủ lưu vào database với trạng thái `pending`; admin xác nhận hoặc huỷ tại tab Tiếp nhận.
+- **Tự động làm mới:** Các portal polling mỗi 20 giây và đồng bộ qua `localStorage` khi có thao tác ghi.
 
-## 📄 Bản Quyền
+## Kiểm thử
 
-Phân phối theo **MIT License** — tự do sử dụng, sửa đổi và phân phối.
+Backend (cần PostgreSQL, tạo schema test ngẫu nhiên, tự dọn sau khi xong):
 
----
-<p align="center">Được phát triển với sự tỉ mỉ dành cho hệ thống dịch vụ ô tô 🚀</p>
+```powershell
+pip install -r be/requirements-dev.txt
+cd be
+python -m pytest tests -q
+```
+
+Frontend (DOM + API giả lập):
+
+```powershell
+npm ci
+npm test
+```
+
+## Cấu trúc
+
+```
+be/
+  models/          # ORM: User, Vehicle, RepairTicket, RepairItem, Inventory,
+                   #       InventoryMovement, Mechanic, Booking, Settings
+  schemas/         # Pydantic: validate input & shape response
+  routers/         # API: auth, vehicles, repairs, inventory, mechanics,
+                   #       bookings, reports, settings, ai
+  services/        # repair_service.py: tinh tien, xuat/hoan kho, chuyen trang thai
+  middleware/      # JWT auth, phan quyen role
+  migrations/      # Alembic versioned migrations
+  core/            # response helpers, time utils, constants
+  manage.py        # CLI: upgrade (backup + migrate), audit
+
+fe/
+  shared/
+    core.js        # API client, toast, auto-refresh, escape, date helpers
+    portal.js      # khoi tao portal chung (auth check, polling setup)
+    ui.css         # style dung chung
+  admin/           # portal quan tri (repair, reception, inventory, hr, finance...)
+  mechanic/        # portal tho (tasks, inventory)
+  customer/        # portal khach (vehicles, repairs, booking)
+  login/           # trang dang nhap
+  index.html       # trang chu + form dat lich
+```
