@@ -5,6 +5,37 @@ window.Garage = (() => {
     const listeners = new Set();
     let refreshTimer;
     let refreshing = false;
+    let activityVersion = 0, lastActivity = 0, pending = false;
+    const dirty = new Set();
+    function visible(node) {
+        if (!node?.isConnected || node.closest('[hidden]')) return false;
+        const modal = node.closest('.modal'), dialog = node.closest('dialog');
+        if (modal?.style.display === 'none' || (dialog && !dialog.open)) return false;
+        return !node.closest('section') || node.closest('section').classList.contains('active-section');
+    }
+    function editing() {
+        return Date.now() - lastActivity < 1800 ||
+            document.activeElement?.matches('input,select,textarea,[contenteditable="true"]') ||
+            [...document.querySelectorAll('dialog[open],.modal')].some(el => el.open || (el.classList.contains('modal') && el.style.display !== 'none' && visible(el))) ||
+            [...dirty].some(visible) ||
+            [...document.querySelectorAll('tr[id^="details-"],tr[id^="vehicle-history-"]')].some(el => !el.hidden && visible(el));
+    }
+    function syncStatus(text) { const label = document.querySelector('.sync-label'); if (label) label.textContent = text; }
+    function refreshGuard(context = {}) {
+        const version = activityVersion;
+        return () => {
+            if (!context.background || (version === activityVersion && !editing())) return true;
+            pending = true; syncStatus('Đang thao tác · Đồng bộ sau'); return false;
+        };
+    }
+    for (const name of ['pointerdown','keydown','input','change']) document.addEventListener(name, event => {
+        activityVersion++; lastActivity = Date.now();
+        if (name === 'input' || name === 'change') {
+            const form = event.target.closest('form');
+            if (form || event.target.closest('#inv-settings,.editor-panel')) dirty.add(form || event.target);
+        }
+    }, true);
+    document.addEventListener('reset', event => dirty.delete(event.target), true);
     const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[char]));
@@ -25,15 +56,19 @@ window.Garage = (() => {
     }
     async function refresh() {
         if (refreshing || document.hidden || !localStorage.getItem('token')) return;
+        if (editing()) { pending = true; syncStatus('Đang thao tác · Đồng bộ sau'); return; }
         refreshing = true;
-        try { await Promise.allSettled([...listeners].map(fn => fn())); }
+        pending = false;
+        try { await Promise.allSettled([...listeners].map(fn => fn({background:true}))); }
         finally { refreshing = false; }
+        if (!pending) syncStatus('Đã đồng bộ · ' + new Date().toLocaleTimeString('vi-VN'));
     }
     function changed() {
         clearTimeout(refreshTimer);
         refreshTimer = setTimeout(refresh, 120);
     }
     async function apiFetch(url, options = {}) {
+        const editScope = document.activeElement?.closest('form,.card,.modal,dialog');
         const headers = new Headers(options.headers);
         const token = localStorage.getItem('token');
         if (token) headers.set('Authorization', `Bearer ${token}`);
@@ -42,10 +77,12 @@ window.Garage = (() => {
         if (response.status === 401 && !String(url).endsWith('/auth/login')) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            location.replace('../login/index.html');
+            const onLoginPage = location.pathname.startsWith('/static/login') || location.pathname === '/login';
+            if (!onLoginPage) location.replace('/login');
         }
         if (!response.ok) toast(data.message || 'Không thể xử lý yêu cầu. Vui lòng thử lại.', 'error');
         if (response.ok && data.success && options.method && options.method !== 'GET') {
+            if (editScope) for (const node of dirty) { if (editScope.contains(node)) dirty.delete(node); }
             changed();
             localStorage.setItem('garage:data-changed', String(Date.now()));
         }
@@ -70,9 +107,10 @@ window.Garage = (() => {
     window.addEventListener('focus', changed);
     window.addEventListener('storage', event => {
         if (event.key === 'garage:data-changed') changed();
-        if (event.key === 'token') location.reload();
+        if (event.key === 'token' && !event.newValue) location.replace('/login');
     });
     setInterval(refresh, 20000);
+    setInterval(() => { if (pending && !editing()) refresh(); }, 2000);
     document.addEventListener('DOMContentLoaded', () => {
         window.showToast = toast;
         document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', changed));
@@ -80,6 +118,6 @@ window.Garage = (() => {
             if (event.key === 'Escape') document.querySelectorAll('.modal').forEach(modal => { modal.style.display = 'none'; });
         });
     });
-    return { base, apiFetch, request, subscribe, changed, escape, date, toast };
+    return { base, apiFetch, request, subscribe, changed, escape, date, toast, refreshGuard, refresh };
 })();
 window.escapeHtml = Garage.escape;

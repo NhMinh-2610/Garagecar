@@ -1,212 +1,204 @@
-// API Base URL
-const API_URL = Garage.base;
+/**
+ * login/script.js
+ * Toàn bộ code được đặt trong DOMContentLoaded để đảm bảo:
+ *   1. DOM đã sẵn sàng (getElementById trả về element thật)
+ *   2. core.js (defer) đã chạy xong → window.Garage tồn tại
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const API_URL        = Garage.base;
+    const loginForm      = document.getElementById('loginForm');
+    const registerForm   = document.getElementById('registerForm');
+    const showRegisterLink = document.getElementById('showRegister');
+    const showLoginLink  = document.getElementById('showLogin');
+    const messageBox     = document.getElementById('messageBox');
 
-// DOM Elements
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-const showRegisterLink = document.getElementById('showRegister');
-const showLoginLink = document.getElementById('showLogin');
-const messageBox = document.getElementById('messageBox');
-
-// Role-based redirect mapping
-function getRedirectUrl(role) {
-    switch (role) {
-        case 'admin':
-            return '../admin/index.html';
-        case 'mechanic':
-            return '../mechanic/index.html';
-        case 'customer':
-            return '../customer/index.html';
-        default:
-            return '../login/index.html';
-    }
-}
-
-// Toggle between Login and Register forms
-showRegisterLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginForm.classList.remove('active');
-    registerForm.classList.add('active');
-    hideMessage();
-});
-
-showLoginLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    registerForm.classList.remove('active');
-    loginForm.classList.add('active');
-    hideMessage();
-});
-
-// Show Message
-function showMessage(message, type = 'error') {
-    messageBox.textContent = message;
-    messageBox.className = `message-box show ${type}`;
-}
-
-function hideMessage() {
-    messageBox.className = 'message-box';
-}
-
-// Handle Login
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideMessage();
-
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-
-    if (!email || !password) {
-        showMessage('Vui lòng nhập đầy đủ thông tin', 'error');
-        return;
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function showMessage(message, type = 'error') {
+        messageBox.textContent = message;
+        messageBox.className = `message-box show ${type}`;
     }
 
-    const submitBtn = loginForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng nhập...';
+    function hideMessage() {
+        messageBox.className = 'message-box';
+    }
 
-    try {
-        const response = await Garage.apiFetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
+    function setMode(register, focus = true) {
+        loginForm.classList.toggle('active', !register);
+        registerForm.classList.toggle('active', register);
+        document.title = `AutoPro · ${register ? 'Đăng ký' : 'Đăng nhập'}`;
+        document.querySelectorAll('[data-auth-mode]').forEach(button => button.setAttribute('aria-pressed', String((button.dataset.authMode === 'register') === register)));
+        history.replaceState(null, '', `?mode=${register ? 'register' : 'login'}`);
+        if (focus) document.getElementById(register ? 'registerFullName' : 'loginEmail').focus();
+    }
+    document.querySelectorAll('[data-password]').forEach(button => button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.password);
+        const reveal = input.type === 'password';
+        input.type = reveal ? 'text' : 'password';
+        button.textContent = reveal ? 'Ẩn' : 'Hiện';
+        button.setAttribute('aria-pressed', String(reveal));
+        button.setAttribute('aria-label', reveal ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+    }));
+    document.querySelectorAll('[data-auth-mode]').forEach(button => button.addEventListener('click', () => {
+        setMode(button.dataset.authMode === 'register'); hideMessage();
+    }));
 
-        const result = await response.json();
-
-        if (result.success) {
-            // Save token and user info
-            localStorage.setItem('token', result.data.token);
-            localStorage.setItem('user', JSON.stringify(result.data.user));
-
-            const role = result.data.user.role;
-            const roleName = getRoleDisplayName(role);
-
-            showMessage(`Đăng nhập thành công! Chào mừng ${roleName}...`, 'success');
-            
-            // Redirect based on role
-            setTimeout(() => {
-                window.location.href = getRedirectUrl(role);
-            }, 1000);
-        } else {
-            showMessage(result.message || 'Đăng nhập thất bại', 'error');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Đăng nhập';
+    function getRedirectUrl(role) {
+        switch (role) {
+            case 'admin':    return '/admin';
+            case 'mechanic': return '/mechanic';
+            case 'customer': return '/customer';
+            default:         return '/login';
         }
-    } catch (error) {
-        console.error('Login error:', error);
-        showMessage('Lỗi kết nối đến server', 'error');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Đăng nhập';
-    }
-});
-
-// Handle Registration (Customer only)
-registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideMessage();
-
-    const fullName = document.getElementById('registerFullName').value.trim();
-    const username = document.getElementById('registerUsername').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-
-    // Validation
-    if (!fullName || !username || !email || !password || !passwordConfirm) {
-        showMessage('Vui lòng nhập đầy đủ thông tin', 'error');
-        return;
     }
 
-    if (password.length < 6) {
-        showMessage('Mật khẩu phải có ít nhất 6 ký tự', 'error');
-        return;
-    }
-
-    if (password !== passwordConfirm) {
-        showMessage('Mật khẩu xác nhận không khớp', 'error');
-        return;
-    }
-
-    const submitBtn = registerForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng ký...';
-
-    try {
-        const response = await Garage.apiFetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                fullName,
-                username,
-                email,
-                password
-                // No role field - server always assigns 'customer'
-            })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showMessage('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
-            
-            // Clear form
-            registerForm.reset();
-            
-            // Switch to login form after 2 seconds
-            setTimeout(() => {
-                registerForm.classList.remove('active');
-                loginForm.classList.add('active');
-                hideMessage();
-            }, 2000);
-        } else {
-            showMessage(result.message || 'Đăng ký thất bại', 'error');
+    function getRoleDisplayName(role) {
+        switch (role) {
+            case 'admin':    return 'Quản Trị Viên';
+            case 'mechanic': return 'Kỹ Thuật Viên';
+            case 'customer': return 'Khách Hàng';
+            default:         return 'Người dùng';
         }
-    } catch (error) {
-        console.error('Register error:', error);
-        showMessage('Lỗi kết nối đến server', 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Đăng ký';
     }
-});
 
-// Get display name for role
-function getRoleDisplayName(role) {
-    switch (role) {
-        case 'admin': return 'Quản Trị Viên';
-        case 'mechanic': return 'Kỹ Thuật Viên';
-        case 'customer': return 'Khách Hàng';
-        default: return 'Người dùng';
-    }
-}
-
-// Check if already logged in and handle query params
-window.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('token');
+    // ── Nếu đã đăng nhập → redirect luôn ────────────────────────────────────
+    const token   = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
-
     if (token && userStr) {
         try {
             const user = JSON.parse(userStr);
-            // Redirect to appropriate portal based on role
-            window.location.href = getRedirectUrl(user.role);
-            return;
-        } catch (e) {
-            localStorage.removeItem('token'); localStorage.removeItem('user');
+            window.location.replace(getRedirectUrl(user.role));
+            return; // dừng lại, không gắn event nào nữa
+        } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
         }
     }
 
-    // Check URL parameters for mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    
-    if (mode === 'register') {
-        loginForm.classList.remove('active');
-        registerForm.classList.add('active');
-        hideMessage();
+    // ── Kiểm tra query ?mode=register ────────────────────────────────────────
+    const mode = new URLSearchParams(window.location.search).get('mode');
+    if (new URLSearchParams(window.location.search).get('password') === 'changed') {
+        showMessage('Đã đổi mật khẩu. Đăng nhập bằng mật khẩu mới để tiếp tục.', 'success');
     }
+    if (mode === 'register') {
+        setMode(true, false);
+    }
+
+    // ── Chuyển tab Đăng ký / Đăng nhập ───────────────────────────────────────
+    showRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        setMode(true);
+        hideMessage();
+    });
+
+    showLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        setMode(false);
+        hideMessage();
+    });
+
+    // ── Đăng nhập ─────────────────────────────────────────────────────────────
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!loginForm.reportValidity() || loginForm.querySelector('[type="submit"]').disabled) return;
+        hideMessage();
+
+        const email    = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!email || !password) {
+            showMessage('Vui lòng nhập đầy đủ thông tin', 'error');
+            return;
+        }
+
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang đăng nhập…';
+
+        try {
+            const response = await Garage.apiFetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                localStorage.setItem('token', result.data.token);
+                localStorage.setItem('user', JSON.stringify(result.data.user));
+
+                const role     = result.data.user.role;
+                showMessage(`Đăng nhập thành công! Chào mừng ${getRoleDisplayName(role)}...`, 'success');
+
+                setTimeout(() => { window.location.replace(getRedirectUrl(role)); }, 800);
+            } else {
+                showMessage(result.message || 'Đăng nhập thất bại', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Đăng nhập';
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            showMessage('Lỗi kết nối đến server', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Đăng nhập';
+        }
+    });
+
+    // ── Đăng ký ──────────────────────────────────────────────────────────────
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!registerForm.reportValidity() || registerForm.querySelector('[type="submit"]').disabled) return;
+        hideMessage();
+
+        const fullName        = document.getElementById('registerFullName').value.trim();
+        const username        = document.getElementById('registerUsername').value.trim();
+        const email           = document.getElementById('registerEmail').value.trim();
+        const password        = document.getElementById('registerPassword').value;
+        const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+        if (!fullName || !username || !email || !password || !passwordConfirm) {
+            showMessage('Vui lòng nhập đầy đủ thông tin', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            showMessage('Mật khẩu phải có ít nhất 6 ký tự', 'error');
+            return;
+        }
+        if (password !== passwordConfirm) {
+            showMessage('Mật khẩu xác nhận không khớp', 'error');
+            return;
+        }
+
+        const submitBtn = registerForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang đăng ký…';
+
+        try {
+            const response = await Garage.apiFetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName, username, email, password }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showMessage('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+                registerForm.reset();
+                setTimeout(() => {
+                    document.getElementById('loginEmail').value = email;
+                    setMode(false);
+                }, 2000);
+            } else {
+                showMessage(result.message || 'Đăng ký thất bại', 'error');
+            }
+        } catch (err) {
+            console.error('Register error:', err);
+            showMessage('Lỗi kết nối đến server', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Tạo tài khoản';
+        }
+    });
 });
