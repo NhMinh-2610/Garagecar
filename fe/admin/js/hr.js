@@ -1,9 +1,11 @@
 // HR Module - Mechanics & User Account Management
-const HR_API = 'http://localhost:8000/api';
+const HR_API = Garage.base;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadMechanics();
     loadUsers();
+    Garage.subscribe(loadMechanics);
+    Garage.subscribe(loadUsers);
 
     // Add Mechanic Modal
     const btnAddMechanic = document.getElementById('btnAddMechanic');
@@ -63,7 +65,7 @@ function getToken() {
 // ===== MECHANICS =====
 async function loadMechanics() {
     try {
-        const response = await fetch(`${HR_API}/mechanics`, {
+        const response = await Garage.apiFetch(`${HR_API}/mechanics`, {
             headers: { 'Authorization': `Bearer ${getToken()}` }
         });
         const result = await response.json();
@@ -74,14 +76,18 @@ async function loadMechanics() {
             return;
         }
 
+        const staffSelect = document.getElementById("staffMechanicId");
+        const current = staffSelect.value;
+        staffSelect.replaceChildren(new Option("Tạo hồ sơ mới", ""), ...result.data.filter(m => !m.userId).map(m => new Option(m.fullName, m.id)));
+        staffSelect.value = current;
         tbody.innerHTML = result.data.map(m => `
             <tr>
-                <td><strong>${m.fullName}</strong></td>
-                <td>${m.phone || '---'}</td>
-                <td>${m.specialty || 'Chung'}</td>
+                <td><strong>${escapeHtml(m.fullName)}</strong> ${m.userId ? '' : '<small>(chưa liên kết tài khoản)</small>'}</td>
+                <td>${escapeHtml(m.phone || '---')}</td>
+                <td>${escapeHtml(m.specialty || 'Chung')}</td>
                 <td><span class="badge badge-done">Hoạt động</span></td>
                 <td>
-                    <button class="btn btn-sm btn-secondary" style="color: #ef4444;" onclick="deleteMechanic(${m.id}, '${m.fullName}')">
+                    <button class="btn btn-sm" onclick="linkMechanicAccount(${m.id})">Tài khoản</button><button class="btn btn-sm btn-secondary" style="color: #ef4444;" onclick="deleteMechanic(${m.id})">
                         <i class="fa-solid fa-trash"></i> Xóa
                     </button>
                 </td>
@@ -103,7 +109,7 @@ async function createMechanic() {
     }
 
     try {
-        const response = await fetch(`${HR_API}/mechanics`, {
+        const response = await Garage.apiFetch(`${HR_API}/mechanics`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -128,10 +134,10 @@ async function createMechanic() {
 }
 
 async function deleteMechanic(id, name) {
-    if (!confirm(`Xóa thợ "${name}"?`)) return;
+    if (!confirm(`Xóa thợ "#${id}"?`)) return;
 
     try {
-        const response = await fetch(`${HR_API}/mechanics/${id}`, {
+        const response = await Garage.apiFetch(`${HR_API}/mechanics/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${getToken()}` }
         });
@@ -151,7 +157,7 @@ async function deleteMechanic(id, name) {
 // ===== USER ACCOUNTS =====
 async function loadUsers() {
     try {
-        const response = await fetch(`${HR_API}/auth/users`, {
+        const response = await Garage.apiFetch(`${HR_API}/auth/users`, {
             headers: { 'Authorization': `Bearer ${getToken()}` }
         });
         const result = await response.json();
@@ -176,14 +182,14 @@ async function loadUsers() {
 
             return `
                 <tr>
-                    <td><strong>${user.username}</strong></td>
-                    <td>${user.fullName}</td>
-                    <td>${user.email}</td>
+                    <td><strong>${escapeHtml(user.username)}</strong></td>
+                    <td>${escapeHtml(user.fullName)}</td>
+                    <td>${escapeHtml(user.email)}</td>
                     <td><span class="badge ${role.class}">${role.label}</span></td>
                     <td>${new Date(user.createdAt).toLocaleDateString('vi-VN')}</td>
                     <td>
                         ${isSelf ? '<span style="color: #6b7280; font-size: 0.85rem;">Bạn</span>' : `
-                            <button class="btn btn-sm btn-secondary" style="color: #ef4444;" onclick="deleteUser(${user.id}, '${user.username}')">
+                            <button class="btn btn-sm btn-secondary" style="color: #ef4444;" onclick="deleteUser(${user.id})">
                                 <i class="fa-solid fa-trash"></i> Xóa
                             </button>
                         `}
@@ -214,13 +220,13 @@ async function createUserAccount() {
     }
 
     try {
-        const response = await fetch(`${HR_API}/auth/register-staff`, {
+        const response = await Garage.apiFetch(`${HR_API}/auth/register-staff`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${getToken()}`
             },
-            body: JSON.stringify({ username, fullName, email, password, role })
+            body: JSON.stringify({ username, fullName, email, password, role, mechanicId: role === "mechanic" ? Number(document.getElementById("staffMechanicId").value) || null : null })
         });
 
         const result = await response.json();
@@ -239,10 +245,10 @@ async function createUserAccount() {
 }
 
 async function deleteUser(userId, username) {
-    if (!confirm(`Xóa tài khoản "${username}"? Hành động này không thể hoàn tác!`)) return;
+    if (!confirm(`Xóa tài khoản "#${userId}"? Hành động này không thể hoàn tác!`)) return;
 
     try {
-        const response = await fetch(`${HR_API}/auth/users/${userId}`, {
+        const response = await Garage.apiFetch(`${HR_API}/auth/users/${userId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${getToken()}` }
         });
@@ -257,4 +263,22 @@ async function deleteUser(userId, username) {
     } catch (error) {
         showToast('Lỗi kết nối server', 'error');
     }
+}
+
+async function linkMechanicAccount(id) {
+    try {
+        const [users,mechanics] = await Promise.all([Garage.request('/auth/users'),Garage.request('/mechanics')]);
+        const current = mechanics.find(m => m.id === id);
+        let dialog = document.getElementById('linkMechanicDialog');
+        if (!dialog) { dialog = document.createElement('dialog'); dialog.id = 'linkMechanicDialog'; document.body.append(dialog); }
+        dialog.innerHTML = '<h3>Liên kết tài khoản thợ</h3><label for="mechanicAccount">Tài khoản</label><select id="mechanicAccount"></select><p class="field-help">Thợ đăng nhập bằng tài khoản này để xem phiếu được giao.</p><button class="btn btn-primary" id="saveMechanicAccount">Lưu</button><form method="dialog"><button class="btn btn-secondary">Đóng</button></form>';
+        const select = dialog.querySelector('select');
+        select.replaceChildren(new Option('Chưa liên kết',''), ...users.filter(u => u.role === 'mechanic' && !mechanics.some(m => m.userId === u.id && m.id !== id)).map(u => new Option(u.fullName + ' — ' + u.email,u.id)));
+        select.value = current.userId || '';
+        dialog.querySelector('#saveMechanicAccount').onclick = async () => {
+            try { await Garage.request('/mechanics/' + id,{method:'PUT',body:{userId:Number(select.value)||null}}); dialog.close(); showToast('Đã lưu liên kết.','success'); }
+            catch(error) { showToast(error.message,'error'); }
+        };
+        dialog.showModal();
+    } catch(error) { showToast(error.message,'error'); }
 }

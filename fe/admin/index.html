@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="css/repair.css?v=3">
     <link rel="stylesheet" href="css/inventory.css">
     <link rel="stylesheet" href="css/report.css">
+<link rel="stylesheet" href="../shared/ui.css">
+<script src="../shared/core.js"></script><script src="../shared/portal.js"></script>
 </head>
 <body>
 
@@ -83,29 +85,29 @@
                         <div class="card stat-card">
                             <div class="stat-icon bg-blue"><i class="fa-solid fa-car"></i></div>
                             <div class="stat-info">
-                                <h3>12</h3>
+                                <h3>—</h3>
                                 <p>Xe tiếp nhận hôm nay</p>
                             </div>
                         </div>
                         <div class="card stat-card">
                             <div class="stat-icon bg-orange"><i class="fa-solid fa-wrench"></i></div>
                             <div class="stat-info">
-                                <h3>5</h3>
+                                <h3>—</h3>
                                 <p>Đang sửa chữa</p>
                             </div>
                         </div>
                         <div class="card stat-card">
                             <div class="stat-icon bg-green"><i class="fa-solid fa-check-circle"></i></div>
                             <div class="stat-info">
-                                <h3>8</h3>
-                                <p>Đã hoàn thành</p>
+                                <h3>—</h3>
+                                <p>Xe đang chờ giao</p>
                             </div>
                         </div>
                          <div class="card stat-card">
                             <div class="stat-icon bg-purple"><i class="fa-solid fa-coins"></i></div>
                             <div class="stat-info">
-                                <h3>15.2M</h3>
-                                <p>Doanh thu tạm tính</p>
+                                <h3>—</h3>
+                                <p>Tổng tiền đã thu</p>
                             </div>
                         </div>
                     </div>
@@ -152,7 +154,7 @@
 
 
                 <!-- 2. RECEPTION & LOOKUP -->
-                <section id="reception-section">
+                <section id="reception-section"><div class="card"><h3>Yêu cầu đặt lịch từ website</h3><div class="table-responsive"><table class="data-table" id="bookingsTable"><thead><tr><th>Mã</th><th>Khách hàng</th><th>Ngày mong muốn</th><th>Dịch vụ / ghi chú</th><th>Trạng thái</th></tr></thead><tbody></tbody></table></div></div>
                     <!-- Vehicle List (Primary) -->
                     <div class="card">
                         <div class="card-header-flex">
@@ -191,7 +193,7 @@
                         <div class="modal-content" style="max-width: 600px;">
                             <span class="close-btn" id="closeReceptionModal">&times;</span>
                             <h2 class="modal-title"><i class="fa-solid fa-file-circle-plus"></i> Tạo Phiếu Tiếp Nhận</h2>
-                            <form id="receptionForm">
+                            <form id="receptionForm"><div class="form-group"><label for="customerSelect">Tài khoản khách hàng</label><select id="customerSelect"></select><p class="field-help">Liên kết để khách xem xe và tiến độ trong tài khoản của mình.</p></div>
                                 <div class="form-group">
                                     <label>Tên chủ xe</label>
                                     <input type="text" name="customerName" required placeholder="Nguyễn Văn A">
@@ -221,9 +223,7 @@
                                     </div>
                                     <div>
                                         <label>Dòng xe</label>
-                                        <select id="modelSelect" disabled>
-                                            <option value="">-- Chọn dòng xe --</option>
-                                        </select>
+                                        <input id="modelSelect" placeholder="Dòng xe (tùy chọn)">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -243,7 +243,7 @@
                         <div class="modal-content" style="max-width: 600px;">
                             <span class="close-btn" id="closeEditModal">&times;</span>
                             <h2 class="modal-title"><i class="fa-solid fa-edit"></i> Chỉnh sửa thông tin</h2>
-                            <form id="editVehicleForm">
+                            <form id="editVehicleForm"><div class="form-group"><label for="editCustomerSelect">Tài khoản khách hàng</label><select id="editCustomerSelect"></select></div>
                                 <input type="hidden" id="editVehicleId">
                                 
                                 <div class="two-col-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
@@ -279,9 +279,7 @@
                                     </div>
                                     <div>
                                         <label>Dòng xe</label>
-                                        <select id="editModelSelect">
-                                            <option value="">-- Chọn dòng xe --</option>
-                                        </select>
+                                        <input id="editModelSelect" placeholder="Dòng xe (tùy chọn)">
                                     </div>
                                 </div>
 
@@ -454,7 +452,7 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <button id="btnAddItem" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Thêm mục</button>
+                                        <label for="partQuantity">Số lượng vật tư</label><input type="number" id="partQuantity" value="1" min="1" step="1" class="form-control"><button id="btnAddItem" class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Thêm mục</button>
                                     </div>
                                 </div>
 
@@ -498,7 +496,7 @@
                             <!-- Import Form Card -->
                             <div class="card">
                                 <h3><i class="fa-solid fa-box"></i> Bảng Nhập Kho</h3>
-                                <form id="importForm" class="mt-4">
+                                <form id="importForm" class="mt-4"><div class="form-group"><label for="existingInventory">Nhập kho</label><select id="existingInventory"><option value="">Tạo vật tư mới</option></select></div>
                                     <div class="form-group mb-3">
                                         <label>Tên vật tư</label>
                                         <input type="text" id="invName" name="name" class="form-control" required>
@@ -547,8 +545,7 @@
                             <div class="card">
                                 <h3>Quản lý Hiệu Xe</h3>
                                 <ul class="list-group">
-                                    <li>Toyota <button class="btn-sm text-red">Xóa</button></li>
-                                    <li>Honda <button class="btn-sm text-red">Xóa</button></li>
+                                    <li>Đang tải danh mục...</li>
                                 </ul>
                                 <div class="add-row mt-2">
                                     <input type="text" placeholder="Thêm hiệu xe..." class="form-control-sm">
@@ -558,7 +555,7 @@
                             <div class="card">
                                 <h3>Quản lý Tiền Công</h3>
                                 <ul class="list-group">
-                                    <li>Rửa xe - 100k <button class="btn-sm text-red">Xóa</button></li>
+                                    <li>Đang tải danh mục...</li>
                                 </ul>
                                 <div class="add-row mt-2">
                                     <input type="text" placeholder="Tên công việc" class="form-control-sm">
@@ -586,7 +583,7 @@
                         <div class="payment-selector">
                             <label>Chọn xe đã sửa xong:</label>
                             <select class="form-control">
-                                <option>59A-123.45 - Nguyễn Văn X (Xong)</option>
+                                <option value="">Đang tải phiếu...</option>
                             </select>
                         </div>
                         
@@ -594,12 +591,12 @@
                             <div class="invoice-box">
                                 <div class="invoice-header">
                                     <h4>HÓA ĐƠN THANH TOÁN</h4>
-                                    <p>Ngày: 21/12/2025</p>
+                                    <p></p>
                                 </div>
                                 <div class="invoice-details">
-                                    <p><strong>Khách hàng:</strong> Nguyễn Văn X</p>
-                                    <p><strong>Biển số:</strong> 59A-123.45</p>
-                                    <p><strong>Tổng tiền:</strong> 3.500.000 VNĐ</p>
+                                    <p>Chọn phiếu để xem thông tin thanh toán.</p>
+                                    
+                                    
                                 </div>
                                 <div class="invoice-actions text-center mt-4">
                                     <button class="btn btn-success btn-lg">Xác Nhận Thu Tiền & In</button>
@@ -627,7 +624,7 @@
                             <thead>
                                 <tr>
                                     <th>Hiệu xe</th>
-                                    <th>Số lượt sửa</th>
+                                    <th>Số phiếu đã thu</th>
                                     <th>Doanh thu (VNĐ)</th>
                                     <th>Tỉ lệ (%)</th>
                                 </tr>
@@ -731,7 +728,7 @@
                         <div class="modal-content" style="max-width: 550px;">
                             <span class="close-btn" id="closeUserModal">&times;</span>
                             <h2 class="modal-title"><i class="fa-solid fa-user-shield"></i> Tạo Tài Khoản Nhân Viên</h2>
-                            <form id="createUserForm">
+                            <form id="createUserForm"><div class="form-group"><label for="staffMechanicId">Liên kết hồ sơ thợ có sẵn (nếu có)</label><select id="staffMechanicId"><option value="">Tạo hồ sơ mới khi chọn vai trò thợ</option></select></div>
                                 <div class="form-group">
                                     <label>Họ và tên</label>
                                     <input type="text" id="newFullName" required placeholder="Nguyễn Văn A">
@@ -780,7 +777,7 @@
     <!-- JS Modules -->
     <script src="js/app.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/reception.js"></script>
+    <script src="js/reception.js"></script><script src="js/bookings.js"></script>
     <script src="js/repair.js"></script>
     <script src="js/inventory.js?v=2"></script>
     <script src="js/finance.js"></script>

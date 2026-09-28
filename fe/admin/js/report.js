@@ -27,43 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const [year, month] = selectedMonth.split('-');
 
         try {
-            // Fetch all repairs (in a real production app, we would query by date from backend)
-            const response = await fetch('http://localhost:8000/api/repairs', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            const result = await response.json();
-            if (!result.success) {
-                showToast('Không thể tải dữ liệu báo cáo', 'error');
-                return;
-            }
-
-            const repairs = result.data || [];
-            
-            // Filter completed/paid repairs in selected month
-            const filteredRepairs = repairs.filter(r => {
-                const isPaidOrCompleted = r.status === 'paid' || r.status === 'completed';
-                if (!isPaidOrCompleted || !r.completedAt) return false;
-                
-                const repairDate = new Date(r.completedAt);
-                return repairDate.getFullYear() == year && (repairDate.getMonth() + 1) == month;
-            });
-
-            // Aggregate data by carBrand
-            const brandStats = {};
-            let totalRevenueAll = 0;
-
-            filteredRepairs.forEach(r => {
-                const brand = r.vehicle?.carBrand || 'Khác';
-                const amount = parseFloat(r.totalAmount) || 0;
-                
-                if (!brandStats[brand]) {
-                    brandStats[brand] = { count: 0, revenue: 0 };
-                }
-                brandStats[brand].count += 1;
-                brandStats[brand].revenue += amount;
-                totalRevenueAll += amount;
-            });
+            const rows = await Garage.request('/reports/revenue?month=' + encodeURIComponent(selectedMonth));
+            const brandStats = Object.fromEntries(rows.map(row => [row.brand, {count:row.count,revenue:row.revenue}]));
+            const totalRevenueAll = rows.reduce((sum,row) => sum + row.revenue,0);
 
             // Sort by revenue descending
             const sortedBrands = Object.keys(brandStats).sort((a, b) => brandStats[b].revenue - brandStats[a].revenue);
@@ -79,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const row = `
                         <tr>
-                            <td><strong>${brand}</strong></td>
+                            <td><strong>${escapeHtml(brand)}</strong></td>
                             <td>${data.count}</td>
                             <td class="text-green font-bold">${data.revenue.toLocaleString('vi-VN')}</td>
                             <td>
@@ -107,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderChart(brands, stats) {
         const ctx = document.getElementById('revenueChart');
-        if (!ctx) return;
+        if (!ctx || typeof Chart === 'undefined') return;
 
         const labels = brands;
         const data = brands.map(b => stats[b].revenue);
@@ -174,10 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Auto-load report when tab is opened
-    const tabBtns = document.querySelectorAll('.sidebar-menu a');
+    Garage.subscribe(fetchAndRenderReport);
+    fetchAndRenderReport();
+    const tabBtns = document.querySelectorAll('.nav-item');
     tabBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const tabId = e.currentTarget.getAttribute('data-tab');
+            const tabId = e.currentTarget.getAttribute('data-target');
             if (tabId === 'report-section') {
                 // Slight delay to ensure DOM is visible for Chart to render properly
                 setTimeout(fetchAndRenderReport, 100);

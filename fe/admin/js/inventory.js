@@ -6,6 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Elements
     const inventoryTable = document.querySelector('#inventoryTable tbody');
     const importForm = document.getElementById('importForm');
+    const existingSelect = document.getElementById('existingInventory');
+    let inventoryItems = [];
+    existingSelect.onchange = () => {
+        const item = inventoryItems.find(i => i.id === Number(existingSelect.value));
+        document.getElementById('invName').value = item?.name || '';
+        document.getElementById('invName').readOnly = Boolean(item);
+        document.getElementById('invPrice').value = item?.unitPrice || 0;
+    };
     
     const addInventoryModal = document.getElementById('addInventoryModal');
     const btnShowAddInventoryModal = document.getElementById('btnShowAddInventoryModal');
@@ -43,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('http://localhost:8000/api/inventory', {
+                const endpoint = existingSelect.value ? `/inventory/${existingSelect.value}/receive` : '/inventory';
+                const response = await Garage.apiFetch(Garage.base + endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -57,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof showToast === 'function') showToast('Đã nhập kho thành công!', 'success');
                     else alert('Đã nhập kho thành công!');
                     importForm.reset();
+                    document.getElementById('invName').readOnly = false;
                     if (addInventoryModal) addInventoryModal.style.display = 'none';
                     loadInventoryList();
                 } else {
@@ -74,13 +84,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load inventory list
     async function loadInventoryList() {
         try {
-            const response = await fetch('http://localhost:8000/api/inventory', {
+            const response = await Garage.apiFetch(`${Garage.base}/inventory`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             const result = await response.json();
             if (result.success && inventoryTable) {
-                inventoryTable.innerHTML = '';
+                inventoryItems = result.data;
+                const selected = existingSelect.value;
+                existingSelect.replaceChildren(new Option('Tạo vật tư mới',''), ...inventoryItems.map(i => new Option(i.name + ' (Tồn: ' + i.quantity + ')',i.id)));
+                existingSelect.value = selected;
+                inventoryTable.innerHTML = result.data.length ? '' : '<tr><td colspan="6" class="empty-state">Chưa có vật tư</td></tr>';
                 result.data.forEach(item => {
                     const price = item.unitPrice ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unitPrice) : '0 ₫';
                     const date = item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('vi-VN') : new Date(item.createdAt).toLocaleDateString('vi-VN');
@@ -88,12 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const row = `
                         <tr style="border: 1px solid #ddd;">
                             <td style="border: 1px solid #ddd; padding: 10px;">#${item.id}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500;">${item.name}</td>
+                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500;">${escapeHtml(item.name)}</td>
                             <td style="border: 1px solid #ddd; padding: 10px;"><span class="badge ${item.quantity > 5 ? 'badge-completed' : 'badge-pending'}">${item.quantity}</span></td>
                             <td style="border: 1px solid #ddd; padding: 10px;">${price}</td>
                             <td style="border: 1px solid #ddd; padding: 10px;">${date}</td>
                             <td style="border: 1px solid #ddd; padding: 10px;">
-                                <button class="btn-icon btn-delete-inv" data-id="${item.id}" title="Xóa">
+                                <button type="button" class="btn btn-sm" onclick="showStockHistory(${item.id})">Lịch sử</button><button class="btn-icon btn-delete-inv" data-id="${item.id}" title="Xóa">
                                     <i class="fa-solid fa-trash-can text-red"></i>
                                 </button>
                             </td>
@@ -120,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Bạn có chắc chắn muốn xóa vật tư này?')) return;
 
         try {
-            const response = await fetch(`http://localhost:8000/api/inventory/${id}`, {
+            const response = await Garage.apiFetch(`${Garage.base}/inventory/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -137,6 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    Garage.subscribe(loadInventoryList);
+    Garage.subscribe(loadSettings);
     // Initial Load
     loadInventoryList();
     loadSettings();
@@ -145,14 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadSettings() {
         // Load Brands
         try {
-            const res = await fetch('http://localhost:8000/api/settings/brands', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await Garage.apiFetch(`${Garage.base}/settings/brands`, { headers: { 'Authorization': `Bearer ${token}` } });
             const result = await res.json();
             if (result.success) {
                 const list = document.querySelector('#inv-settings .card:nth-child(1) .list-group');
                 if (list) {
                     list.innerHTML = '';
                     result.data.forEach(brand => {
-                        list.innerHTML += `<li>${brand.name} <button class="btn-sm text-red btn-delete-brand" data-id="${brand.id}">Xóa</button></li>`;
+                        list.innerHTML += `<li>${escapeHtml(brand.name)} <button class="btn-sm text-red btn-delete-brand" data-id="${brand.id}">Xóa</button></li>`;
                     });
                 }
             }
@@ -160,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Load Wages
         try {
-            const res = await fetch('http://localhost:8000/api/settings/wages', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await Garage.apiFetch(`${Garage.base}/settings/wages`, { headers: { 'Authorization': `Bearer ${token}` } });
             const result = await res.json();
             if (result.success) {
                 const list = document.querySelector('#inv-settings .card:nth-child(2) .list-group');
@@ -168,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     list.innerHTML = '';
                     result.data.forEach(wage => {
                         const priceStr = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wage.price);
-                        list.innerHTML += `<li>${wage.name} - ${priceStr} <button class="btn-sm text-red btn-delete-wage" data-id="${wage.id}">Xóa</button></li>`;
+                        list.innerHTML += `<li>${escapeHtml(wage.name)} - ${priceStr} <button class="btn-sm text-red btn-delete-wage" data-id="${wage.id}">Xóa</button></li>`;
                     });
                 }
             }
@@ -176,12 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Load Params
         try {
-            const res = await fetch('http://localhost:8000/api/settings/params', { headers: { 'Authorization': `Bearer ${token}` } });
+            const res = await Garage.apiFetch(`${Garage.base}/settings/params`, { headers: { 'Authorization': `Bearer ${token}` } });
             const result = await res.json();
             if (result.success) {
                 if (result.data.max_cars_per_day) {
                     const input = document.querySelector('#inv-settings .card.full-width input[type="number"]');
-                    if (input) input.value = result.data.max_cars_per_day;
+                    if (input && document.activeElement !== input) input.value = result.data.max_cars_per_day;
                 }
             }
         } catch (e) { console.error(e); }
@@ -194,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = async function() {
                 if(!confirm('Xóa hiệu xe này?')) return;
                 const id = this.getAttribute('data-id');
-                await fetch(`http://localhost:8000/api/settings/brands/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                await Garage.apiFetch(`${Garage.base}/settings/brands/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 loadSettings();
             };
         });
@@ -203,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = async function() {
                 if(!confirm('Xóa tiền công này?')) return;
                 const id = this.getAttribute('data-id');
-                await fetch(`http://localhost:8000/api/settings/wages/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                await Garage.apiFetch(`${Garage.base}/settings/wages/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 loadSettings();
             };
         });
@@ -216,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = document.querySelector('#inv-settings .card:nth-child(1) input');
             const name = input.value.trim();
             if (!name) return;
-            const res = await fetch('http://localhost:8000/api/settings/brands', {
+            const res = await Garage.apiFetch(`${Garage.base}/settings/brands`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ name })
@@ -236,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = inputs[0].value.trim();
             const price = parseFloat(inputs[1].value);
             if (!name || isNaN(price)) return;
-            const res = await fetch('http://localhost:8000/api/settings/wages', {
+            const res = await Garage.apiFetch(`${Garage.base}/settings/wages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ name, price })
@@ -254,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSaveParams) {
         btnSaveParams.onclick = async () => {
             const val = document.querySelector('#inv-settings .card.full-width input[type="number"]').value;
-            const res = await fetch('http://localhost:8000/api/settings/params', {
+            const res = await Garage.apiFetch(`${Garage.base}/settings/params`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ key: 'max_cars_per_day', value: val.toString() })
@@ -266,3 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+
+async function showStockHistory(id) {
+    try {
+        const rows = await Garage.request('/inventory/' + id + '/movements');
+        let dialog = document.getElementById('stockHistoryDialog');
+        if (!dialog) { dialog = document.createElement('dialog'); dialog.id = 'stockHistoryDialog'; document.body.append(dialog); }
+        dialog.innerHTML = '<h3>Lịch sử nhập / xuất kho</h3>' + (rows.length ? '<table class="data-table"><thead><tr><th>Ngày</th><th>Thay đổi</th><th>Tồn sau</th><th>Lý do</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + Garage.date(r.createdAt).toLocaleString('vi-VN') + '</td><td>' + r.quantityChange + '</td><td>' + r.balanceAfter + '</td><td>' + Garage.escape(({opening:'Tồn đầu',receipt:'Nhập kho',repair:'Phiếu sửa',adjustment:'Điều chỉnh'})[r.reason] || r.reason) + ' ' + Garage.escape(r.reference || '') + '</td></tr>').join('') + '</tbody></table>' : '<p>Chưa có phát sinh kể từ khi nâng cấp.</p>') + '<form method="dialog"><button class="btn btn-secondary">Đóng</button></form>';
+        dialog.showModal();
+    } catch (error) { showToast(error.message,'error'); }
+}

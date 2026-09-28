@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateDashboardStats = async () => {
         try {
             // Fetch vehicles
-            const vehiclesRes = await fetch('http://localhost:8000/api/vehicles', {
+            const vehiclesRes = await Garage.apiFetch(`${Garage.base}/vehicles`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const doneCount = vehicles.filter(v => v.status === 'completed').length;
 
             // Fetch repairs for revenue
-            const repairsRes = await fetch('http://localhost:8000/api/repairs', {
+            const repairsRes = await Garage.apiFetch(`${Garage.base}/repairs`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const repairsData = await repairsRes.json();
                 repairs = repairsData.data || [];
                 totalRevenue = repairs
-                    .filter(r => r.status === 'paid' || r.status === 'completed')
+                    .filter(r => r.status === 'paid')
                     .reduce((sum, r) => sum + parseFloat(r.totalAmount || 0), 0);
             }
 
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ).length;
 
         const weeklyRevenue = repairs
-            .filter(r => new Date(r.createdAt) > oneWeekAgo && (r.status === 'paid' || r.status === 'completed'))
+            .filter(r => Garage.date(r.paidAt) > oneWeekAgo && r.status === 'paid')
             .reduce((sum, r) => sum + parseFloat(r.totalAmount || 0), 0);
 
         document.getElementById('weeklyVehicles').textContent = weeklyVehicles;
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 type: 'vehicle',
                 icon: 'fa-car',
                 color: '#3b82f6',
-                text: `Tiếp nhận xe ${v.licensePlate} - ${v.customerName}`,
+                text: `Tiếp nhận xe ${escapeHtml(v.licensePlate)} - ${escapeHtml(v.customerName)}`,
                 data: v
             });
         });
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: 'repair',
                     icon: 'fa-wrench',
                     color: r.status === 'paid' ? '#10b981' : '#f59e0b',
-                    text: `Phiếu sửa ${r.vehicle.licensePlate} - ${r.status === 'paid' ? 'Đã thanh toán' : 'Hoàn thành'}`,
+                    text: `Phiếu sửa ${r.vehicle.licensePlate} - ${({draft:'Chờ sửa',working:'Đang sửa',completed:'Chờ thanh toán',paid:'Đã thanh toán'})[r.status]}`,
                     data: r
                 });
             }
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fa-solid ${act.icon}"></i>
                 </div>
                 <div style="flex: 1;">
-                    <p style="margin: 0; font-size: 0.875rem;">${act.text}</p>
+                    <p style="margin: 0; font-size: 0.875rem;">${escapeHtml(act.text)}</p>
                     <small style="color: #6b7280;">${formatRelativeTime(act.time)}</small>
                 </div>
             </div>
@@ -183,5 +183,5 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDashboardStats();
 
     // Refresh every 30 seconds
-    setInterval(updateDashboardStats, 30000);
+    Garage.subscribe(updateDashboardStats);
 });
