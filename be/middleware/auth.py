@@ -23,7 +23,7 @@ async def get_current_user(
     try:
         payload = decode_token(credentials.credentials)
         user = await db.get(User, payload.get("id"))
-        if user is None:
+        if user is None or not user.isActive or payload.get("version", 0) != user.sessionVersion:
             raise JWTError("Account no longer exists")
         return {"id": user.id, "email": user.email, "role": user.role, "fullName": user.fullName}
     except JWTError:

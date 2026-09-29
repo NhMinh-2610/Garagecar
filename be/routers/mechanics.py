@@ -15,10 +15,15 @@ router = APIRouter(prefix="/api/mechanics", tags=["Mechanics"])
 
 @router.get("", summary="List active mechanics (admin + mechanic)")
 async def list_mechanics(
+    include_inactive: bool = False,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC)),
+    user: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC)),
 ):
-    stmt = select(Mechanic).where(Mechanic.status == "active").order_by(Mechanic.createdAt.desc())
+    stmt = select(Mechanic).order_by(Mechanic.createdAt.desc())
+    if include_inactive and user["role"] != "admin":
+        raise HTTPException(403, "Chỉ admin được xem hồ sơ ngừng hoạt động")
+    if not include_inactive:
+        stmt = stmt.where(Mechanic.status == "active")
     result = await db.execute(stmt)
     mechanics = result.scalars().all()
     return success_response([MechanicResponse.model_validate(m).model_dump() for m in mechanics])
@@ -62,7 +67,7 @@ async def delete_mechanic(
 
 
 @router.put("/{mechanic_id}")
-async def link_account(mechanic_id: int, body: MechanicUpdate, db: AsyncSession = Depends(get_db),
+async def update_mechanic(mechanic_id: int, body: MechanicUpdate, db: AsyncSession = Depends(get_db),
                         _: dict = Depends(require_role(Role.ADMIN))):
     mechanic = await db.scalar(select(Mechanic).where(Mechanic.id == mechanic_id).with_for_update())
     if not mechanic:
@@ -71,6 +76,13 @@ async def link_account(mechanic_id: int, body: MechanicUpdate, db: AsyncSession 
         user = await db.get(User, body.userId)
         if not user or user.role != "mechanic":
             raise HTTPException(400, "Tài khoản phải có vai trò thợ")
-    mechanic.userId = body.userId
+    if body.status == "inactive":
+        active = await db.scalar(select(RepairTicket.id).where(RepairTicket.mechanicId == mechanic.id,
+                                                             RepairTicket.status.in_(["draft", "working"])))
+        if active:
+            raise HTTPException(409, "Cần phân công lại phiếu đang mở trước khi ngừng hoạt động")
+    for field, value in body.model_dump(exclude_unset=True).items():
+        if value is not None or field in ("userId", "phone"):
+            setattr(mechanic, field, value)
     await db.commit()
-    return success_response(MechanicResponse.model_validate(mechanic).model_dump(), "Đã liên kết tài khoản")
+    return success_response(MechanicResponse.model_validate(mechanic).model_dump(), "Đã cập nhật hồ sơ thợ")

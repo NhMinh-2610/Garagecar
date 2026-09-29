@@ -4,6 +4,8 @@ from sqlalchemy import select
 
 from database.session import get_db
 from models.settings import Brand, Wage, SystemParameter
+from models.vehicle import Vehicle
+from sqlalchemy import update
 from schemas.settings import (
     BrandCreate, BrandResponse,
     WageCreate, WageResponse,
@@ -14,6 +16,30 @@ from core.response import success_response, error_response
 from middleware.auth import require_role
 
 router = APIRouter(prefix="/api/settings", tags=["Settings"])
+
+
+@router.put("/brands/{brand_id}")
+async def update_brand(brand_id: int, body: BrandCreate, db: AsyncSession = Depends(get_db),
+                       _: dict = Depends(require_role(Role.ADMIN))):
+    brand = await db.scalar(select(Brand).where(Brand.id == brand_id).with_for_update())
+    if not brand:
+        return error_response("Không tìm thấy hiệu xe", 404)
+    old_name = brand.name
+    brand.name = body.name
+    await db.execute(update(Vehicle).where(Vehicle.carBrand == old_name).values(carBrand=body.name))
+    await db.commit()
+    return success_response(BrandResponse.model_validate(brand).model_dump(), "Đã cập nhật hiệu xe")
+
+
+@router.put("/wages/{wage_id}")
+async def update_wage(wage_id: int, body: WageCreate, db: AsyncSession = Depends(get_db),
+                      _: dict = Depends(require_role(Role.ADMIN))):
+    wage = await db.get(Wage, wage_id)
+    if not wage:
+        return error_response("Không tìm thấy tiền công", 404)
+    wage.name, wage.price = body.name, body.price
+    await db.commit()
+    return success_response(WageResponse.model_validate(wage).model_dump(), "Đã cập nhật tiền công")
 
 # --- Brands ---
 @router.get("/brands", summary="List all vehicle brands")

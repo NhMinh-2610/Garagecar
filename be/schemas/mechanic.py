@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
 from schemas.common import Name, PositiveId
 
@@ -9,6 +9,7 @@ class MechanicCreate(BaseModel):
     userId: Optional[PositiveId] = None
     phone: Optional[str] = None
     specialty: Optional[str] = "Chung"
+    status: Literal["active", "inactive"] = "active"
 
 
 class MechanicResponse(BaseModel):
@@ -25,3 +26,7 @@ class MechanicResponse(BaseModel):
 
 class MechanicUpdate(BaseModel):
     userId: Optional[PositiveId] = None
+    fullName: Optional[Name] = None
+    phone: Optional[str] = None
+    specialty: Optional[Name] = None
+    status: Optional[Literal["active", "inactive"]] = None

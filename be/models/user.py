@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, text
 from sqlalchemy.sql import func
 
 from database.engine import Base
@@ -18,5 +18,8 @@ class User(Base):
     password = Column(String, nullable=False)
     fullName = Column("fullName", String, nullable=False)
     role = Column(String, nullable=False, default="customer")
+    isActive = Column(Boolean, nullable=False, default=True, server_default=text("true"))
+    sessionVersion = Column(Integer, nullable=False, default=0, server_default="0")
+    lastLoginAt = Column(DateTime, nullable=True)
     createdAt = Column("createdAt", DateTime, server_default=func.now())
     updatedAt = Column("updatedAt", DateTime, server_default=func.now(), onupdate=func.now())

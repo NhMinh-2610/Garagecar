@@ -128,7 +128,6 @@ async def delete_repair(ticket_id: int, db: AsyncSession = Depends(get_db),
 async def toggle_item(ticket_id: int, item_id: int, body: RepairItemToggle,
                       db: AsyncSession = Depends(get_db),
                       user: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC))):
-    from datetime import datetime
     ticket = await lock_ticket(db, ticket_id)
     await authorize_ticket(db, ticket, user)
     if ticket.status != "working":

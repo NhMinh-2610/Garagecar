@@ -21,11 +21,12 @@ from models import User, Mechanic, Vehicle, Inventory
 
 
 def migrate(connection):
-    spec = importlib.util.spec_from_file_location("migration", Path(__file__).parents[1] / "migrations/versions/001_relational_workflow.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    with Operations.context(MigrationContext.configure(connection)):
-        module.upgrade()
+    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py"]:
+        spec = importlib.util.spec_from_file_location("migration", Path(__file__).parents[1] / "migrations/versions" / filename)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with Operations.context(MigrationContext.configure(connection)):
+            module.upgrade()
 
 
 @pytest_asyncio.fixture
@@ -81,6 +82,72 @@ def repair_body(vehicle_id, ids, quantity=2):
         "taskName": "Change oil", "inventoryId": ids["inventory_id"], "quantity": quantity,
         "laborPrice": 50, "partPrice": 1, "totalPrice": 1,
     }]}
+
+
+@pytest.mark.asyncio
+async def test_admin_account_lifecycle_and_revoked_sessions(api):
+    client, auth, ids, factory, _ = api
+    body = {"username":"newcustomer", "email":"new@example.com", "fullName":"New Customer",
+            "password":"initial123", "role":"customer"}
+    assert (await client.post('/api/auth/users', headers=auth('customer'), json=body)).status_code == 403
+    created = await client.post('/api/auth/users', headers=auth('admin'), json=body)
+    assert created.status_code == 201, created.text
+    uid = created.json()['data']['id']
+    assert 'password' not in created.json()['data']
+    login = await client.post('/api/auth/login', json={"email":body['email'], "password":body['password']})
+    assert login.status_code == 200, login.text
+    token = {'Authorization':'Bearer '+login.json()['data']['token']}
+    assert (await client.get('/api/auth/me', headers=token)).status_code == 200
+    edit = {key:body[key] for key in ['username','email','fullName']}
+    edit['isActive'] = False
+    assert (await client.put(f'/api/auth/users/{uid}', headers=auth('admin'), json=edit)).status_code == 200
+    assert (await client.get('/api/auth/me', headers=token)).status_code == 401
+    assert (await client.post('/api/auth/login', json={"email":body['email'], "password":body['password']})).status_code == 401
+    edit['isActive'] = True
+    assert (await client.put(f'/api/auth/users/{uid}', headers=auth('admin'), json=edit)).status_code == 200
+    assert (await client.get('/api/auth/me', headers=token)).status_code == 401  # unlocking must not restore old sessions
+    login = await client.post('/api/auth/login', json={"email":body['email'], "password":body['password']})
+    token = {'Authorization':'Bearer '+login.json()['data']['token']}
+    reset = await client.post(f'/api/auth/users/{uid}/password', headers=auth('admin'), json={'password':'reset12345'})
+    assert reset.status_code == 200
+    assert (await client.get('/api/auth/me', headers=token)).status_code == 401
+    login = await client.post('/api/auth/login', json={"email":body['email'], "password":"reset12345"})
+    assert login.status_code == 200
+    token = {'Authorization':'Bearer '+login.json()['data']['token']}
+    assert (await client.put('/api/auth/me/password', headers=token,json={'currentPassword':'wrong','password':'personal123'})).status_code == 400
+    assert (await client.put('/api/auth/me/password', headers=token,json={'currentPassword':'reset12345','password':'personal123'})).status_code == 200
+    assert (await client.get('/api/auth/me', headers=token)).status_code == 401
+    assert (await client.post('/api/auth/login', json={'email':body['email'],'password':'personal123'})).status_code == 200
+    self_edit = {'username':'admin','email':'admin@example.com','fullName':'Admin','isActive':False}
+    assert (await client.put(f'/api/auth/users/{ids["admin"]}', headers=auth('admin'), json=self_edit)).status_code == 409
+    assert (await client.put(f'/api/auth/users/{uid}', headers=auth('admin'), json={**edit,'role':'admin'})).status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_account_creation_links_existing_profiles_atomically(api):
+    client, auth, ids, factory, _ = api
+    async with factory() as db:
+        customer_vehicle = Vehicle(licensePlate='NEW-01',customerName='Owner',phone='0901234567',carBrand='Toyota')
+        staff = Mechanic(fullName='New Mechanic')
+        db.add_all([customer_vehicle,staff]); await db.commit()
+        vid, mid = customer_vehicle.id, staff.id
+    body = {'username':'owner','email':'owner@example.com','fullName':'Owner','password':'initial123','role':'customer','vehicleIds':[vid]}
+    created = await client.post('/api/auth/users',headers=auth('admin'),json=body)
+    assert created.status_code == 201, created.text
+    owner_id = created.json()['data']['id']
+    own = {'Authorization':'Bearer '+create_access_token({'id':owner_id})}
+    assert (await client.get('/api/vehicles/my-vehicles',headers=own)).json()['data'][0]['id'] == vid
+    duplicate = {**body,'username':'otherowner','email':'otherowner@example.com'}
+    assert (await client.post('/api/auth/users',headers=auth('admin'),json=duplicate)).status_code == 409
+    worker = {**body,'username':'newworker','email':'worker@example.com','role':'mechanic','mechanicId':mid,'vehicleIds':[]}
+    created_worker = await client.post('/api/auth/users',headers=auth('admin'),json=worker)
+    assert created_worker.status_code == 201, created_worker.text
+    async with factory() as db:
+        assert (await db.get(Mechanic,mid)).userId == created_worker.json()['data']['id']
+        assert (await db.get(Vehicle,vid)).customerId == owner_id
+        assert await db.scalar(select(User.id).where(User.username=='otherowner')) is None
+    assert (await client.delete(f'/api/auth/users/{owner_id}',headers=auth('admin'))).status_code == 409
+    assert (await client.post('/api/auth/register',json={**worker,'username':'public','email':'public@example.com'})).json()['data']['role'] == 'customer'
 
 
 @pytest.mark.asyncio
@@ -226,3 +293,34 @@ async def test_booking_persists_and_admin_controls_status(api):
     assert (await client.put(f'/api/bookings/{bid}',headers=auth('admin'),json={'status':'confirmed'})).status_code == 200
     rows = (await client.get('/api/bookings',headers=auth('admin'))).json()['data']
     assert rows[0]['status'] == 'confirmed'
+
+
+@pytest.mark.asyncio
+async def test_staff_edit_preserves_account_and_can_reactivate(api):
+    client, auth, ids, _, _ = api
+    path = f"/api/mechanics/{ids['mechanic_id']}"
+    response = await client.put(path,headers=auth('admin'),json={'fullName':'Updated Name','phone':'0912345678','status':'inactive'})
+    assert response.status_code == 200, response.text
+    assert response.json()['data']['userId'] == ids['mechanic']
+    assert (await client.get('/api/mechanics',headers=auth('admin'))).json()['data'] == []
+    rows = (await client.get('/api/mechanics?include_inactive=true',headers=auth('admin'))).json()['data']
+    assert len(rows) == 1 and rows[0]['status'] == 'inactive'
+    assert (await client.get('/api/mechanics?include_inactive=true',headers=auth('mechanic'))).status_code == 403
+    assert (await client.put(path,headers=auth('admin'),json={'status':'active'})).status_code == 200
+    vid = await vehicle(client,auth,ids)
+    assert (await client.post('/api/repairs',headers=auth('admin'),json=repair_body(vid,ids))).status_code == 201
+    assert (await client.put(path,headers=auth('admin'),json={'status':'inactive'})).status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_catalog_edits_update_vehicle_brand(api):
+    client, auth, ids, _, _ = api
+    vid = await vehicle(client,auth,ids)
+    brands = (await client.get('/api/settings/brands')).json()['data']
+    bid = next(b['id'] for b in brands if b['name']=='Toyota')
+    assert (await client.put(f'/api/settings/brands/{bid}',headers=auth('admin'),json={'name':'Toyota Updated'})).status_code == 200
+    assert (await client.get(f'/api/vehicles/{vid}',headers=auth('admin'))).json()['data']['carBrand'] == 'Toyota Updated'
+    wages = (await client.get('/api/settings/wages')).json()['data']
+    wid = wages[0]['id']
+    response = await client.put(f'/api/settings/wages/{wid}',headers=auth('admin'),json={'name':'Updated task','price':75000})
+    assert response.status_code == 200 and float(response.json()['data']['price']) == 75000
