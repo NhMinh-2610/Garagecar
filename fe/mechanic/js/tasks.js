@@ -1,230 +1,69 @@
-// Mechanic Portal - Tasks Module
-let allTasks = [];
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadMyTasks();
-});
-
-// Tab switching
-function switchTaskTab(tab) {
-    const tabs = document.querySelectorAll('.task-tab');
-    const contents = document.querySelectorAll('.task-tab-content');
-
-    tabs.forEach(t => t.classList.remove('active'));
-    contents.forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
-
-    if (tab === 'working') {
-        tabs[0].classList.add('active');
-        document.getElementById('tabWorking').classList.add('active');
-        document.getElementById('tabWorking').style.display = 'block';
-    } else {
-        tabs[1].classList.add('active');
-        document.getElementById('tabCompleted').classList.add('active');
-        document.getElementById('tabCompleted').style.display = 'block';
+(() => {
+    const $ = id => document.getElementById(id), e = Garage.escape;
+    let tasks = [], loading = false, mutation = false;
+    const statusNames = {draft:'Chờ bắt đầu',working:'Đang sửa',completed:'Chờ thanh toán',paid:'Đã thanh toán'};
+    async function load(context = {}) {
+        const canRender = Garage.refreshGuard(context);
+        if (loading || mutation) return;
+        loading = true;
+        $('refreshTasks').disabled = true;
+        try {
+            const data = await Garage.request('/repairs/my-tasks');
+            if (!canRender()) return;
+            tasks = data;
+            $('taskError').hidden = true;
+            $('statTotal').textContent = tasks.length;
+            $('statWaiting').textContent = tasks.filter(t => t.status === 'draft').length;
+            $('statWorking').textContent = tasks.filter(t => t.status === 'working').length;
+            $('statDone').textContent = tasks.filter(t => ['completed','paid'].includes(t.status)).length;
+            render();
+        } catch (error) {
+            $('taskError').textContent = `${error.message}. Nhấn Làm mới để thử lại.`;
+            $('taskError').hidden = false;
+            $('taskCount').textContent = 'Dữ liệu chưa được cập nhật.';
+        } finally { loading = false; $('refreshTasks').disabled = false; }
     }
-}
-
-async function loadMyTasks() {
-    try {
-        const response = await Garage.apiFetch(`${API_URL}/repairs/my-tasks`, { headers: getAuthHeaders() });
-        const result = await response.json();
-
-        if (!result.success) {
-            showToast('Lỗi tải công việc', 'error');
-            return;
+    function render() {
+        const query = $('taskSearch').value.trim().toLocaleLowerCase('vi'), status = $('taskStatus').value;
+        const filtered = tasks.filter(t => {
+            const match = status === 'all' || (status === 'active' ? ['draft','working'].includes(t.status) : status === 'done' ? ['completed','paid'].includes(t.status) : t.status === status);
+            return match && `#${t.id} ${t.vehicle?.licensePlate || ''} ${t.vehicle?.carBrand || ''} ${(t.items || []).map(i => i.taskName).join(' ')}`.toLocaleLowerCase('vi').includes(query);
+        }).sort((a,b) => $('taskSort').value === 'newest' ? b.id-a.id : a.id-b.id);
+        $('taskCount').textContent = `${filtered.length} / ${tasks.length} phiếu phù hợp`;
+        $('workingTasks').innerHTML = filtered.map(t => {
+            const items = t.items || [], done = items.filter(i => i.isCompleted).length;
+            const active = ['draft','working'].includes(t.status), canComplete = t.status === 'working' && items.length > 0 && done === items.length;
+            return `<article class="task-card" id="task-${t.id}"><div class="task-card-header"><div><p class="eyebrow">PHIẾU #${t.id}</p><h3>${e(t.vehicle?.licensePlate || 'Chưa có biển số')}</h3><p class="muted">${e(t.vehicle?.carBrand || '')} ${e(t.vehicle?.carModel || '')}</p></div><span class="badge badge-${t.status === 'draft' ? 'pending' : t.status === 'working' ? 'working' : 'done'}">${e(statusNames[t.status] || t.status)}</span></div><div class="task-card-meta"><span>Khách: ${e(t.vehicle?.customerName || '—')}</span><span>Tiếp nhận: ${formatDate(t.createdAt)}</span>${t.completedAt ? `<span>Hoàn thành: ${formatDate(t.completedAt)}</span>` : ''}</div><div class="progress-text"><span>${done}/${items.length} hạng mục</span><span>${items.length ? Math.round(done/items.length*100) : 0}%</span></div><div class="progress-bar" role="progressbar" aria-label="Tiến độ phiếu ${t.id}" aria-valuemin="0" aria-valuemax="${items.length || 1}" aria-valuenow="${done}"><div class="progress-bar-fill" style="width:${items.length ? done/items.length*100 : 0}%"></div></div><div class="checklist">${items.map(i => `<label class="checklist-item ${i.isCompleted ? 'done' : ''}"><input type="checkbox" data-ticket="${t.id}" data-item="${i.id}" ${i.isCompleted ? 'checked' : ''} ${t.status !== 'working' || mutation ? 'disabled' : ''}><span><strong>${e(i.taskName)}</strong><small>${i.partName && i.partName !== '---' ? `${e(i.partName)} · Số lượng: ${i.quantity}` : 'Không sử dụng vật tư'}</small>${i.completedAt ? `<small>Hoàn thành: ${formatDate(i.completedAt)}</small>` : ''}</span></label>`).join('') || '<p class="muted">Chưa có hạng mục. Liên hệ quản lý để bổ sung.</p>'}</div>${active ? `<div class="task-actions">${t.status === 'draft' ? `<button class="btn btn-primary" data-start="${t.id}" ${mutation ? 'disabled' : ''}>Bắt đầu sửa</button>` : `<button class="btn btn-success" data-complete="${t.id}" ${!canComplete || mutation ? 'disabled' : ''}>Hoàn thành phiếu</button>`}<span class="muted">${t.status === 'draft' ? 'Bắt đầu để cập nhật checklist.' : canComplete ? 'Đã đủ hạng mục để bàn giao.' : `Còn ${items.length-done} hạng mục cần xử lý.`}</span></div>` : '<p class="muted">Phiếu đã hoàn thành. Checklist được lưu để tra cứu.</p>'}</article>`;
+        }).join('') || '<div class="card empty-state">Không có công việc phù hợp. Phiếu mới sẽ xuất hiện khi quản lý phân công cho bạn.</div>';
+    }
+    async function update(path, body) {
+        if (mutation || loading) { render(); return; }
+        mutation = true; render();
+        try {
+            await Garage.request(path,{method:'PUT',body});
+            Garage.toast('Đã cập nhật tiến độ.','success');
+        } catch (error) { Garage.toast(error.message,'error'); }
+        finally {
+            mutation = false;
+            // Reload even after a conflict; restore the server checklist after a failed request.
+            await load();
+            render();
         }
-
-        allTasks = result.data || [];
-
-        // Update stats
-        const working = allTasks.filter(t => t.status === 'draft' || t.status === 'working');
-        const done = allTasks.filter(t => t.status === 'completed' || t.status === 'paid');
-        
-        document.getElementById('statTotal').textContent = allTasks.length;
-        document.getElementById('statWorking').textContent = working.length;
-        document.getElementById('statDone').textContent = done.length;
-
-        // Render tasks
-        renderWorkingTasks(working);
-        renderCompletedTasks(done);
-
-    } catch (error) {
-        console.error('Error loading tasks:', error);
-        showToast('Lỗi kết nối server', 'error');
     }
-}
-
-function renderWorkingTasks(tasks) {
-    const container = document.getElementById('workingTasks');
-
-    if (tasks.length === 0) {
-        container.innerHTML = '<p class="empty-state">🎉 Không có công việc nào đang xử lý</p>';
-        return;
-    }
-
-    container.innerHTML = tasks.map(task => {
-        const vehicle = task.vehicle;
-        const items = task.items || [];
-        const completedItems = items.filter(i => i.isCompleted).length;
-        const totalItems = items.length;
-        const progressPct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-        const canComplete = task.status === "working" && totalItems > 0 && completedItems === totalItems;
-
-        const statusBadge = task.status === 'draft' 
-            ? '<span class="badge badge-pending">Chờ bắt đầu</span>'
-            : '<span class="badge badge-working">Đang sửa</span>';
-
-        return `
-            <div class="task-card" id="task-${task.id}">
-                <div class="task-card-header">
-                    <h4>${escapeHtml(vehicle ? vehicle.licensePlate : 'N/A')} - ${escapeHtml(vehicle ? vehicle.carBrand + ' ' + (vehicle.carModel || '') : '')}</h4>
-                    ${statusBadge}
-                </div>
-
-                <div class="task-card-meta">
-                    <span><i class="fa-solid fa-user"></i> ${escapeHtml(vehicle ? vehicle.customerName : 'N/A')}</span>
-                    <span><i class="fa-solid fa-calendar"></i> ${formatDate(task.createdAt)}</span>
-                    <span><i class="fa-solid fa-coins"></i> ${formatCurrency(task.totalAmount)}</span>
-                </div>
-
-                <!-- Progress -->
-                <div>
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: ${progressPct}%"></div>
-                    </div>
-                    <div class="progress-text">
-                        <span>${completedItems}/${totalItems} hạng mục</span>
-                        <span>${progressPct}%</span>
-                    </div>
-                </div>
-
-                <!-- Checklist -->
-                <div class="checklist">
-                    ${items.map(item => `
-                        <div class="checklist-item ${item.isCompleted ? 'done' : ''}" onclick="${task.status === 'working' ? `toggleItem(${task.id}, ${item.id}, ${!item.isCompleted})` : ''}">
-                            <input type="checkbox" ${task.status !== 'working' ? 'disabled' : ''} ${item.isCompleted ? 'checked' : ''} 
-                                onclick="event.stopPropagation(); toggleItem(${task.id}, ${item.id}, ${!item.isCompleted})">
-                            <span class="item-name">${escapeHtml(item.taskName)}</span>
-                            <span class="item-price">${escapeHtml(item.partName !== '---' ? item.partName + ' · ' : '')}${formatCurrency(item.totalPrice)}</span>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="task-actions">
-                    ${task.status === 'draft' ? `
-                        <button class="btn btn-primary btn-sm" onclick="startRepair(${task.id})">
-                            <i class="fa-solid fa-play"></i> Bắt đầu sửa
-                        </button>
-                    ` : ''}
-                    <button class="btn btn-success btn-sm" onclick="completeRepair(${task.id})" ${!canComplete ? 'disabled' : ''}>
-                        <i class="fa-solid fa-check-double"></i> Hoàn thành phiếu
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function renderCompletedTasks(tasks) {
-    const container = document.getElementById('completedTasks');
-
-    if (tasks.length === 0) {
-        container.innerHTML = '<p class="empty-state">Chưa có công việc hoàn thành</p>';
-        return;
-    }
-
-    container.innerHTML = tasks.map(task => {
-        const vehicle = task.vehicle;
-        const items = task.items || [];
-        const statusLabel = task.status === 'paid' ? 'Đã thanh toán' : 'Hoàn thành';
-        const statusClass = task.status === 'paid' ? 'badge-paid' : 'badge-done';
-
-        return `
-            <div class="task-card completed">
-                <div class="task-card-header">
-                    <h4>${escapeHtml(vehicle ? vehicle.licensePlate : 'N/A')} - ${escapeHtml(vehicle ? vehicle.carBrand + ' ' + (vehicle.carModel || '') : '')}</h4>
-                    <span class="badge ${statusClass}">${statusLabel}</span>
-                </div>
-                <div class="task-card-meta">
-                    <span><i class="fa-solid fa-user"></i> ${escapeHtml(vehicle ? vehicle.customerName : 'N/A')}</span>
-                    <span><i class="fa-solid fa-calendar"></i> Hoàn thành: ${formatDate(task.completedAt)}</span>
-                    <span><i class="fa-solid fa-coins"></i> ${formatCurrency(task.totalAmount)}</span>
-                    <span><i class="fa-solid fa-list-check"></i> ${items.length} hạng mục</span>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-async function toggleItem(ticketId, itemId, isCompleted) {
-    if (allTasks.find(t => t.id === ticketId)?.status !== 'working') return;
-    try {
-        const response = await Garage.apiFetch(`${API_URL}/repairs/${ticketId}/items/${itemId}/toggle`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ isCompleted })
+    document.addEventListener('DOMContentLoaded', () => {
+        ['taskSearch','taskStatus','taskSort'].forEach(id => $(id).addEventListener('input',render));
+        $('refreshTasks').addEventListener('click',load);
+        $('workingTasks').addEventListener('change', event => {
+            const input = event.target.closest('input[data-item]');
+            if (!input) return;
+            const ticket = tasks.find(t => t.id === Number(input.dataset.ticket));
+            if (ticket?.status === 'working') update(`/repairs/${ticket.id}/items/${input.dataset.item}/toggle`,{isCompleted:input.checked});
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showToast(isCompleted ? 'Đã hoàn thành hạng mục' : 'Đã bỏ đánh dấu', 'success');
-            // Reload tasks to refresh progress
-            await loadMyTasks();
-        } else {
-            showToast(result.message || 'Lỗi cập nhật', 'error');
-            await loadMyTasks();
-        }
-    } catch (error) {
-        console.error('Toggle item error:', error);
-        showToast('Lỗi kết nối server', 'error');
-    }
-}
-
-async function startRepair(ticketId) {
-    try {
-        const response = await Garage.apiFetch(`${API_URL}/repairs/${ticketId}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ status: 'working' })
+        $('workingTasks').addEventListener('click', event => {
+            const button = event.target.closest('button');
+            if (button?.dataset.start) update(`/repairs/${button.dataset.start}`,{status:'working'});
+            if (button?.dataset.complete && confirm('Xác nhận đã hoàn thành tất cả hạng mục và bàn giao phiếu?')) update(`/repairs/${button.dataset.complete}`,{status:'completed'});
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showToast('Đã bắt đầu sửa chữa!', 'success');
-            await loadMyTasks();
-        } else {
-            showToast(result.message || 'Lỗi cập nhật', 'error');
-        }
-    } catch (error) {
-        console.error('Start repair error:', error);
-        showToast('Lỗi kết nối server', 'error');
-    }
-}
-
-async function completeRepair(ticketId) {
-    if (!confirm('Xác nhận hoàn thành phiếu sửa chữa này?')) return;
-
-    try {
-        const response = await Garage.apiFetch(`${API_URL}/repairs/${ticketId}`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ status: 'completed' })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showToast('🎉 Phiếu sửa chữa đã hoàn thành!', 'success');
-            await loadMyTasks();
-        } else {
-            showToast(result.message || 'Lỗi hoàn thành phiếu', 'error');
-        }
-    } catch (error) {
-        console.error('Complete repair error:', error);
-        showToast('Lỗi kết nối server', 'error');
-    }
-}
-
-Garage.subscribe(loadMyTasks);
+        load(); Garage.subscribe(load);
+    });
+})();
