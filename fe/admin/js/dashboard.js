@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) return;
 
     // Fetch and update dashboard stats
-    const updateDashboardStats = async () => {
+    const updateDashboardStats = async (context = {}) => {
+        const canRender = Garage.refreshGuard(context);
         try {
             // Fetch vehicles
             const vehiclesRes = await Garage.apiFetch(`${Garage.base}/vehicles`, {
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Update main stat cards
+            if (!canRender()) return;
             const stats = document.querySelectorAll('.stat-card .stat-info h3');
             if (stats[0]) stats[0].textContent = todayVehicles;
             if (stats[1]) stats[1].textContent = workingCount;

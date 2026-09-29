@@ -6,9 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const money = formatCurrency;
     const esc = Garage.escape;
 
-    async function load() {
+    async function load(context = {}) {
+        const canRender = Garage.refreshGuard(context);
         try {
-            tickets = await Garage.request('/repairs');
+            const data = await Garage.request('/repairs');
+            if (!canRender()) return;
+            tickets = data;
+            for (const [id,status] of [['repairWaiting','draft'],['repairWorking','working'],['repairCompleted','completed'],['repairPaid','paid']]) {
+                byId(id).textContent = tickets.filter(t => t.status === status).length;
+            }
             const search = (byId('globalRepairSearch').value || '').toLowerCase();
             const mechanic = byId('filterMechanic').value;
             const filtered = tickets.filter(t => (!mechanic || String(t.mechanicId) === mechanic)
@@ -81,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
             byId('customTask').value = '';
             byId('customTask').style.display = 'none';
             byId('btnAddItem').disabled = Boolean(ticket && ticket.status !== 'draft') || Boolean(ticket?.items.some(i => !i.inventoryId && i.partPrice > 0));
-            byId('btnSaveTicket').textContent = ticket ? 'Lưu thay đổi' : 'Tạo phiếu';
+            document.querySelector('#repairModal .editor-panel').hidden = byId('btnAddItem').disabled;
+            byId('btnSaveTicket').textContent = byId('btnAddItem').disabled ? 'Lưu phân công' : ticket ? 'Lưu thay đổi' : 'Tạo phiếu';
             byId('btnSaveTicket').disabled = false;
             renderItems();
             modal.style.display = 'block';
@@ -140,16 +147,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = button.dataset.action;
         if (action === 'expand') { const detail = byId('details-' + ticket.id); detail.hidden = !detail.hidden; return; }
         if (action === 'edit') { await open(ticket.vehicleId,ticket); return; }
+        if (action === 'pay') { await window.openPaymentForTicket(ticket.id); return; }
         if (action === 'view') {
             const detail = await Garage.request('/repairs/' + ticket.id);
-            showToast(detail.items.map(i => i.taskName + ': ' + money(i.totalPrice)).join(' · ')); return;
+            let dialog = byId('ticketDetailDialog');
+            if (!dialog) { dialog = document.createElement('dialog'); dialog.id = 'ticketDetailDialog'; document.body.append(dialog); }
+            dialog.innerHTML = `<h3>Phiếu sửa #${detail.id} · ${esc(detail.vehicle.licensePlate)}</h3>
+                <p class="muted">${esc(detail.vehicle.customerName)} · ${esc(detail.mechanicName)}</p>
+                <div class="table-responsive"><table><thead><tr><th>Hạng mục</th><th>Vật tư</th><th>Số lượng</th><th>Tiền công</th><th>Thành tiền</th></tr></thead>
+                <tbody>${detail.items.map(i => `<tr><td>${esc(i.taskName)}</td><td>${esc(i.partName)}</td><td>${i.quantity}</td><td>${money(i.laborPrice)}</td><td>${money(i.totalPrice)}</td></tr>`).join('')}</tbody></table></div>
+                <div class="summary-row">Tổng tiền<strong>${money(detail.totalAmount)}</strong></div><form method="dialog"><button class="btn btn-secondary">Đóng</button></form>`;
+            dialog.showModal(); return;
         }
-        const prompts = {start:'Bắt đầu sửa chữa?',complete:'Xác nhận hoàn thành tất cả hạng mục?',pay:'Xác nhận đã nhận đủ tiền?',delete:'Xóa phiếu chờ sửa và hoàn vật tư về kho?'};
+        const prompts = {start:'Bắt đầu sửa chữa?',complete:'Xác nhận hoàn thành tất cả hạng mục?',delete:'Xóa phiếu chờ sửa và hoàn vật tư về kho?'};
         if (!confirm(prompts[action])) return;
         button.disabled = true;
         try {
             await Garage.request('/repairs/' + ticket.id, action === 'delete'
-                ? {method:'DELETE'} : {method:'PUT',body:{status:{start:'working',complete:'completed',pay:'paid'}[action]}});
+                ? {method:'DELETE'} : {method:'PUT',body:{status:{start:'working',complete:'completed'}[action]}});
             showToast('Đã cập nhật phiếu.', 'success'); await load();
         } catch (error) { showToast(error.message,'error'); button.disabled = false; }
     });

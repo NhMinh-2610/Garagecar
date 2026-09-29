@@ -3,9 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const byId = id => document.getElementById(id);
     const esc = Garage.escape;
     let vehicles = [], customers = [], brands = [];
-    async function load() {
+    async function load(context = {}) {
+        const canRender = Garage.refreshGuard(context);
         try {
-            vehicles = await Garage.request('/vehicles');
+            const data = await Garage.request('/vehicles');
+            if (!canRender()) return;
+            vehicles = data;
             render();
         } catch (error) { showToast(error.message,'error'); }
     }
@@ -18,11 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<tr><td>${esc(v.licensePlate)}</td><td>${esc(v.customerName)}<br><small>${esc(v.phone)} · ${v.customerId ? 'Đã liên kết tài khoản' : 'Khách vãng lai / chưa liên kết'}</small></td>
                 <td>${esc(v.carBrand)} ${esc(v.carModel || '')}</td><td>${Garage.date(v.receivedDate)?.toLocaleDateString('vi-VN') || '—'}</td>
                 <td><span class="badge badge-${v.status === 'repairing' ? 'working' : 'pending'}">${v.status === 'completed' && unpaid ? 'Chờ thanh toán' : labels[v.status]}</span></td>
-                <td><button class="btn btn-sm btn-primary" data-action="edit" data-id="${v.id}">Sửa</button>
-                ${v.status !== 'delivered' && !unpaid ? `<button class="btn btn-sm btn-secondary" data-action="repair" data-id="${v.id}">Tạo phiếu</button>` : ''}
+                <td><div class="vehicle-actions">
+                ${v.status !== 'delivered' && v.status !== 'completed' && !unpaid ? `<button class="btn btn-sm btn-primary" data-action="repair" data-id="${v.id}">＋ Tạo phiếu</button>` : ''}
                 ${v.status === 'completed' && !unpaid ? `<button class="btn btn-sm btn-success" data-action="deliver" data-id="${v.id}">Giao xe</button>` : ''}
                 ${v.status === 'delivered' ? `<button class="btn btn-sm btn-success" data-action="receive" data-id="${v.id}">Tiếp nhận lại</button>` : ''}
-                ${!v.repairTickets.length ? `<button class="btn btn-sm btn-danger" data-action="delete" data-id="${v.id}">Xóa</button>` : ''}</td>
+                <button class="btn btn-sm btn-secondary" data-action="edit" data-id="${v.id}">Sửa thông tin</button>
+                ${!v.repairTickets.length ? `<button class="btn btn-sm btn-quiet-danger" data-action="delete" data-id="${v.id}" aria-label="Xóa xe ${esc(v.licensePlate)}">Xóa</button>` : ''}</div></td>
                 <td><button class="btn btn-sm" data-action="history" data-id="${v.id}">Lịch sử (${v.repairTickets.length})</button></td></tr>
                 <tr id="vehicle-history-${v.id}" hidden><td colspan="7">${v.repairTickets.map(t => `<p>#${t.id} · ${esc(t.mechanicName)} · ${{draft:'Chờ sửa',working:'Đang sửa',completed:'Chờ thanh toán',paid:'Đã thanh toán'}[t.status]} · ${formatCurrency(t.totalAmount)}</p>`).join('') || 'Chưa có lịch sử sửa chữa.'}</td></tr>`;
         }).join('') || '<tr><td colspan="7" class="empty-state">Không có xe phù hợp</td></tr>';

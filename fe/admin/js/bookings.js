@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const table = document.querySelector('#bookingsTable tbody');
-    async function load() {
+    async function load(context = {}) {
+        const canRender = Garage.refreshGuard(context);
         try {
             const bookings = await Garage.request('/bookings');
+            if (!canRender()) return;
             table.innerHTML = bookings.map(b => `<tr><td>#${b.id}</td><td>${Garage.escape(b.customerName)}<br>${Garage.escape(b.phone)}</td>
                 <td>${Garage.escape(b.preferredDate)}</td><td>${Garage.escape(({maintenance:'Bảo dưỡng',repair:'Sửa chữa',spa:'Chăm sóc xe',other:'Khác'})[b.service] || b.service)}<br>${Garage.escape(b.note)}</td>
                 <td><select data-booking="${b.id}" aria-label="Trạng thái lịch hẹn">${Object.entries({pending:'Chờ xác nhận',confirmed:'Đã xác nhận',cancelled:'Đã hủy'})

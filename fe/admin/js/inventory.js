@@ -1,174 +1,90 @@
-// Inventory Module - Full Functionality
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
-    if (!token) return;
-
-    // Elements
-    const inventoryTable = document.querySelector('#inventoryTable tbody');
-    const importForm = document.getElementById('importForm');
-    const existingSelect = document.getElementById('existingInventory');
-    let inventoryItems = [];
+    const byId = id => document.getElementById(id);
+    const existingSelect = byId('existingInventory');
+    const importForm = byId('importForm');
+    let inventoryItems = [], brands = [], wages = [];
     existingSelect.onchange = () => {
         const item = inventoryItems.find(i => i.id === Number(existingSelect.value));
-        document.getElementById('invName').value = item?.name || '';
-        document.getElementById('invName').readOnly = Boolean(item);
-        document.getElementById('invPrice').value = item?.unitPrice || 0;
+        byId('invName').value = item?.name || '';
+        byId('invName').readOnly = Boolean(item);
+        byId('invPrice').value = item?.unitPrice || 0;
     };
-    
-    const addInventoryModal = document.getElementById('addInventoryModal');
-    const btnShowAddInventoryModal = document.getElementById('btnShowAddInventoryModal');
-    const closeAddInventoryModal = document.getElementById('closeAddInventoryModal');
-
-    // Modal Logic
-    if (btnShowAddInventoryModal && addInventoryModal) {
-        btnShowAddInventoryModal.addEventListener('click', () => {
-            addInventoryModal.style.display = 'flex';
-        });
+    function render() {
+        byId('inventorySku').textContent = inventoryItems.length;
+        byId('inventoryUnits').textContent = inventoryItems.reduce((sum,i) => sum + i.quantity,0);
+        byId('inventoryValue').textContent = formatCurrency(inventoryItems.reduce((sum,i) => sum + i.quantity * i.unitPrice,0));
+        byId('inventoryLow').textContent = inventoryItems.filter(i => i.quantity <= 5).length;
+        const search = byId('inventorySearch').value.toLowerCase();
+        const filter = byId('inventoryFilter').value;
+        const items = inventoryItems.filter(i => (i.name + ' ' + i.id).toLowerCase().includes(search) && (!filter || (filter === 'empty' ? i.quantity === 0 : i.quantity > 0 && i.quantity <= 5)));
+        byId('inventoryTable').querySelector('tbody').innerHTML = items.map(i => `<tr><td>#${i.id}</td><td><strong>${Garage.escape(i.name)}</strong></td>
+            <td><span class="badge ${i.quantity > 5 ? 'badge-done' : 'badge-warning'}">${i.quantity}${i.quantity === 0 ? ' · Hết hàng' : i.quantity <= 5 ? ' · Sắp hết' : ''}</span></td>
+            <td>${formatCurrency(i.unitPrice)}</td><td>${formatDate(i.updatedAt || i.createdAt)}</td>
+            <td><button class="btn btn-sm" data-stock="${i.id}" data-action="receive">Nhập</button><button class="btn btn-sm" data-stock="${i.id}" data-action="edit">Sửa</button><button class="btn btn-sm" data-stock="${i.id}" data-action="history">Lịch sử</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">Không tìm thấy vật tư phù hợp.</td></tr>';
     }
-
-    if (closeAddInventoryModal && addInventoryModal) {
-        closeAddInventoryModal.addEventListener('click', () => {
-            addInventoryModal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', (e) => {
-        if (e.target === addInventoryModal) {
-            addInventoryModal.style.display = 'none';
-        }
-    });
-
-    // Inventory Import Form
-    if(importForm) {
-        importForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(importForm);
-            const inventoryData = {
-                name: formData.get('name'),
-                quantity: parseInt(formData.get('quantity')),
-                unitPrice: parseFloat(formData.get('unitPrice'))
-            };
-
-            try {
-                const endpoint = existingSelect.value ? `/inventory/${existingSelect.value}/receive` : '/inventory';
-                const response = await Garage.apiFetch(Garage.base + endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(inventoryData)
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    if (typeof showToast === 'function') showToast('Đã nhập kho thành công!', 'success');
-                    else alert('Đã nhập kho thành công!');
-                    importForm.reset();
-                    document.getElementById('invName').readOnly = false;
-                    if (addInventoryModal) addInventoryModal.style.display = 'none';
-                    loadInventoryList();
-                } else {
-                    if (typeof showToast === 'function') showToast('Lỗi: ' + result.message, 'error');
-                    else alert('Lỗi: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Import error:', error);
-                if (typeof showToast === 'function') showToast('Không thể nhập kho', 'error');
-                else alert('Không thể nhập kho');
-            }
-        });
-    }
-
-    // Load inventory list
-    async function loadInventoryList() {
+    async function loadInventoryList(context = {}) {
+        const canRender = Garage.refreshGuard(context);
         try {
-            const response = await Garage.apiFetch(`${Garage.base}/inventory`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            const result = await response.json();
-            if (result.success && inventoryTable) {
-                inventoryItems = result.data;
-                const selected = existingSelect.value;
-                existingSelect.replaceChildren(new Option('Tạo vật tư mới',''), ...inventoryItems.map(i => new Option(i.name + ' (Tồn: ' + i.quantity + ')',i.id)));
-                existingSelect.value = selected;
-                inventoryTable.innerHTML = result.data.length ? '' : '<tr><td colspan="6" class="empty-state">Chưa có vật tư</td></tr>';
-                result.data.forEach(item => {
-                    const price = item.unitPrice ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unitPrice) : '0 ₫';
-                    const date = item.updatedAt ? new Date(item.updatedAt).toLocaleDateString('vi-VN') : new Date(item.createdAt).toLocaleDateString('vi-VN');
-                    
-                    const row = `
-                        <tr style="border: 1px solid #ddd;">
-                            <td style="border: 1px solid #ddd; padding: 10px;">#${item.id}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px; font-weight: 500;">${escapeHtml(item.name)}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px;"><span class="badge ${item.quantity > 5 ? 'badge-completed' : 'badge-pending'}">${item.quantity}</span></td>
-                            <td style="border: 1px solid #ddd; padding: 10px;">${price}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px;">${date}</td>
-                            <td style="border: 1px solid #ddd; padding: 10px;">
-                                <button type="button" class="btn btn-sm" onclick="showStockHistory(${item.id})">Lịch sử</button><button class="btn-icon btn-delete-inv" data-id="${item.id}" title="Xóa">
-                                    <i class="fa-solid fa-trash-can text-red"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    inventoryTable.innerHTML += row;
-                });
-
-                // Attach delete events
-                document.querySelectorAll('.btn-delete-inv').forEach(btn => {
-                    btn.addEventListener('click', deleteInventoryItem);
-                });
-            }
-        } catch (error) {
-            console.error('Load inventory error:', error);
-        }
+            const data = await Garage.request('/inventory');
+            if (!canRender()) return;
+            inventoryItems = data;
+            const value = existingSelect.value;
+            existingSelect.replaceChildren(new Option('Tạo vật tư mới',''), ...inventoryItems.map(i => new Option(i.name + ' (Tồn: ' + i.quantity + ')',i.id)));
+            existingSelect.value = value;
+            render();
+        } catch(error) { showToast(error.message,'error'); }
     }
-
-    // Delete Inventory Item
-    async function deleteInventoryItem(e) {
-        const btn = e.currentTarget;
-        const id = btn.getAttribute('data-id');
-        
-        if (!confirm('Bạn có chắc chắn muốn xóa vật tư này?')) return;
-
+    byId('inventorySearch').oninput = render;
+    byId('inventoryFilter').onchange = render;
+    byId('inventoryTable').onclick = async event => {
+        const button = event.target.closest('[data-stock]');
+        if (!button) return;
+        const item = inventoryItems.find(i => i.id === Number(button.dataset.stock));
+        if (button.dataset.action === 'history') return showStockHistory(item.id);
+        if (button.dataset.action === 'receive') { existingSelect.value = item.id; existingSelect.onchange(); byId('invQuantity').focus(); return; }
+        let dialog = byId('editStockDialog');
+        if (!dialog) { dialog = document.createElement('dialog'); dialog.id='editStockDialog'; document.body.append(dialog); }
+        dialog.innerHTML = '<h3>Thông tin vật tư #' + item.id + '</h3><form id="stockEditForm"><div class="form-group"><label>Tên vật tư<input name="name" required></label></div><div class="form-group"><label>Đơn giá hiện tại (đ)<input name="unitPrice" type="number" min="0" required></label></div><p class="field-help">Giữ nguyên tồn kho. Dùng Nhập kho để bổ sung số lượng.</p><div class="form-actions"><button class="btn btn-primary">Lưu thay đổi</button></div></form><form method="dialog"><button class="btn btn-secondary">Đóng</button></form>';
+        const form = dialog.querySelector('#stockEditForm');
+        form.elements.name.value = item.name; form.elements.unitPrice.value = item.unitPrice;
+        form.onsubmit = async event => {
+            event.preventDefault();
+            try { await Garage.request('/inventory/' + item.id,{method:'PUT',body:{name:form.elements.name.value,unitPrice:Number(form.elements.unitPrice.value)}}); dialog.close(); showToast('Đã lưu vật tư.','success'); await loadInventoryList(); }
+            catch(error) { showToast(error.message,'error'); }
+        };
+        dialog.showModal();
+    };
+    importForm.onsubmit = async event => {
+        event.preventDefault();
+        const button = importForm.querySelector('[type="submit"]');
+        button.disabled = true;
         try {
-            const response = await Garage.apiFetch(`${Garage.base}/inventory/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+            await Garage.request(existingSelect.value ? '/inventory/' + existingSelect.value + '/receive' : '/inventory', {
+                method:'POST',body:{name:byId('invName').value,quantity:Number(byId('invQuantity').value),unitPrice:Number(byId('invPrice').value)},
             });
-            const result = await response.json();
-            if (result.success) {
-                if (typeof showToast === 'function') showToast('Đã xóa vật tư!', 'success');
-                loadInventoryList();
-            } else {
-                if (typeof showToast === 'function') showToast('Lỗi: ' + result.message, 'error');
-            }
-        } catch (error) {
-            console.error('Delete error:', error);
-            if (typeof showToast === 'function') showToast('Lỗi khi xóa vật tư', 'error');
-        }
-    }
-
-    Garage.subscribe(loadInventoryList);
-    Garage.subscribe(loadSettings);
-    // Initial Load
-    loadInventoryList();
-    loadSettings();
-
+            importForm.reset(); byId('invName').readOnly=false;
+            showToast('Đã ghi nhận nhập kho.','success'); await loadInventoryList();
+        } catch(error) { showToast(error.message,'error'); }
+        finally { button.disabled=false; }
+    };
+    Garage.subscribe(loadInventoryList); Garage.subscribe(loadSettings);
+    loadInventoryList(); loadSettings();
     // --- Settings Logic ---
-    async function loadSettings() {
+    async function loadSettings(context = {}) {
+        const canRender = Garage.refreshGuard(context);
         // Load Brands
         try {
             const res = await Garage.apiFetch(`${Garage.base}/settings/brands`, { headers: { 'Authorization': `Bearer ${token}` } });
             const result = await res.json();
+            if (!canRender()) return;
             if (result.success) {
                 const list = document.querySelector('#inv-settings .card:nth-child(1) .list-group');
                 if (list) {
                     list.innerHTML = '';
+                    brands = result.data;
                     result.data.forEach(brand => {
-                        list.innerHTML += `<li>${escapeHtml(brand.name)} <button class="btn-sm text-red btn-delete-brand" data-id="${brand.id}">Xóa</button></li>`;
+                        list.innerHTML += `<li><span>${escapeHtml(brand.name)}</span><span><button class="btn-sm btn-edit-catalog" data-kind="brands" data-id="${brand.id}">Sửa</button> <button class="btn-sm text-red btn-delete-brand" data-id="${brand.id}">Xóa</button></span></li>`;
                     });
                 }
             }
@@ -178,13 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await Garage.apiFetch(`${Garage.base}/settings/wages`, { headers: { 'Authorization': `Bearer ${token}` } });
             const result = await res.json();
+            if (!canRender()) return;
             if (result.success) {
                 const list = document.querySelector('#inv-settings .card:nth-child(2) .list-group');
                 if (list) {
                     list.innerHTML = '';
+                    wages = result.data;
                     result.data.forEach(wage => {
                         const priceStr = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(wage.price);
-                        list.innerHTML += `<li>${escapeHtml(wage.name)} - ${priceStr} <button class="btn-sm text-red btn-delete-wage" data-id="${wage.id}">Xóa</button></li>`;
+                        list.innerHTML += `<li><span>${escapeHtml(wage.name)} · ${priceStr}</span><span><button class="btn-sm btn-edit-catalog" data-kind="wages" data-id="${wage.id}">Sửa</button> <button class="btn-sm text-red btn-delete-wage" data-id="${wage.id}">Xóa</button></span></li>`;
                     });
                 }
             }
@@ -194,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await Garage.apiFetch(`${Garage.base}/settings/params`, { headers: { 'Authorization': `Bearer ${token}` } });
             const result = await res.json();
+            if (!canRender()) return;
             if (result.success) {
                 if (result.data.max_cars_per_day) {
                     const input = document.querySelector('#inv-settings .card.full-width input[type="number"]');
@@ -206,6 +125,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function attachSettingsEvents() {
+        document.querySelectorAll('.btn-edit-catalog').forEach(button => {
+            button.onclick = () => {
+                const kind = button.dataset.kind;
+                const item = (kind === 'brands' ? brands : wages).find(i => i.id === Number(button.dataset.id));
+                let dialog = document.getElementById('catalogDialog');
+                if (!dialog) { dialog = document.createElement('dialog'); dialog.id='catalogDialog'; document.body.append(dialog); }
+                dialog.innerHTML='<h3>' + (kind === 'brands' ? 'Sửa hiệu xe' : 'Sửa tiền công') + '</h3><form id="catalogEdit"><div class="form-group"><label>Tên<input name="name" required></label></div>' + (kind === 'wages' ? '<div class="form-group"><label>Tiền công (đ)<input name="price" type="number" min="0" required></label></div><p class="field-help">Giá mới chỉ áp dụng khi tạo hạng mục mới.</p>' : '<p class="field-help">Tên hiệu xe được cập nhật cho các xe đang dùng trong danh sách.</p>') + '<div class="form-actions"><button class="btn btn-primary">Lưu thay đổi</button></div></form><form method="dialog"><button class="btn btn-secondary">Đóng</button></form>';
+                const form=dialog.querySelector('#catalogEdit');form.elements.name.value=item.name;
+                if (kind==='wages') form.elements.price.value=item.price;
+                form.onsubmit=async event=>{
+                    event.preventDefault();
+                    const body={name:form.elements.name.value};if(kind==='wages')body.price=Number(form.elements.price.value);
+                    try { await Garage.request('/settings/'+kind+'/'+item.id,{method:'PUT',body});dialog.close();await loadSettings();showToast('Đã lưu danh mục.','success'); }
+                    catch(error){showToast(error.message,'error');}
+                };
+                dialog.showModal();
+            };
+        });
         document.querySelectorAll('.btn-delete-brand').forEach(btn => {
             btn.onclick = async function() {
                 if(!confirm('Xóa hiệu xe này?')) return;

@@ -1,47 +1,84 @@
 ﻿document.addEventListener('DOMContentLoaded', () => {
-    const select = document.querySelector('#finance-section select');
-    const button = document.querySelector('#finance-section .btn-success');
+    const byId = id => document.getElementById(id);
+    const select = byId('paymentSelect');
+    const button = byId('confirmPayment');
     const details = document.querySelector('.invoice-details');
-    let repairs = [], paid = null;
+    const print = document.createElement('button');
+    print.className = 'btn btn-secondary'; print.textContent = 'In phiếu';
+    print.onclick = () => window.print(); button.after(print);
+    let all = [], selectedId = null;
+    const esc = Garage.escape;
     function preview(ticket = null) {
         button.disabled = !ticket || ticket.status === 'paid';
-        details.innerHTML = ticket ? `<p><strong>Phiếu:</strong> #${ticket.id}</p>
-            <p><strong>Khách hàng:</strong> ${Garage.escape(ticket.vehicle.customerName)}</p>
-            <p><strong>Biển số:</strong> ${Garage.escape(ticket.vehicle.licensePlate)}</p>
-            ${ticket.items.map(i => `<p>${Garage.escape(i.taskName)} × ${i.quantity}: ${formatCurrency(i.totalPrice)}</p>`).join('')}
-            <p><strong>Tổng tiền:</strong> ${formatCurrency(ticket.totalAmount)}</p>
-            <p>${ticket.status === 'paid' ? 'Đã thanh toán — ' + Garage.date(ticket.paidAt).toLocaleString('vi-VN') : 'Chưa thanh toán'}</p>`
-            : '<p>Chọn phiếu đã hoàn thành để xem chi tiết và thu tiền.</p>';
-        document.querySelector('.invoice-header p').textContent = '';
+        print.disabled = !ticket;
+        details.innerHTML = ticket ? `<div class="summary-row"><span>Phiếu sửa</span><strong>#${ticket.id}</strong></div>
+            <div class="summary-row"><span>Khách hàng</span><strong>${esc(ticket.vehicle.customerName)}</strong></div>
+            <div class="summary-row"><span>Biển số</span><strong>${esc(ticket.vehicle.licensePlate)}</strong></div>
+            <table><thead><tr><th>Hạng mục</th><th>SL</th><th>Thành tiền</th></tr></thead><tbody>
+            ${ticket.items.map(i => `<tr><td>${esc(i.taskName)}</td><td>${i.quantity}</td><td>${formatCurrency(i.totalPrice)}</td></tr>`).join('')}</tbody></table>
+            <div class="summary-row"><strong>Tổng thanh toán</strong><strong>${formatCurrency(ticket.totalAmount)}</strong></div>
+            <p><span class="badge ${ticket.status === 'paid' ? 'badge-done':'badge-warning'}">${ticket.status === 'paid' ? 'Đã thu tiền' : 'Chưa thu tiền'}</span>
+            ${ticket.paidAt ? Garage.date(ticket.paidAt).toLocaleString('vi-VN') : ''}</p>`
+            : '<p class="empty-state">Chọn phiếu đã hoàn thành để xem chi tiết và thu tiền.</p>';
     }
-    async function load() {
+    function renderHistory() {
+        const search = byId('paymentSearch').value.toLowerCase();
+        const rows = all.filter(r => r.status === 'paid' && [r.id,r.vehicle?.licensePlate,r.vehicle?.customerName].join(' ').toLowerCase().includes(search))
+            .sort((a,b) => Garage.date(b.paidAt) - Garage.date(a.paidAt));
+        byId('paymentHistory').querySelector('tbody').innerHTML = rows.map(r => `<tr><td>#${r.id}</td>
+            <td><strong>${esc(r.vehicle.customerName)}</strong><br><small>${esc(r.vehicle.licensePlate)}</small></td>
+            <td>${r.paidAt ? Garage.date(r.paidAt).toLocaleString('vi-VN') : 'Chưa có ngày thu'}</td><td><strong>${formatCurrency(r.totalAmount)}</strong></td>
+            <td><button class="btn btn-sm" data-invoice="${r.id}">Xem / In lại</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty-state">Chưa có phiếu thu phù hợp.</td></tr>';
+    }
+    async function load(context = {}) {
+        const canRender = Garage.refreshGuard(context);
         try {
-            repairs = (await Garage.request('/repairs')).filter(r => r.status === 'completed');
-            const current = select.value;
-            select.replaceChildren(new Option(repairs.length ? '-- Chọn phiếu --' : 'Không có phiếu chờ thu tiền',''),
-                ...repairs.map(r => new Option('#' + r.id + ' — ' + r.vehicle.licensePlate + ' — ' + formatCurrency(r.totalAmount),r.id)));
-            select.value = current;
-            preview(repairs.find(r => r.id === Number(select.value)) || paid);
-        } catch (error) { showToast(error.message,'error'); }
+            const data = await Garage.request('/repairs');
+            if (!canRender()) return;
+            all = data;
+            const pending = all.filter(r => r.status === 'completed');
+            const paid = all.filter(r => r.status === 'paid');
+            const now = new Date();
+            const monthKey = date => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit'}).format(date);
+            byId('financePending').textContent = pending.length;
+            byId('financeOutstanding').textContent = formatCurrency(pending.reduce((s,r) => s + r.totalAmount,0));
+            byId('financePaidCount').textContent = paid.length;
+            byId('financeMonth').textContent = formatCurrency(paid.filter(r => r.paidAt && monthKey(Garage.date(r.paidAt)) === monthKey(now)).reduce((s,r) => s+r.totalAmount,0));
+            const value = select.value;
+            select.replaceChildren(new Option(pending.length ? '-- Chọn phiếu chờ thu --':'Không có phiếu chờ thu',''),
+                ...pending.map(r => new Option('#'+r.id+' — '+r.vehicle.licensePlate+' — '+formatCurrency(r.totalAmount),r.id)));
+            select.value = value;
+            preview(all.find(r => r.id === selectedId));
+            renderHistory();
+        } catch(error) { showToast(error.message,'error'); }
     }
-    select.onchange = () => { paid = null; preview(repairs.find(r => r.id === Number(select.value))); };
+    select.onchange = () => { selectedId = Number(select.value) || null; preview(all.find(r => r.id === selectedId)); };
+    window.openPaymentForTicket = async id => {
+        document.querySelector('.nav-item[data-target="finance-section"]')?.click();
+        await load();
+        selectedId = Number(id);
+        const ticket = all.find(r => r.id === selectedId);
+        if (!ticket || !['completed','paid'].includes(ticket.status)) { showToast('Phiếu chưa sẵn sàng để thu tiền.','warning'); return; }
+        select.value = ticket.status === 'completed' ? String(id) : '';
+        preview(ticket);
+        document.querySelector('.invoice-box').scrollIntoView({behavior:'smooth',block:'center'});
+    };
+    byId('paymentSearch').oninput = renderHistory;
+    byId('paymentHistory').onclick = event => {
+        const action = event.target.closest('[data-invoice]');
+        if (!action) return;
+        selectedId = Number(action.dataset.invoice);
+        select.value = '';
+        preview(all.find(r => r.id === selectedId));
+        document.querySelector('.invoice-box').scrollIntoView({behavior:'smooth',block:'center'});
+    };
     button.onclick = async () => {
-        const id = Number(select.value);
-        if (!id || !confirm('Xác nhận đã thu đủ tiền cho phiếu này?')) return;
+        if (!selectedId || !confirm('Xác nhận garage đã nhận đủ tiền cho phiếu #' + selectedId + '?')) return;
         button.disabled = true;
         try {
-            paid = await Garage.request('/repairs/' + id, {method:'PUT',body:{status:'paid'}});
-            preview(paid); showToast('Đã ghi nhận thanh toán.','success');
-            await load();
-        } catch (error) { showToast(error.message,'error'); button.disabled = false; }
+            await Garage.request('/repairs/'+selectedId,{method:'PUT',body:{status:'paid'}});
+            showToast('Đã ghi nhận thu tiền.','success'); await load();
+        } catch(error) { showToast(error.message,'error'); button.disabled=false; }
     };
-    button.textContent = 'Xác nhận thu tiền';
-    const print = document.createElement('button');
-    print.className = 'btn btn-secondary';
-    print.textContent = 'In phiếu';
-    print.onclick = () => window.print();
-    button.after(print);
-    Garage.subscribe(load);
-    preview(); load();
+    Garage.subscribe(load); preview(); load();
 });
-

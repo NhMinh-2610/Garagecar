@@ -1,160 +1,53 @@
-// Report Module Logic - Dynamic Data with Chart.js
-document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    const reportMonthInput = document.getElementById('reportMonth');
-    const btnViewReport = document.getElementById('btnViewReport');
-    const reportTableBody = document.querySelector('#reportTable tbody');
-    let revenueChartInstance = null;
-
-    // Set default month to current month
-    const today = new Date();
-    const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-    if (reportMonthInput) {
-        reportMonthInput.value = currentMonthStr;
-    }
-
-    async function fetchAndRenderReport() {
-        if (!reportMonthInput || !reportTableBody) return;
-
-        const selectedMonth = reportMonthInput.value; // Format: YYYY-MM
-        if (!selectedMonth) {
-            showToast('Vui lòng chọn tháng', 'error');
-            return;
-        }
-
-        const [year, month] = selectedMonth.split('-');
-
+﻿document.addEventListener('DOMContentLoaded', () => {
+    const byId = id => document.getElementById(id);
+    const now = new Date();
+    byId('reportMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    let rows = [], chart = null, loadedMonth = '';
+    async function load() {
+        const month = byId('reportMonth').value;
+        if (!month) { showToast('Vui lòng chọn tháng báo cáo.','warning'); return; }
         try {
-            const rows = await Garage.request('/reports/revenue?month=' + encodeURIComponent(selectedMonth));
-            const brandStats = Object.fromEntries(rows.map(row => [row.brand, {count:row.count,revenue:row.revenue}]));
-            const totalRevenueAll = rows.reduce((sum,row) => sum + row.revenue,0);
-
-            // Sort by revenue descending
-            const sortedBrands = Object.keys(brandStats).sort((a, b) => brandStats[b].revenue - brandStats[a].revenue);
-
-            // Render Table
-            reportTableBody.innerHTML = '';
-            if (sortedBrands.length === 0) {
-                reportTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Không có dữ liệu trong tháng này</td></tr>';
-            } else {
-                sortedBrands.forEach(brand => {
-                    const data = brandStats[brand];
-                    const percentage = totalRevenueAll > 0 ? ((data.revenue / totalRevenueAll) * 100).toFixed(1) : 0;
-                    
-                    const row = `
-                        <tr>
-                            <td><strong>${escapeHtml(brand)}</strong></td>
-                            <td>${data.count}</td>
-                            <td class="text-green font-bold">${data.revenue.toLocaleString('vi-VN')}</td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="flex:1; background:#e5e7eb; height:8px; border-radius:4px; overflow:hidden;">
-                                        <div style="width:${percentage}%; background:var(--primary-color); height:100%;"></div>
-                                    </div>
-                                    <span style="font-size:0.85rem; color:#6b7280; width:40px;">${percentage}%</span>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    reportTableBody.innerHTML += row;
-                });
+            rows = await Garage.request('/reports/revenue?month='+encodeURIComponent(month));
+            rows.sort((a,b) => b.revenue-a.revenue);
+            loadedMonth = month;
+            const total = rows.reduce((s,r) => s+r.revenue,0);
+            const count = rows.reduce((s,r) => s+r.count,0);
+            byId('reportRevenue').textContent = formatCurrency(total);
+            byId('reportCount').textContent = count;
+            byId('reportAverage').textContent = formatCurrency(count ? total/count : 0);
+            byId('reportBrands').textContent = rows.length;
+            byId('reportPeriod').textContent = 'Tháng '+month.split('-').reverse().join('/');
+            byId('reportTotal').textContent = 'Tổng cộng: '+count+' phiếu · '+formatCurrency(total);
+            byId('exportReport').disabled = rows.length === 0;
+            byId('reportTable').querySelector('tbody').innerHTML = rows.map(r => `<tr><td><strong>${Garage.escape(r.brand)}</strong></td>
+                <td>${r.count}</td><td>${formatCurrency(r.revenue)}</td><td>${total ? (r.revenue/total*100).toFixed(1) : '0.0'}%</td></tr>`).join('')
+                || '<tr><td colspan="4" class="empty-state">Chưa có phiếu thanh toán trong tháng này.</td></tr>';
+            byId('revenueBreakdown').innerHTML = rows.map(r => `<div class="summary-row"><span>${Garage.escape(r.brand)}</span><strong>${formatCurrency(r.revenue)}</strong></div>
+                <div class="breakdown-bar"><span style="width:${total ? r.revenue/total*100 : 0}%"></span></div>`).join('') || '<p class="empty-state">Chưa có dữ liệu để phân tích.</p>';
+            if (chart) { chart.destroy(); chart=null; }
+            byId('chartEmpty').hidden = rows.length > 0 && typeof Chart !== 'undefined';
+            byId('chartEmpty').textContent = rows.length ? 'Xem số liệu chi tiết ở bảng bên dưới.' : 'Chưa có doanh thu trong kỳ này.';
+            byId('revenueChart').hidden = !rows.length || typeof Chart === 'undefined';
+            if (rows.length && typeof Chart !== 'undefined') {
+                chart = new Chart(byId('revenueChart'),{type:'bar',data:{labels:rows.map(r=>r.brand),datasets:[{data:rows.map(r=>r.revenue),backgroundColor:'#7771df',borderRadius:6,maxBarThickness:56}]},
+                    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>formatCurrency(c.parsed.y)}}},
+                        scales:{y:{beginAtZero:true,ticks:{callback:v=>new Intl.NumberFormat('vi-VN',{notation:'compact'}).format(v)},grid:{color:'#edf0f6'}},x:{grid:{display:false}}}}});
             }
-
-            // Render Chart
-            renderChart(sortedBrands, brandStats);
-
-        } catch (error) {
-            console.error('Report generation error:', error);
-            showToast('Lỗi khi tạo báo cáo', 'error');
-        }
+        } catch(error) { showToast(error.message,'error'); }
     }
-
-    function renderChart(brands, stats) {
-        const ctx = document.getElementById('revenueChart');
-        if (!ctx || typeof Chart === 'undefined') return;
-
-        const labels = brands;
-        const data = brands.map(b => stats[b].revenue);
-
-        // Destroy previous chart if exists
-        if (revenueChartInstance) {
-            revenueChartInstance.destroy();
-        }
-
-        revenueChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: data,
-                    backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                    borderColor: 'rgba(79, 70, 229, 1)',
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y.toLocaleString('vi-VN') + ' VNĐ';
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                if (value >= 1000000) {
-                                    return (value / 1000000) + 'M';
-                                } else if (value >= 1000) {
-                                    return (value / 1000) + 'k';
-                                }
-                                return value;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    if (btnViewReport) {
-        btnViewReport.addEventListener('click', fetchAndRenderReport);
-    }
-
-    // Auto-load report when tab is opened
-    Garage.subscribe(fetchAndRenderReport);
-    fetchAndRenderReport();
-    const tabBtns = document.querySelectorAll('.nav-item');
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const tabId = e.currentTarget.getAttribute('data-target');
-            if (tabId === 'report-section') {
-                // Slight delay to ensure DOM is visible for Chart to render properly
-                setTimeout(fetchAndRenderReport, 100);
-            }
-        });
-    });
-
-    // Also trigger initial load if the section is somehow active initially
-    if (document.getElementById('report-section')?.classList.contains('active')) {
-        fetchAndRenderReport();
-    }
+    byId('btnViewReport').onclick = load;
+    byId('reportMonth').onchange = load;
+    byId('exportReport').onclick = () => {
+        if (!rows.length) return;
+        const safe = value => {
+            let text=String(value);
+            if (typeof value==='string' && /^[=+@-]/.test(text)) text="'"+text;
+            return '"'+text.replaceAll('"','""')+'"';
+        };
+        const content = [['Tháng','Hiệu xe','Số phiếu đã thu','Doanh thu VND'],...rows.map(r=>[loadedMonth,r.brand,r.count,r.revenue])].map(row=>row.map(safe).join(',')).join('\r\n');
+        const url=URL.createObjectURL(new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8;'}));
+        const link=document.createElement('a'); link.href=url; link.download='doanh-thu-'+loadedMonth+'.csv'; link.click();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+    };
+    Garage.subscribe(load); load();
 });
