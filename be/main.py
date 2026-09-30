@@ -21,23 +21,67 @@ import models  # noqa: F401 — registers all ORM models with metadata
 from routers import auth, vehicles, repairs, inventory, mechanics, ai
 from routers import settings as settings_router
 from routers import reports
-from routers import bookings, accounts
+from routers import bookings, accounts, maintenance, service, employees
 
 
 # ── Lifespan: verify schema readiness ─────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Schema changes are explicit: python -m alembic upgrade head.
     from sqlalchemy import inspect
+
     async with engine.connect() as conn:
-        columns = await conn.run_sync(lambda sync: {c["name"] for c in inspect(sync).get_columns("vehicles")})
+        columns = await conn.run_sync(
+            lambda sync: {c["name"] for c in inspect(sync).get_columns("vehicles")}
+        )
         if "customerId" not in columns:
-            raise RuntimeError("Database needs migration: cd be && python -m alembic upgrade head")
-        user_columns = await conn.run_sync(lambda sync: {c["name"] for c in inspect(sync).get_columns("users")})
+            raise RuntimeError(
+                "Database needs migration: cd be && python -m alembic upgrade head"
+            )
+        user_columns = await conn.run_sync(
+            lambda sync: {c["name"] for c in inspect(sync).get_columns("users")}
+        )
         if not {"isActive", "sessionVersion", "lastLoginAt"}.issubset(user_columns):
-            raise RuntimeError("Database needs account migration: python be/manage.py upgrade")
-    yield
+            raise RuntimeError(
+                "Database needs account migration: python be/manage.py upgrade"
+            )
+        ticket_columns = await conn.run_sync(
+            lambda sync: {
+                c["name"] for c in inspect(sync).get_columns("repair_tickets")
+            }
+        )
+        if (
+            not {
+                "maintenance_profiles",
+                "vehicle_care",
+                "maintenance_records",
+                "maintenance_reminders",
+                "service_visits",
+                "service_quotes",
+                "employee_profiles",
+            }.issubset(
+                await conn.run_sync(lambda sync: set(inspect(sync).get_table_names()))
+            )
+            or "disabledPermissions" not in user_columns
+            or "serviceVisitId" not in ticket_columns
+        ):
+            raise RuntimeError(
+                "Database needs garage migration: python be/manage.py upgrade"
+            )
+    import asyncio
+    from services.reminder_worker import reminder_loop
+
+    worker = asyncio.create_task(reminder_loop())
+    try:
+        yield
+    finally:
+        worker.cancel()
+        from contextlib import suppress
+
+        with suppress(asyncio.CancelledError):
+            await worker
     # Teardown (optional cleanup)
     await engine.dispose()
 
@@ -48,11 +92,11 @@ app = FastAPI(
     title="GarageCar API",
     description=(
         "RESTful API for GarageCar garage management system.\n\n"
-        "Features: multi-role authentication (admin/mechanic/customer), "
+        "Features: multi-role authentication (admin/advisor/accountant/hr/mechanic/customer), "
         "vehicle intake, repair ticket workflow, inventory management, "
         "and an integrated **AI assistant** for repair diagnosis & cost estimation."
     ),
-    version="2.0.0",
+    version="3.0.0",
     lifespan=lifespan,
 )
 
@@ -74,13 +118,18 @@ async def http_error(request, exc):
 
 @app.exception_handler(RequestValidationError)
 async def validation_error(request, exc):
-    errors = [f"{'.'.join(str(p) for p in e['loc'][1:])}: {e['msg']}" for e in exc.errors()]
+    errors = [
+        f"{'.'.join(str(p) for p in e['loc'][1:])}: {e['msg']}" for e in exc.errors()
+    ]
     return error_response("; ".join(errors), 422)
 
 
 @app.exception_handler(IntegrityError)
 async def integrity_error(request, exc):
-    return error_response("Dữ liệu bị trùng hoặc đang được sử dụng. Vui lòng tải lại và kiểm tra.", 409)
+    return error_response(
+        "Dữ liệu bị trùng hoặc đang được sử dụng. Vui lòng tải lại và kiểm tra.", 409
+    )
+
 
 # ── Routers ────────────────────────────────────────────────────────────────────
 
@@ -94,16 +143,20 @@ app.include_router(ai.router)
 app.include_router(settings_router.router)
 app.include_router(reports.router)
 app.include_router(bookings.router)
+app.include_router(maintenance.router)
+app.include_router(service.router)
+app.include_router(employees.router)
 
 
 # ── Health check ───────────────────────────────────────────────────────────────
+
 
 @app.get("/api/health", tags=["Health"])
 async def health():
     return {
         "success": True,
         "message": "GarageCar Python API is running",
-        "version": "2.0.0",
+        "version": "3.0.0",
         "ai_provider": settings.ai_provider,
     }
 
@@ -141,6 +194,18 @@ if _fe_dir.exists():
     async def customer_page():
         return RedirectResponse(url="/static/customer/index.html")
 
+    @app.get("/staff", include_in_schema=False)
+    async def staff_page():
+        return RedirectResponse(url="/static/staff/index.html")
+
+    @app.get("/service-worker.js", include_in_schema=False)
+    async def service_worker():
+        return FileResponse(
+            _fe_dir / "service-worker.js",
+            media_type="application/javascript",
+            headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
+        )
+
     # Mount static files last so API routes take priority
     app.mount("/static", StaticFiles(directory=str(_fe_dir)), name="frontend-static")
 
@@ -149,4 +214,5 @@ if _fe_dir.exists():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=settings.port, reload=True)
