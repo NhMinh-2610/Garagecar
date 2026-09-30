@@ -1,21 +1,31 @@
 """Account lifecycle; roles stay fixed to protect existing profile ownership."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from schemas.garage_care import PermissionInput
 from core.constants import Role
 from core.response import success_response
 from core.security import hash_password, verify_password
 from database.session import get_db
 from middleware.auth import get_current_user, require_role
 from models import User, Mechanic, Vehicle
-from schemas.auth import AccountCreate, AccountUpdate, PasswordReset, PasswordChange, UserResponse
+from schemas.auth import (
+    AccountCreate,
+    AccountUpdate,
+    PasswordReset,
+    PasswordChange,
+    UserResponse,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["Accounts"])
 
 
 async def ensure_unique(db, username, email, user_id=None):
-    query = select(User.id).where(or_(User.username == username, func.lower(User.email) == email.lower()))
+    query = select(User.id).where(
+        or_(User.username == username, func.lower(User.email) == email.lower())
+    )
     if user_id is not None:
         query = query.where(User.id != user_id)
     if await db.scalar(query):
@@ -23,23 +33,52 @@ async def ensure_unique(db, username, email, user_id=None):
 
 
 @router.post("/users", status_code=201)
-async def create_account(body: AccountCreate, db: AsyncSession = Depends(get_db),
-                         _: dict = Depends(require_role(Role.ADMIN))):
+async def create_account(
+    body: AccountCreate,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(require_role(Role.ADMIN)),
+):
     await ensure_unique(db, body.username, body.email)
-    if body.mechanicId and body.role != "mechanic" or body.vehicleIds and body.role != "customer":
+    if (
+        body.mechanicId
+        and body.role != "mechanic"
+        or body.vehicleIds
+        and body.role != "customer"
+    ):
         raise HTTPException(422, "Hồ sơ liên kết không phù hợp với vai trò")
     mechanic = None
     if body.mechanicId:
-        mechanic = await db.scalar(select(Mechanic).where(Mechanic.id == body.mechanicId).with_for_update())
+        mechanic = await db.scalar(
+            select(Mechanic).where(Mechanic.id == body.mechanicId).with_for_update()
+        )
         if not mechanic or mechanic.userId or mechanic.status != "active":
-            raise HTTPException(409, "Hồ sơ thợ đã có tài khoản hoặc không còn hoạt động")
+            raise HTTPException(
+                409, "Hồ sơ thợ đã có tài khoản hoặc không còn hoạt động"
+            )
     vehicle_ids = sorted(set(body.vehicleIds))
-    vehicles = list((await db.scalars(select(Vehicle).where(Vehicle.id.in_(vehicle_ids))
-                                    .order_by(Vehicle.id).with_for_update())).all()) if vehicle_ids else []
+    vehicles = (
+        list(
+            (
+                await db.scalars(
+                    select(Vehicle)
+                    .where(Vehicle.id.in_(vehicle_ids))
+                    .order_by(Vehicle.id)
+                    .with_for_update()
+                )
+            ).all()
+        )
+        if vehicle_ids
+        else []
+    )
     if len(vehicles) != len(vehicle_ids) or any(v.customerId for v in vehicles):
         raise HTTPException(409, "Xe không tồn tại hoặc đã liên kết khách hàng khác")
-    user = User(username=body.username, fullName=body.fullName, email=body.email,
-                role=body.role, password=hash_password(body.password))
+    user = User(
+        username=body.username,
+        fullName=body.fullName,
+        email=body.email,
+        role=body.role,
+        password=hash_password(body.password),
+    )
     db.add(user)
     await db.flush()
     if body.role == "mechanic":
@@ -50,14 +89,22 @@ async def create_account(body: AccountCreate, db: AsyncSession = Depends(get_db)
     for vehicle in vehicles:
         vehicle.customerId = user.id
     await db.commit()
-    return success_response(UserResponse.model_validate(user).model_dump(), "Đã tạo tài khoản", 201)
+    return success_response(
+        UserResponse.model_validate(user).model_dump(), "Đã tạo tài khoản", 201
+    )
 
 
 @router.put("/users/{user_id}")
-async def update_account(user_id: int, body: AccountUpdate, db: AsyncSession = Depends(get_db),
-                         current: dict = Depends(require_role(Role.ADMIN))):
+async def update_account(
+    user_id: int,
+    body: AccountUpdate,
+    db: AsyncSession = Depends(get_db),
+    current: dict = Depends(require_role(Role.ADMIN)),
+):
     # Serialize account lifecycle operations, including concurrent admin requests.
-    await db.scalars(select(User).where(User.role == "admin").order_by(User.id).with_for_update())
+    await db.scalars(
+        select(User).where(User.role == "admin").order_by(User.id).with_for_update()
+    )
     user = await db.scalar(select(User).where(User.id == user_id).with_for_update())
     if not user:
         raise HTTPException(404, "Không tìm thấy tài khoản")
@@ -72,12 +119,18 @@ async def update_account(user_id: int, body: AccountUpdate, db: AsyncSession = D
     for field, value in body.model_dump().items():
         setattr(user, field, value)
     await db.commit()
-    return success_response(UserResponse.model_validate(user).model_dump(), "Đã cập nhật tài khoản")
+    return success_response(
+        UserResponse.model_validate(user).model_dump(), "Đã cập nhật tài khoản"
+    )
 
 
 @router.post("/users/{user_id}/password")
-async def reset_password(user_id: int, body: PasswordReset, db: AsyncSession = Depends(get_db),
-                         current: dict = Depends(require_role(Role.ADMIN))):
+async def reset_password(
+    user_id: int,
+    body: PasswordReset,
+    db: AsyncSession = Depends(get_db),
+    current: dict = Depends(require_role(Role.ADMIN)),
+):
     if user_id == current["id"]:
         raise HTTPException(409, "Dùng mục Tài khoản của tôi để đổi mật khẩu của bạn")
     user = await db.scalar(select(User).where(User.id == user_id).with_for_update())
@@ -86,19 +139,28 @@ async def reset_password(user_id: int, body: PasswordReset, db: AsyncSession = D
     user.password = hash_password(body.password)
     user.sessionVersion += 1
     await db.commit()
-    return success_response(None, "Đã đặt lại mật khẩu và kết thúc các phiên đăng nhập cũ")
+    return success_response(
+        None, "Đã đặt lại mật khẩu và kết thúc các phiên đăng nhập cũ"
+    )
 
 
 @router.get("/me")
-async def profile(db: AsyncSession = Depends(get_db), current: dict = Depends(get_current_user)):
+async def profile(
+    db: AsyncSession = Depends(get_db), current: dict = Depends(get_current_user)
+):
     user = await db.get(User, current["id"])
     return success_response(UserResponse.model_validate(user).model_dump())
 
 
 @router.put("/me/password")
-async def change_password(body: PasswordChange, db: AsyncSession = Depends(get_db),
-                          current: dict = Depends(get_current_user)):
-    user = await db.scalar(select(User).where(User.id == current["id"]).with_for_update())
+async def change_password(
+    body: PasswordChange,
+    db: AsyncSession = Depends(get_db),
+    current: dict = Depends(get_current_user),
+):
+    user = await db.scalar(
+        select(User).where(User.id == current["id"]).with_for_update()
+    )
     if not verify_password(body.currentPassword, user.password):
         raise HTTPException(400, "Mật khẩu hiện tại không đúng")
     if body.currentPassword == body.password:
@@ -107,3 +169,48 @@ async def change_password(body: PasswordChange, db: AsyncSession = Depends(get_d
     user.sessionVersion += 1
     await db.commit()
     return success_response(None, "Đã đổi mật khẩu. Vui lòng đăng nhập lại")
+
+
+@router.put("/users/{user_id}/permissions")
+async def restrict_features(
+    user_id: int,
+    body: "PermissionInput",
+    db: AsyncSession = Depends(get_db),
+    current: dict = Depends(require_role(Role.ADMIN)),
+):
+    from core.permissions import ROLE_PERMISSIONS
+
+    user = await db.scalar(select(User).where(User.id == user_id).with_for_update())
+    if not user:
+        raise HTTPException(404, "Không tìm thấy tài khoản")
+    if user_id == current["id"]:
+        raise HTTPException(409, "Không thể khóa chức năng của tài khoản đang sử dụng")
+    if set(body.disabledPermissions) - ROLE_PERMISSIONS.get(user.role, set()):
+        raise HTTPException(
+            422, "Chỉ được khóa chức năng thuộc vai trò, không được cấp thêm quyền"
+        )
+    # Administration remains recoverable by an active admin.
+    if user.role == "admin" and "accounts" in body.disabledPermissions:
+        raise HTTPException(409, "Giữ quyền quản lý tài khoản cho quản trị viên")
+    user.disabledPermissions = sorted(set(body.disabledPermissions))
+    await db.commit()
+    return success_response(
+        UserResponse.model_validate(user).model_dump(), "Đã cập nhật khóa chức năng"
+    )
+
+
+@router.get("/customer-lookup")
+async def customer_lookup(
+    db: AsyncSession = Depends(get_db),
+    current: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR)),
+):
+    if "reception" not in current["permissions"]:
+        raise HTTPException(403, "Chức năng tiếp nhận đã bị khóa")
+    users = await db.scalars(
+        select(User)
+        .where(User.role == "customer", User.isActive.is_(True))
+        .order_by(User.fullName)
+    )
+    return success_response(
+        [{"id": u.id, "fullName": u.fullName, "email": u.email} for u in users]
+    )

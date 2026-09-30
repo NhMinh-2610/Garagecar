@@ -48,6 +48,7 @@ class UserResponse(BaseModel):
     email: str
     fullName: str
     role: str
+    disabledPermissions: list[str] = Field(default_factory=list)
     isActive: bool = True
     lastLoginAt: Optional[datetime] = None
     createdAt: Optional[datetime] = None
@@ -60,7 +61,7 @@ class TokenResponse(BaseModel):
 
 class AccountCreate(RegisterRequest):
     model_config = ConfigDict(extra="forbid")
-    role: Literal["admin", "mechanic", "customer"]
+    role: Literal["admin", "mechanic", "customer", "advisor", "accountant", "hr"]
     mechanicId: Optional[PositiveId] = None
     vehicleIds: list[PositiveId] = Field(default_factory=list, max_length=100)
 

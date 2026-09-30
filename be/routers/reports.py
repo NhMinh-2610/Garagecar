@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/reports", tags=["Reports"])
 
 @router.get("/revenue")
 async def revenue(month: str = Query(pattern=r"^\d{4}-(0[1-9]|1[0-2])$"),
-                  db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN))):
+                  db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN, Role.ACCOUNTANT))):
     year, number = map(int, month.split("-"))
     if not 1 <= year <= 9998:
         from fastapi import HTTPException

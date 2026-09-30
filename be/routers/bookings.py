@@ -43,14 +43,14 @@ async def create_booking(body: BookingCreate, db: AsyncSession = Depends(get_db)
 
 
 @router.get("")
-async def list_bookings(db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN))):
+async def list_bookings(db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR))):
     rows = await db.scalars(select(Booking).order_by(Booking.createdAt.desc()).limit(500))
     return success_response([{column.name: getattr(row, column.name) for column in Booking.__table__.columns} for row in rows])
 
 
 @router.put("/{booking_id}")
 async def update_booking(booking_id: int, body: BookingUpdate, db: AsyncSession = Depends(get_db),
-                         _: dict = Depends(require_role(Role.ADMIN))):
+                         _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR))):
     booking = await db.get(Booking, booking_id)
     if not booking:
         raise HTTPException(404, "Không tìm thấy lịch hẹn")

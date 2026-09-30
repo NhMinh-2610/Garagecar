@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 @router.get("", summary="List all inventory items (admin + mechanic)")
 async def list_inventory(
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC)),
+    _: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC, Role.ADVISOR)),
 ):
     stmt = select(Inventory).order_by(Inventory.name.asc())
     result = await db.execute(stmt)
