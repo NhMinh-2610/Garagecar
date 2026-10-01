@@ -95,6 +95,24 @@ async def replace_items(db, ticket, requested):
         part = stock.get(inventory_id)
         if part is None:
             raise HTTPException(400, "Vật tư không tồn tại")
+        if needed[inventory_id] and part.fitments:
+            from models import VehicleCare
+
+            care = await db.get(VehicleCare, ticket.vehicleId)
+            matches = care and any(
+                f["brand"].strip().casefold()
+                == ticket.vehicle.carBrand.strip().casefold()
+                and f["model"].strip().casefold()
+                == (ticket.vehicle.carModel or "").strip().casefold()
+                and f["yearFrom"] <= care.modelYear <= f["yearTo"]
+                and f["engine"].strip().casefold() == care.engine.strip().casefold()
+                for f in part.fitments
+            )
+            if not matches:
+                raise HTTPException(
+                    409,
+                    f"Vật tư {part.name} chưa có cấu hình tương thích khớp hồ sơ xe. Bổ sung năm/động cơ hoặc chọn đúng mã",
+                )
         available = part.quantity + old[inventory_id]
         if needed[inventory_id] > available:
             raise HTTPException(409, f"Không đủ tồn kho: {part.name} (còn {available})")
@@ -123,6 +141,7 @@ async def replace_items(db, ticket, requested):
                 taskName=data.taskName,
                 inventoryId=data.inventoryId,
                 partName=part.name if part else "---",
+                partCode=part.sku if part else None,
                 quantity=data.quantity,
                 partPrice=price,
                 laborPrice=labor,
@@ -153,7 +172,9 @@ async def sync_vehicle(db, vehicle):
         vehicle.status = "waiting"
 
 
-async def transition(db, ticket, status):
+async def transition(
+    db, ticket, status, user=None, payment_method="cash", payment_reference=""
+):
     if status == ticket.status:
         return
     if status not in TRANSITIONS[ticket.status]:
@@ -179,6 +200,21 @@ async def transition(db, ticket, status):
             visit = await db.get(ServiceVisit, ticket.serviceVisitId)
             if not visit or not visit.qcAt:
                 raise HTTPException(409, "Cần nghiệm thu trước khi thu tiền")
+        from models import PaymentReceipt
+
+        if payment_method != "cash" and not payment_reference.strip():
+            raise HTTPException(422, "Cần mã giao dịch khi thu qua ngân hàng hoặc thẻ")
+        if not user:
+            raise HTTPException(403, "Cần xác định người thu tiền")
+        db.add(
+            PaymentReceipt(
+                ticketId=ticket.id,
+                amount=ticket.totalAmount,
+                method=payment_method,
+                reference=payment_reference.strip(),
+                receivedBy=user["id"],
+            )
+        )
         ticket.paidAt = utcnow()
     ticket.status = status
     await sync_vehicle(db, ticket.vehicle)
