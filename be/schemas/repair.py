@@ -1,5 +1,5 @@
-﻿from datetime import datetime
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from core.constants import RepairStatus
 from schemas.common import Money, Name, PositiveId
@@ -28,6 +28,8 @@ class RepairItemResponse(BaseModel):
     laborPrice: float
     totalPrice: float
     isCompleted: bool
+    evidenceRound: int = 1
+    partCode: Optional[str] = None
     completedAt: Optional[datetime]
     createdAt: Optional[datetime]
 
@@ -53,13 +55,18 @@ class RepairTicketUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     mechanicId: Optional[PositiveId] = None
     status: Optional[RepairStatus] = None
-    items: Optional[list[RepairItemCreate]] = Field(default=None, min_length=1, max_length=100)
+    paymentMethod: Literal["cash", "bank", "card"] = "cash"
+    paymentReference: str = Field(default="", max_length=100)
+    items: Optional[list[RepairItemCreate]] = Field(
+        default=None, min_length=1, max_length=100
+    )
 
 
 class RepairTicketResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     serviceVisitId: Optional[int] = None
+    qcAt: Optional[datetime] = None
     vehicleId: int
     mechanicId: Optional[int] = None
     totalAmount: float
@@ -71,4 +78,3 @@ class RepairTicketResponse(BaseModel):
     createdAt: Optional[datetime]
     items: list[RepairItemResponse] = Field(default_factory=list)
     vehicle: Optional[VehicleInRepair] = None
-

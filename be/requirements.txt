@@ -12,3 +12,4 @@ openai==1.47.0
 google-generativeai==0.7.2
 email-validator>=2.0.0
 alembic>=1.13,<2
+Pillow>=11.3,<13

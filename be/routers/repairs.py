@@ -146,6 +146,27 @@ async def update_repair(
     await authorize_ticket(db, ticket, user)
     fields = body.model_fields_set
     if (
+        ticket.status == "paid"
+        and body.status == "paid"
+        and fields & {"paymentMethod", "paymentReference"}
+    ):
+        from models import PaymentReceipt
+
+        receipt = await db.scalar(
+            select(PaymentReceipt).where(PaymentReceipt.ticketId == ticket.id)
+        )
+        if (
+            not receipt
+            or ("paymentMethod" in fields and receipt.method != body.paymentMethod)
+            or (
+                "paymentReference" in fields
+                and receipt.reference != body.paymentReference.strip()
+            )
+        ):
+            raise HTTPException(
+                409, "Phiếu đã thu; không được sửa phương thức hoặc mã giao dịch"
+            )
+    if (
         user["role"] == "admin"
         and body.status != "paid"
         and "workshop" not in user["permissions"]
@@ -153,7 +174,12 @@ async def update_repair(
         raise HTTPException(403, "Chức năng sửa chữa đã bị khóa")
     if body.status == "paid" and "finance" not in user["permissions"]:
         raise HTTPException(403, "Chức năng thu tiền đã bị khóa")
-    if user["role"] == "accountant" and (fields != {"status"} or body.status != "paid"):
+    if fields & {"paymentMethod", "paymentReference"} and body.status != "paid":
+        raise HTTPException(422, "Thông tin thanh toán chỉ được gửi khi thu tiền")
+    if user["role"] == "accountant" and (
+        fields - {"status", "paymentMethod", "paymentReference"}
+        or body.status != "paid"
+    ):
         raise HTTPException(403, "Kế toán chỉ được thu tiền phiếu đã hoàn thành")
     if user["role"] == "advisor" and fields != {"mechanicId"}:
         raise HTTPException(
@@ -191,7 +217,14 @@ async def update_repair(
                 )
             await replace_items(db, ticket, body.items)
     if body.status:
-        await transition(db, ticket, body.status.value)
+        await transition(
+            db,
+            ticket,
+            body.status.value,
+            user,
+            body.paymentMethod,
+            body.paymentReference,
+        )
     await db.commit()
     await db.refresh(ticket)
     return success_response(serialize(ticket), "Cập nhật phiếu thành công")
@@ -233,6 +266,21 @@ async def toggle_item(
     item = next((item for item in ticket.items if item.id == item_id), None)
     if not item:
         raise HTTPException(404, "Không tìm thấy hạng mục")
+    if body.isCompleted:
+        from services.evidence_service import (
+            require_item_evidence,
+            check_ev_certificate,
+        )
+        from models import Inventory
+
+        await check_ev_certificate(
+            db,
+            user,
+            await db.get(Inventory, item.inventoryId) if item.inventoryId else None,
+        )
+        await require_item_evidence(db, item)
+    elif item.isCompleted:
+        item.evidenceRound += 1
     item.isCompleted = body.isCompleted
     item.completedAt = utcnow() if body.isCompleted else None
     await db.commit()

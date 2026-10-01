@@ -14,22 +14,47 @@ class RepairTicket(Base):
     __tablename__ = "repair_tickets"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    mechanicId = Column(Integer, ForeignKey("mechanics.id", ondelete="RESTRICT"), index=True, nullable=True)
-    serviceVisitId = Column(Integer, ForeignKey("service_visits.id", ondelete="RESTRICT"), unique=True, nullable=True)
+    mechanicId = Column(
+        Integer,
+        ForeignKey("mechanics.id", ondelete="RESTRICT"),
+        index=True,
+        nullable=True,
+    )
+    serviceVisitId = Column(
+        Integer,
+        ForeignKey("service_visits.id", ondelete="RESTRICT"),
+        unique=True,
+        nullable=True,
+    )
     vehicleId = Column(
         "vehicleId", Integer, ForeignKey("vehicles.id"), nullable=False, index=True
     )
     totalAmount = Column("totalAmount", Numeric(14, 2), nullable=False, default=0)
-    mechanicName = Column("mechanicName", String, nullable=True, default="Chưa phân công")
-    status = Column(String, nullable=False, default="draft")  # draft|working|completed|paid
+    mechanicName = Column(
+        "mechanicName", String, nullable=True, default="Chưa phân công"
+    )
+    status = Column(
+        String, nullable=False, default="draft"
+    )  # draft|working|completed|paid
     startedAt = Column("startedAt", DateTime, nullable=True)
     completedAt = Column("completedAt", DateTime, nullable=True)
     paidAt = Column("paidAt", DateTime, nullable=True)
     createdAt = Column("createdAt", DateTime, server_default=func.now())
-    updatedAt = Column("updatedAt", DateTime, server_default=func.now(), onupdate=func.now())
+    updatedAt = Column(
+        "updatedAt", DateTime, server_default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     vehicle = relationship("Vehicle", back_populates="repairTickets", lazy="selectin")
+    serviceVisit = relationship("ServiceVisit", lazy="selectin")
+
+    @property
+    def qcAt(self):
+        return self.serviceVisit.qcAt if self.serviceVisit else None
+
     items = relationship(
-        "RepairItem", back_populates="ticket", lazy="selectin", cascade="all, delete-orphan"
+        "RepairItem",
+        back_populates="ticket",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )
