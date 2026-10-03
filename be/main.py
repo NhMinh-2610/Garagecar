@@ -4,7 +4,7 @@ Entry point: uvicorn main:app --reload
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,13 +15,14 @@ from sqlalchemy.exc import IntegrityError
 from core.response import error_response
 
 from config.settings import settings
-from database.engine import engine, Base
+from database.engine import engine
 import models  # noqa: F401 — registers all ORM models with metadata
 
 from routers import auth, vehicles, repairs, inventory, mechanics, ai
 from routers import settings as settings_router
 from routers import reports
 from routers import bookings, accounts, maintenance, service, employees
+from routers import evidence, finance_operations, hr_operations, advisor_operations
 
 
 # ── Lifespan: verify schema readiness ─────────────────────────────────────────
@@ -71,6 +72,36 @@ async def lifespan(app: FastAPI):
                 "Database needs garage migration: python be/manage.py upgrade"
             )
     import asyncio
+
+    async with engine.connect() as conn:
+        if not {
+            "repair_evidence",
+            "payment_receipts",
+            "expenses",
+            "staff_shifts",
+            "staff_certificates",
+            "leave_requests",
+            "service_followups",
+        }.issubset(
+            await conn.run_sync(lambda sync: set(inspect(sync).get_table_names()))
+        ):
+            raise RuntimeError(
+                "Database needs professional workflow migration: python be/manage.py upgrade"
+            )
+        for table, expected in {
+            "inventories": {"sku", "barcode", "fitments", "highVoltage"},
+            "repair_items": {"evidenceRound", "partCode"},
+            "staff_certificates": {"status", "revokedBy", "revokedAt", "revokeReason"},
+        }.items():
+            existing = await conn.run_sync(
+                lambda sync: {
+                    column["name"] for column in inspect(sync).get_columns(table)
+                }
+            )
+            if not expected.issubset(existing):
+                raise RuntimeError(
+                    "Database needs professional workflow migration: python be/manage.py upgrade"
+                )
     from services.reminder_worker import reminder_loop
 
     worker = asyncio.create_task(reminder_loop())
@@ -146,6 +177,10 @@ app.include_router(bookings.router)
 app.include_router(maintenance.router)
 app.include_router(service.router)
 app.include_router(employees.router)
+app.include_router(evidence.router)
+app.include_router(finance_operations.router)
+app.include_router(hr_operations.router)
+app.include_router(advisor_operations.router)
 
 
 # ── Health check ───────────────────────────────────────────────────────────────
@@ -197,6 +232,18 @@ if _fe_dir.exists():
     @app.get("/staff", include_in_schema=False)
     async def staff_page():
         return RedirectResponse(url="/static/staff/index.html")
+
+    @app.get("/advisor", include_in_schema=False)
+    async def advisor_page():
+        return RedirectResponse(url="/static/advisor/index.html")
+
+    @app.get("/accountant", include_in_schema=False)
+    async def accountant_page():
+        return RedirectResponse(url="/static/accountant/index.html")
+
+    @app.get("/hr", include_in_schema=False)
+    async def hr_page():
+        return RedirectResponse(url="/static/hr/index.html")
 
     @app.get("/service-worker.js", include_in_schema=False)
     async def service_worker():

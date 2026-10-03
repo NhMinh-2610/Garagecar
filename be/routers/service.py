@@ -89,6 +89,7 @@ async def detail(db, visit):
     return {
         **row_dict(visit),
         "licensePlate": vehicle.licensePlate,
+        "vehicleStatus": vehicle.status,
         "customerId": vehicle.customerId,
         "quotes": [row_dict(q) for q in quotes],
         "ticketId": ticket.id if ticket else None,
@@ -110,7 +111,19 @@ async def visits(db: AsyncSession = Depends(get_db), user=Depends(get_current_us
     else:
         advisor(user)
     rows = (await db.scalars(query.order_by(ServiceVisit.id.desc()).limit(100))).all()
-    return success_response([await detail(db, r) for r in rows])
+    result = [await detail(db, r) for r in rows]
+    if user["role"] == "accountant":
+        keys = (
+            "id",
+            "vehicleId",
+            "licensePlate",
+            "ticketId",
+            "ticketStatus",
+            "qcAt",
+            "status",
+        )
+        result = [{key: row[key] for key in keys} for row in result]
+    return success_response(result)
 
 
 @router.post("/visits", status_code=201)
@@ -465,6 +478,9 @@ async def resources(
                     "name": p.name,
                     "unitPrice": float(p.unitPrice),
                     "quantity": p.quantity,
+                    "sku": p.sku,
+                    "fitments": p.fitments,
+                    "highVoltage": p.highVoltage,
                 }
                 for p in parts
             ],
