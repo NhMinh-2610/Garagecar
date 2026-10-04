@@ -45,6 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRedirectUrl(role) {
         switch (role) {
+            case 'advisor':
+            case 'accountant':
+            case 'hr': return '/staff';
             case 'admin':    return '/admin';
             case 'mechanic': return '/mechanic';
             case 'customer': return '/customer';
@@ -54,6 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRoleDisplayName(role) {
         switch (role) {
+            case 'advisor': return 'Cố vấn dịch vụ';
+            case 'accountant': return 'Kế toán';
+            case 'hr': return 'Nhân sự';
             case 'admin':    return 'Quản Trị Viên';
             case 'mechanic': return 'Kỹ Thuật Viên';
             case 'customer': return 'Khách Hàng';

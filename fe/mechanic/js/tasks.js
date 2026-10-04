@@ -50,7 +50,8 @@
             render();
         }
     }
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed('workshop')) return;
         ['taskSearch','taskStatus','taskSort'].forEach(id => $(id).addEventListener('input',render));
         $('refreshTasks').addEventListener('click',load);
         $('workingTasks').addEventListener('change', event => {

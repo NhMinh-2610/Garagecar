@@ -3,9 +3,9 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AutoPro · Khách hàng</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="../shared/ui.css"><link rel="stylesheet" href="../shared/workspace.css"><link rel="stylesheet" href="../shared/portals.css">
-<script src="../shared/core.js" defer></script><script src="../shared/portal.js" defer></script>
+<script src="../shared/core.js" defer></script><script src="../shared/access.js" defer></script><script src="../shared/portal.js" defer></script>
 <script src="js/app.js" defer></script><script src="js/auth.js" defer></script><script src="js/workspace.js" defer></script><script src="../shared/booking.js" defer></script>
-</head><body>
+<link rel="stylesheet" href="../shared/care.css"><script src="../shared/maintenance.js" defer></script><script src="../shared/service.js" defer></script><script src="../shared/pwa.js" defer></script></head><body>
 <aside id="sidebar">
 <a class="brand" href="../index.html"><span class="brand-mark">A</span><span>AutoPro<small>GARAGE WORKSPACE</small></span></a>
 <p class="nav-caption">DÀNH CHO KHÁCH HÀNG</p>
@@ -14,14 +14,14 @@
 <button class="nav-item" data-target="vehicles-section"><i class="fa-solid fa-car" aria-hidden="true"></i>Xe của tôi</button>
 <button class="nav-item" data-target="repairs-section"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>Sửa chữa & Chi phí</button>
 <button class="nav-item" data-target="booking-section"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>Đặt lịch dịch vụ</button>
-</nav>
+<button class="nav-item" data-target="service-section">Báo giá & Xác nhận</button><button class="nav-item" data-target="maintenance-section">Bảo dưỡng & Nhắc hạn</button></nav>
 <div class="sidebar-footer"><div class="user-info"><h4>Khách hàng</h4><small>Tài khoản cá nhân</small></div><button id="logoutBtn" class="btn-icon" aria-label="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i></button></div>
 </aside>
 <div id="content">
 <header class="topbar"><button class="btn-icon toggle-sidebar" aria-label="Mở menu" aria-controls="sidebar" aria-expanded="false">☰</button><span id="pageTitle">Tổng quan</span><span class="sync-label">Dữ liệu từ garage · tự làm mới</span><button id="refreshData" class="btn btn-sm">Làm mới</button></header>
 <main class="content-body">
 <p id="loadError" class="inline-message error" role="alert" hidden></p>
-<section id="dashboard-section" class="active-section">
+<section id="service-section"><div id="serviceWorkspace"></div></section><section id="maintenance-section"><div id="maintenanceWorkspace"></div></section><section id="dashboard-section" class="active-section">
 <div class="section-heading"><div><p class="eyebrow">KHÁCH HÀNG / TỔNG QUAN</p><h1>Đồng hành cùng chiếc xe của bạn</h1><p class="section-description">Theo dõi tiến độ, kiểm tra chi phí và chủ động lên lịch chăm sóc xe.</p></div><button class="btn btn-primary" data-go="booking-section">＋ Đặt lịch dịch vụ</button></div>
 <div class="metrics">
 <div class="metric"><span>Xe của tôi</span><strong id="statVehicles">—</strong><small>Xe đã liên kết tài khoản</small></div>

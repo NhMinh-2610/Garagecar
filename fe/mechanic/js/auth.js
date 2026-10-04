@@ -32,6 +32,7 @@ function checkAuth() {
         // Check role - only mechanics allowed here
         if (user.role !== 'mechanic') {
             const redirectMap = {
+                advisor: "/staff", accountant: "/staff", hr: "/staff",
                 'admin': '../admin/index.html',
                 'customer': '../customer/index.html',
             };

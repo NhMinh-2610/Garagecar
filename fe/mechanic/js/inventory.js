@@ -15,7 +15,8 @@
         $('stockSummary').textContent = `${items.length} / ${inventory.length} mã vật tư · ${inventory.filter(i => i.quantity === 0).length} hết hàng · ${inventory.filter(i => i.quantity > 0 && i.quantity <= 5).length} sắp hết`;
         document.querySelector('#inventoryTable tbody').innerHTML = items.map(i => `<tr><td><strong>${Garage.escape(i.name)}</strong></td><td>${i.quantity}</td><td>${formatCurrency(i.unitPrice)}</td><td><span class="badge badge-${i.quantity === 0 ? 'inactive' : i.quantity <= 5 ? 'warning' : 'done'}">${i.quantity === 0 ? 'Hết hàng' : i.quantity <= 5 ? 'Sắp hết' : 'Còn hàng'}</span></td></tr>`).join('') || '<tr><td colspan="4" class="empty-state">Không có vật tư phù hợp.</td></tr>';
     }
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed('workshop')) return;
         ['inventorySearch','stockFilter'].forEach(id => $(id).addEventListener('input',render));
         $('refreshTasks').addEventListener('click',load);
         load(); Garage.subscribe(load);
