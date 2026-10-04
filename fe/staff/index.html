@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AutoPro · Nhân viên</title>
+    <link rel="stylesheet" href="../shared/ui.css" />
+    <link rel="stylesheet" href="../shared/workspace.css" />
+    <link rel="stylesheet" href="../shared/portals.css" />
+    <link rel="stylesheet" href="../shared/care.css" />
+    <script src="../shared/core.js" defer></script>
+    <script src="../shared/access.js" defer></script>
+    <script src="../shared/portal.js" defer></script>
+    <script src="app.js" defer></script>
+    <script src="../shared/maintenance.js" defer></script>
+    <script src="../shared/service.js" defer></script>
+    <script src="../shared/pwa.js" defer></script>
+  </head>
+  <body>
+    <aside id="sidebar">
+      <a class="brand" href="/"
+        ><span class="brand-mark">A</span
+        ><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
+      >
+      <p class="nav-caption">NHÂN VIÊN GARAGE</p>
+      <nav aria-label="Chức năng theo vị trí">
+        <button
+          class="nav-item"
+          data-permission="reception"
+          data-target="staffReception-section"
+        >
+          Tiếp nhận & Lịch hẹn</button
+        ><button
+          class="nav-item"
+          data-permission="workshop"
+          data-target="service-section"
+        >
+          Cố vấn & Báo giá</button
+        ><button
+          class="nav-item"
+          data-permission="maintenance"
+          data-target="maintenance-section"
+        >
+          Bảo dưỡng & Nhắc hạn</button
+        ><button
+          class="nav-item"
+          data-permission="finance"
+          data-target="finance-section"
+        >
+          Tài chính · Thu tiền</button
+        ><button
+          class="nav-item"
+          data-permission="reports"
+          data-target="staffReport-section"
+        >
+          Báo cáo doanh thu</button
+        ><button
+          class="nav-item"
+          data-permission="hr"
+          data-target="staffHR-section"
+        >
+          Hồ sơ nhân sự
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <h4>Nhân viên</h4>
+          <small id="staffRole"></small>
+        </div>
+        <button class="btn" id="logoutBtn">Đăng xuất</button>
+      </div>
+    </aside>
+    <div id="content">
+      <header class="topbar">
+        <button
+          class="btn-icon toggle-sidebar"
+          aria-label="Mở menu"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          ☰</button
+        ><span id="pageTitle">Công việc</span
+        ><span class="sync-label">Tự đồng bộ khi không thao tác</span
+        ><button id="staffRefresh" class="btn btn-sm">Làm mới</button>
+      </header>
+      <main class="content-body">
+        <p id="staffError" class="inline-message error" role="alert" hidden></p>
+        <section id="staffReception-section">
+          <div id="staffReception"></div>
+        </section>
+        <section id="service-section">
+          <div id="serviceWorkspace"></div>
+        </section>
+        <section id="maintenance-section">
+          <div id="maintenanceWorkspace"></div>
+        </section>
+        <section id="finance-section"><div id="staffFinance"></div></section>
+        <section id="staffReport-section"><div id="staffReport"></div></section>
+        <section id="staffHR-section"><div id="staffHR"></div></section>
+      </main>
+    </div>
+  </body>
+</html>

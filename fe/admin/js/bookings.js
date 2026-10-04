@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed("reception")) return;
     const table = document.querySelector('#bookingsTable tbody');
     async function load(context = {}) {
         const canRender = Garage.refreshGuard(context);

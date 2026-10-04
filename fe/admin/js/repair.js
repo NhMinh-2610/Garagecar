@@ -1,5 +1,6 @@
 ﻿/* Repair editor and workflow; prices and transitions are validated by the API. */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed("workshop")) return;
     const byId = id => document.getElementById(id);
     const modal = byId('repairModal');
     let items = [], inventory = [], tickets = [], editingId = null;

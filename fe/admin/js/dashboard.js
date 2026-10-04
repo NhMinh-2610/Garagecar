@@ -1,7 +1,8 @@
 // Dashboard Statistics Module - Enhanced
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed(["reception","workshop","finance"])) return;
     const token = localStorage.getItem('token');
-    
+
     if (!token) return;
 
     // Fetch and update dashboard stats
@@ -12,18 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const vehiclesRes = await Garage.apiFetch(`${Garage.base}/vehicles`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             if (!vehiclesRes.ok) return;
-            
+
             const vehiclesData = await vehiclesRes.json();
             const vehicles = vehiclesData.data || [];
 
             // Calculate stats
             const today = new Date().toDateString();
-            const todayVehicles = vehicles.filter(v => 
+            const todayVehicles = vehicles.filter(v =>
                 new Date(v.receivedDate).toDateString() === today
             ).length;
-            
+
             const workingCount = vehicles.filter(v => v.status === 'repairing').length;
             const doneCount = vehicles.filter(v => v.status === 'completed').length;
 
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const repairsRes = await Garage.apiFetch(`${Garage.base}/repairs`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
+
             let totalRevenue = 0;
             let repairs = [];
             if (repairsRes.ok) {
@@ -69,11 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        const weeklyVehicles = vehicles.filter(v => 
+        const weeklyVehicles = vehicles.filter(v =>
             new Date(v.receivedDate) > oneWeekAgo
         ).length;
 
-        const weeklyRepairs = repairs.filter(r => 
+        const weeklyRepairs = repairs.filter(r =>
             new Date(r.createdAt) > oneWeekAgo
         ).length;
 

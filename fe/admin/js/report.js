@@ -1,4 +1,5 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed("reports")) return;
     const byId = id => document.getElementById(id);
     const now = new Date();
     byId('reportMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');

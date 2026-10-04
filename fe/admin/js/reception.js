@@ -1,5 +1,6 @@
 ﻿/* Vehicle registration and ownership: account links are always explicit IDs. */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed("reception")) return;
     const byId = id => document.getElementById(id);
     const esc = Garage.escape;
     let vehicles = [], customers = [], brands = [];

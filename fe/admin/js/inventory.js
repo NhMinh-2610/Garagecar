@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed("catalog")) return;
     const token = localStorage.getItem('token');
     const byId = id => document.getElementById(id);
     const existingSelect = byId('existingInventory');

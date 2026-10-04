@@ -9,9 +9,10 @@
 <link rel="stylesheet" href="../shared/workspace.css">
 <script src="../shared/core.js">
 </script>
+<script src="../shared/access.js"></script>
 <script src="../shared/portal.js">
 </script>
-</head>
+<link rel="stylesheet" href="../shared/care.css"><script src="../shared/maintenance.js" defer></script><script src="../shared/service.js" defer></script><script src="../shared/pwa.js" defer></script><script src="../shared/employees.js" defer></script></head>
 <body>
 <div class="app-container">
 <aside id="sidebar">
@@ -57,7 +58,7 @@
 </i>
 <span>Quản trị Nhân sự</span>
 </button>
-</nav>
+<button class="nav-item" data-target="service-section">Cố vấn & Báo giá</button><button class="nav-item" data-target="maintenance-section">Bảo dưỡng & Nhắc hạn</button></nav>
 <div class="sidebar-footer">
 <div class="user-info">
 <h4>Quản trị viên</h4>
@@ -81,7 +82,7 @@
 </span>Đồng bộ mỗi 20 giây</span>
 </header>
 <div class="content-body">
-<section id="dashboard-section" class="active-section">
+<section id="service-section"><div id="serviceWorkspace"></div></section><section id="maintenance-section"><div id="maintenanceWorkspace"></div></section><section id="dashboard-section" class="active-section">
 <div class="section-heading">
 <div>
 <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
@@ -871,7 +872,7 @@
 <input id="userSearch" type="search" placeholder="Tìm họ tên, email, tên đăng nhập…" aria-label="Tìm tài khoản">
 <select id="userRoleFilter" aria-label="Lọc vai trò">
 <option value="">Tất cả vai trò</option>
-<option value="admin">Quản trị viên</option>
+<option value="admin">Quản trị viên</option><option value="advisor">Cố vấn dịch vụ</option><option value="accountant">Kế toán</option><option value="hr">Nhân sự</option>
 <option value="mechanic">Kỹ thuật viên</option>
 <option value="customer">Khách hàng</option>
 </select>
@@ -964,7 +965,7 @@
 <label>Vai trò<select id="newRole" required>
 <option value="customer">Khách hàng</option>
 <option value="mechanic">Kỹ thuật viên</option>
-<option value="admin">Quản trị viên</option>
+<option value="admin">Quản trị viên</option><option value="advisor">Cố vấn dịch vụ</option><option value="accountant">Kế toán</option><option value="hr">Nhân sự</option>
 </select>
 </label>
 </div>
@@ -983,7 +984,7 @@
 </form>
 </div>
 </div>
-</section>
+<div id="employeeWorkspace"></div></section>
 </div>
 </main>
 </div>

@@ -1,4 +1,5 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', async () => {
+    if (!await Garage.whenAllowed("hr")) return;
     const byId=id=>document.getElementById(id), esc=Garage.escape;
     let mechanics=[],users=[],vehicles=[];
     function render() {
@@ -17,14 +18,14 @@
             || '<tr><td colspan="5" class="empty-state">Không có kỹ thuật viên phù hợp.</td></tr>';
         const userSearch=byId('userSearch').value.toLowerCase(), role=byId('userRoleFilter').value, accountStatus=byId('userStatusFilter').value;
         const current=JSON.parse(localStorage.getItem('user')||'{}');
-        const roles={admin:'Quản trị viên',mechanic:'Kỹ thuật viên',customer:'Khách hàng'};
+        const roles={admin:'Quản trị viên',mechanic:'Kỹ thuật viên',customer:'Khách hàng',advisor:'Cố vấn dịch vụ',accountant:'Kế toán',hr:'Nhân sự'};
         const filtered=users.filter(u=>[u.username,u.fullName,u.email].join(' ').toLowerCase().includes(userSearch)&&(!role||u.role===role)&&(!accountStatus||(accountStatus==='locked' ? u.isActive===false : u.isActive!==false)));
         byId('accountSummary').textContent=`${filtered.length} / ${users.length} tài khoản · ${users.filter(u=>u.isActive===false).length} đã khóa`;
         byId('usersTable').querySelector('tbody').innerHTML=filtered
             .map(u=>`<tr><td><strong>${esc(u.username)}</strong></td><td>${esc(u.fullName)}</td><td>${esc(u.email)}</td>
             <td><span class="badge ${u.role==='admin'?'badge-working':'badge-inactive'}">${esc(roles[u.role]||u.role)}</span><br><small>${u.role==='customer' ? vehicles.filter(v=>v.customerId===u.id).length+' xe liên kết' : u.role==='mechanic' ? esc(mechanics.find(m=>m.userId===u.id)?.fullName || 'Chưa có hồ sơ thợ') : 'Điều hành garage'}</small></td>
             <td><span class="badge ${u.isActive===false?'badge-inactive':'badge-done'}">${u.isActive===false?'Đã khóa':'Hoạt động'}</span><br><small>${u.lastLoginAt ? formatDate(u.lastLoginAt) : 'Chưa ghi nhận đăng nhập'}</small></td>
-            <td><button class="btn btn-sm" data-user="${u.id}" data-action="edit">Quản lý</button>${u.id===current.id?'<small>Tài khoản của bạn</small>':`<button class="btn btn-sm" data-user="${u.id}" data-action="password">Đặt lại mật khẩu</button>`}</td></tr>`).join('')
+            <td><button class="btn btn-sm" data-user="${u.id}" data-action="edit">Quản lý</button><button class="btn btn-sm" data-user="${u.id}" data-action="permissions">Khóa chức năng</button>${u.id===current.id?'<small>Tài khoản của bạn</small>':`<button class="btn btn-sm" data-user="${u.id}" data-action="password">Đặt lại mật khẩu</button>`}</td></tr>`).join('')
             || '<tr><td colspan="6" class="empty-state">Không có tài khoản phù hợp.</td></tr>';
         const value=byId('staffMechanicId').value;
         byId('staffMechanicId').replaceChildren(new Option('Tạo hồ sơ mới',''),...mechanics.filter(m=>!m.userId&&m.status==='active').map(m=>new Option(m.fullName,m.id)));
@@ -110,6 +111,11 @@
     byId('usersTable').onclick=async event=>{
         const button=event.target.closest('[data-user]');if(!button)return;
         const user=users.find(u=>u.id===Number(button.dataset.user));
+        if(button.dataset.action==='permissions'){
+            const defaults={admin:['reception','workshop','maintenance','catalog','finance','reports','hr','accounts'],advisor:['reception','workshop','maintenance'],mechanic:['workshop','maintenance'],accountant:['finance','reports'],hr:['hr'],customer:['maintenance']};
+            const labels={reception:'Tiếp nhận',workshop:'Sửa chữa / Cố vấn',maintenance:'Bảo dưỡng',catalog:'Kho / Danh mục',finance:'Thu tiền',reports:'Báo cáo',hr:'Nhân sự',accounts:'Tài khoản'};
+            const d=document.createElement('dialog');d.className='care-dialog';d.innerHTML='<div class="card-heading"><h3>Khóa chức năng · '+esc(user.fullName)+'</h3><button data-close class="btn-icon">×</button></div><form><p>Chọn chức năng cần khóa. Tài khoản chỉ có quyền trong vị trí đã cấp.</p>'+defaults[user.role].map(p=>'<p><label><input type="checkbox" name="disabled" value="'+p+'" '+(user.disabledPermissions?.includes(p)?'checked':'')+'> '+labels[p]+'</label></p>').join('')+'<p class="care-error text-red" role="alert"></p><button class="btn btn-primary">Lưu khóa chức năng</button></form>';document.body.append(d);d.querySelector('[data-close]').onclick=()=>d.close();d.onclose=()=>d.remove();d.querySelector('form').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');if(b.disabled)return;b.disabled=true;try{await Garage.request('/auth/users/'+user.id+'/permissions',{method:'PUT',body:{disabledPermissions:[...d.querySelectorAll('input:checked')].map(n=>n.value)}});d.close();await load();}catch(error){d.querySelector('.care-error').textContent=error.message;}finally{b.disabled=false;}};d.showModal();return;
+        }
         const reset=button.dataset.action==='password',self=user.id===JSON.parse(localStorage.getItem('user')||'{}').id;
         const dialog=document.createElement('dialog');dialog.className='account-dialog';dialog.setAttribute('aria-labelledby','accountDialogTitle');
         dialog.innerHTML=`<div class="card-heading"><h3 id="accountDialogTitle">${reset?'Đặt lại mật khẩu':'Quản lý tài khoản'}</h3><button class="btn-icon" data-close aria-label="Đóng">×</button></div><p class="muted">${esc(user.email)} · ${esc(user.role)}</p><form id="accountEditForm">${reset?'<p class="notice">Các phiên đăng nhập cũ sẽ kết thúc. Cung cấp mật khẩu mới cho đúng chủ tài khoản.</p><div class="form-group"><label>Mật khẩu mới<input name="password" type="password" autocomplete="new-password" minlength="6" maxlength="72" required></label></div><div class="form-group"><label>Nhập lại mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" required></label></div>':`<div class="form-group"><label>Họ tên<input name="fullName" value="${esc(user.fullName)}" maxlength="255" required></label></div><div class="form-group"><label>Tên đăng nhập<input name="username" value="${esc(user.username)}" maxlength="255" required></label></div><div class="form-group"><label>Email<input name="email" type="email" value="${esc(user.email)}" required></label></div><div class="form-group"><label>Trạng thái<select name="isActive" ${self?'disabled':''}><option value="true" ${user.isActive!==false?'selected':''}>Hoạt động</option><option value="false" ${user.isActive===false?'selected':''}>Khóa truy cập</option></select></label></div><p class="field-help">Khóa tài khoản kết thúc các phiên đăng nhập, giữ nguyên hồ sơ và lịch sử sửa chữa.</p>`}<p class="field-help" id="accountEditError" role="alert"></p><div class="form-actions"><button type="submit" class="btn btn-primary">${reset?'Đặt lại mật khẩu':'Lưu thay đổi'}</button></div></form>`;
