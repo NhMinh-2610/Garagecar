@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 2,
-  "reviewedOn": "2026-10-07",
-  "policy": "Danh mục giúp lựa chọn công việc và vật tư; không xác nhận mã phụ tùng tương thích. Tra VIN, sách đúng đời xe/động cơ/hộp số và tài liệu nhà sản xuất trước khi duyệt lịch. Không dùng một chu kỳ thay thế cho mọi hãng.",
+  "schemaVersion": 3,
+  "reviewedOn": "2026-10-08",
+  "policy": "Danh mục giúp lựa chọn công việc và vật tư; không xác nhận mã phụ tùng tương thích. Tra VIN, sách đúng đời xe/động cơ/hộp số và tài liệu nhà sản xuất trước khi duyệt lịch. Không dùng một chu kỳ thay thế cho mọi hãng. Bộ phận gợi ý theo hãng/dòng/hệ truyền động không phải danh sách mã OEM. Chỉ số km/tháng từ lịch đã được xác minh mới tạo nhắc hạn. Danh mục bao gồm cả mẫu xe cũ đang lưu hành.",
   "components": [
     {
       "code": "engine_oil",
@@ -10,7 +10,11 @@
       "applicability": "Xăng / diesel / hybrid có động cơ đốt trong",
       "inspection": "Kiểm tra mức, rò rỉ; thay dầu đúng độ nhớt và chuẩn hãng, không chỉ dựa SAE.",
       "materials": "Dầu đúng SAE/API/ACEA hoặc chuẩn riêng OEM; vòng đệm nút xả",
-      "caution": "Cảnh báo áp suất dầu, rò rỉ hoặc IOLM cần kiểm tra sớm; không chờ lịch."
+      "caution": "Cảnh báo áp suất dầu, rò rỉ hoặc IOLM cần kiểm tra sớm; không chờ lịch.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "oil_filter",
@@ -19,7 +23,11 @@
       "applicability": "Động cơ đốt trong",
       "inspection": "Thay lọc; kiểm tra gioăng, van và rò rỉ sau khi chạy thử.",
       "materials": "Lọc đúng mã VIN, gioăng/đệm",
-      "caution": "Không coi thay dầu là tự động đã thay lọc: phải ghi riêng."
+      "caution": "Không coi thay dầu là tự động đã thay lọc: phải ghi riêng.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "engine_air_filter",
@@ -28,7 +36,11 @@
       "applicability": "Động cơ đốt trong",
       "inspection": "Kiểm tra bẩn/rách; vệ sinh hoặc thay theo sách và tình trạng.",
       "materials": "Lọc gió đúng hình dạng, kích thước",
-      "caution": "Đi đường bụi có thể cần kiểm tra sớm hơn."
+      "caution": "Đi đường bụi có thể cần kiểm tra sớm hơn.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "cabin_filter",
@@ -37,7 +49,12 @@
       "applicability": "Xe có trang bị",
       "inspection": "Kiểm tra lưu lượng gió, bụi/mùi; vệ sinh khoang hoặc thay lọc.",
       "materials": "Lọc cabin thường/than hoạt tính đúng mã",
-      "caution": "Không tự suy ra cần nạp gas khi lọc bẩn."
+      "caution": "Không tự suy ra cần nạp gas khi lọc bẩn.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "spark_plugs",
@@ -46,7 +63,11 @@
       "applicability": "Động cơ xăng; không áp dụng diesel",
       "inspection": "Kiểm tra mã, vật liệu điện cực, khe hở và lực siết; thay đúng loại.",
       "materials": "Bugi thường / platinum / iridium theo động cơ",
-      "caution": "Bugi thường và iridium có thể có chu kỳ rất khác nhau."
+      "caution": "Bugi thường và iridium có thể có chu kỳ rất khác nhau.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "fuel_filter",
@@ -55,7 +76,11 @@
       "applicability": "Theo trang bị, phân biệt xăng và diesel",
       "inspection": "Kiểm tra/thay; diesel có thể phải xả nước theo cảnh báo.",
       "materials": "Lọc, gioăng; nhiên liệu theo quy trình mồi hệ thống",
-      "caution": "Lọc xăng nằm trong bình và lọc diesel không dùng chung quy trình."
+      "caution": "Lọc xăng nằm trong bình và lọc diesel không dùng chung quy trình.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "coolant",
@@ -64,7 +89,11 @@
       "applicability": "Theo động cơ / hệ thống làm mát trang bị",
       "inspection": "Kiểm tra mức, rò rỉ và tình trạng; thay/xả khí đúng quy trình.",
       "materials": "Dung dịch đúng chuẩn, tỷ lệ pha; vòng đệm khi cần",
-      "caution": "Lần thay đầu có thể dài hơn chu kỳ lặp. Không mở nắp khi nóng."
+      "caution": "Lần thay đầu có thể dài hơn chu kỳ lặp. Không mở nắp khi nóng.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "brake_fluid",
@@ -73,7 +102,12 @@
       "applicability": "Theo hệ thống thủy lực",
       "inspection": "Kiểm tra mức, rò rỉ; thay và xả khí đúng chuẩn hãng.",
       "materials": "Dầu DOT đúng sách; không trộn tùy tiện",
-      "caution": "Đừng dùng kiểm tra mức dầu để reset mốc thay dầu."
+      "caution": "Đừng dùng kiểm tra mức dầu để reset mốc thay dầu.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "brake_pads",
@@ -82,7 +116,12 @@
       "applicability": "Phanh đĩa",
       "inspection": "Đo bề dày, kiểm tra mòn lệch, tiếng kêu và đèn báo.",
       "materials": "Má đúng cầu trước/sau; bộ phụ kiện theo thiết kế",
-      "caution": "Thay theo đo kiểm/giới hạn hãng, không đặt tuổi thọ km chung."
+      "caution": "Thay theo đo kiểm/giới hạn hãng, không đặt tuổi thọ km chung.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "brake_discs",
@@ -91,7 +130,12 @@
       "applicability": "Phanh đĩa",
       "inspection": "Đo chiều dày, độ đảo; kiểm tra xước/nứt.",
       "materials": "Đĩa đúng kích thước và mã; dụng cụ đo",
-      "caution": "Ghi số đo và giới hạn MIN TH từ tài liệu/chi tiết."
+      "caution": "Ghi số đo và giới hạn MIN TH từ tài liệu/chi tiết.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "drum_brakes",
@@ -100,7 +144,12 @@
       "applicability": "Xe có phanh tang trống",
       "inspection": "Đo mòn, kiểm tra xi lanh và rò rỉ; điều chỉnh khi cần.",
       "materials": "Guốc, lò xo, xi lanh theo chẩn đoán",
-      "caution": "Không áp dụng cho cầu chỉ dùng phanh đĩa."
+      "caution": "Không áp dụng cho cầu chỉ dùng phanh đĩa.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "tires",
@@ -109,7 +158,12 @@
       "applicability": "Tất cả xe",
       "inspection": "Đo độ sâu gai, áp suất, kiểm tra nứt/phồng; đối chiếu cỡ và tải.",
       "materials": "Lốp đúng cỡ, chỉ số tải/tốc độ; van",
-      "caution": "Thay theo tình trạng và hướng dẫn hãng lốp/xe; không cố định km."
+      "caution": "Thay theo tình trạng và hướng dẫn hãng lốp/xe; không cố định km.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "tire_rotation",
@@ -118,7 +172,12 @@
       "applicability": "Tùy cấu hình lốp",
       "inspection": "Đảo đúng sơ đồ; kiểm tra lốp định hướng, cỡ trước/sau và TPMS.",
       "materials": "Dụng cụ siết lực; van khi cần",
-      "caution": "Lốp khác cỡ trước/sau có thể không đảo theo sơ đồ thông thường."
+      "caution": "Lốp khác cỡ trước/sau có thể không đảo theo sơ đồ thông thường.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "battery_12v",
@@ -127,7 +186,12 @@
       "applicability": "Theo trang bị",
       "inspection": "Đo tình trạng/khả năng khởi động, kiểm tra cực và giá đỡ.",
       "materials": "Ắc quy thường / EFB / AGM đúng thiết kế",
-      "caution": "Start-stop cần loại phù hợp, có thể cần đăng ký/reset sau thay."
+      "caution": "Start-stop cần loại phù hợp, có thể cần đăng ký/reset sau thay.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "drive_belt",
@@ -136,7 +200,11 @@
       "applicability": "Xe có trang bị",
       "inspection": "Kiểm tra nứt, sờn, độ căng và puly.",
       "materials": "Dây đai, tăng đai/puly theo chẩn đoán",
-      "caution": "Khác dây đai cam; không gộp chu kỳ."
+      "caution": "Khác dây đai cam; không gộp chu kỳ.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "timing_belt",
@@ -145,7 +213,11 @@
       "applicability": "Chỉ động cơ dùng đai cam",
       "inspection": "Xác định động cơ dùng đai khô/đai trong dầu; thay đúng quy trình.",
       "materials": "Bộ đai cam, tăng đai, phụ kiện theo sách",
-      "caution": "Không áp mốc đai cam cho động cơ dùng xích cam."
+      "caution": "Không áp mốc đai cam cho động cơ dùng xích cam.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "transmission_fluid",
@@ -154,7 +226,11 @@
       "applicability": "Phân biệt MT / AT / CVT / DCT",
       "inspection": "Kiểm tra rò rỉ; thay đúng chuẩn, nhiệt độ và cách kiểm tra mức.",
       "materials": "ATF/CVTF/MTF/DCTF đúng chuẩn; lọc/gioăng khi sách yêu cầu",
-      "caution": "Không dùng dầu CVT cho AT; điều kiện kéo tải có thể đổi lịch."
+      "caution": "Không dùng dầu CVT cho AT; điều kiện kéo tải có thể đổi lịch.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "differential_fluid",
@@ -163,7 +239,11 @@
       "applicability": "Xe có cụm vi sai cần bảo dưỡng",
       "inspection": "Kiểm tra rò rỉ, thay theo cấu hình dẫn động.",
       "materials": "Dầu đúng độ nhớt/chuẩn, đệm nút",
-      "caution": "Chỉ áp dụng đúng cầu và bộ vi sai của xe."
+      "caution": "Chỉ áp dụng đúng cầu và bộ vi sai của xe.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "transfer_fluid",
@@ -172,7 +252,11 @@
       "applicability": "4WD/AWD có trang bị",
       "inspection": "Kiểm tra/thay theo tài liệu hộp phân phối.",
       "materials": "Dầu đúng chuẩn hộp phân phối",
-      "caution": "Không thêm hạng mục này mặc định cho xe FWD."
+      "caution": "Không thêm hạng mục này mặc định cho xe FWD.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "steering_suspension",
@@ -181,7 +265,12 @@
       "applicability": "Tất cả xe theo cấu hình",
       "inspection": "Kiểm tra độ rơ, chụp bụi, rò rỉ giảm xóc; đo góc khi cần.",
       "materials": "Rô tuyn/cao su/giảm xóc chỉ sau chẩn đoán",
-      "caution": "Cân chỉnh sau sửa chữa có ảnh hưởng hình học bánh xe."
+      "caution": "Cân chỉnh sau sửa chữa có ảnh hưởng hình học bánh xe.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "wipers_lights",
@@ -190,7 +279,12 @@
       "applicability": "Tất cả xe",
       "inspection": "Kiểm tra gạt, phun rửa, đèn tín hiệu và còi.",
       "materials": "Lưỡi gạt, bóng đèn đúng loại; nước rửa kính",
-      "caution": "Theo tình trạng; không đặt lịch thay đồng loạt."
+      "caution": "Theo tình trạng; không đặt lịch thay đồng loạt.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "air_conditioning",
@@ -199,7 +293,12 @@
       "applicability": "Xe có trang bị",
       "inspection": "Đo nhiệt độ, kiểm tra rò rỉ và lượng môi chất theo chẩn đoán.",
       "materials": "Môi chất/lubricant đúng nhãn xe, gioăng phù hợp",
-      "caution": "Không nạp gas định kỳ nếu chưa xác định thiếu hoặc rò."
+      "caution": "Không nạp gas định kỳ nếu chưa xác định thiếu hoặc rò.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ]
     },
     {
       "code": "diesel_emissions",
@@ -208,7 +307,11 @@
       "applicability": "Diesel có đúng trang bị",
       "inspection": "Đọc lỗi, kiểm tra điều kiện tái sinh, dùng dung dịch đúng SCR nếu có.",
       "materials": "Dung dịch SCR đúng chuẩn; phụ tùng sau chẩn đoán",
-      "caution": "Không coi mọi xe diesel đều có SCR; không tự xóa/cắt hệ thống."
+      "caution": "Không coi mọi xe diesel đều có SCR; không tự xóa/cắt hệ thống.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
     },
     {
       "code": "hybrid_cooling",
@@ -217,7 +320,247 @@
       "applicability": "Hybrid có trang bị",
       "inspection": "Kiểm tra cửa hút gió/lọc và mạch làm mát đúng hướng dẫn.",
       "materials": "Lọc, nước làm mát đúng mạch",
-      "caution": "Công việc điện áp cao cần kỹ thuật viên và quy trình hãng."
+      "caution": "Công việc điện áp cao cần kỹ thuật viên và quy trình hãng.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ]
+    },
+    {
+      "code": "wheel_bearing",
+      "name": "Bạc đạn / moay-ơ bánh xe",
+      "group": "Gầm",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra độ rơ, tiếng ồn và cảm biến tích hợp.",
+      "materials": "Cụm moay-ơ đúng cầu và chuẩn cảm biến",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "shock_absorber",
+      "name": "Giảm xóc / chân máy / cao su gầm",
+      "group": "Gầm",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra rò rỉ, rơ, hư cao su; xác định đúng vị trí.",
+      "materials": "Giảm xóc, bát bèo, cao su theo VIN",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "tpms",
+      "name": "Cảm biến áp suất lốp",
+      "group": "Lốp",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra tín hiệu, pin cảm biến và quy trình học lại.",
+      "materials": "Van/cảm biến đúng tần số và đời xe",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid",
+        "ev"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "ignition_coil",
+      "name": "Cuộn đánh lửa",
+      "group": "Động cơ",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Đọc lỗi, kiểm tra điện và điều kiện gây bỏ máy trước khi thay.",
+      "materials": "Cuộn đúng động cơ; giắc theo thiết kế",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "oxygen_sensor",
+      "name": "Cảm biến oxy / khí xả",
+      "group": "Khí thải",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Chẩn đoán tín hiệu và vị trí trước/sau bộ xúc tác.",
+      "materials": "Cảm biến đúng giắc và vị trí",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "fuel_injector",
+      "name": "Kim phun nhiên liệu",
+      "group": "Nhiên liệu",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Chẩn đoán áp suất/lưu lượng; không thay chỉ từ mã lỗi.",
+      "materials": "Kim phun, gioăng và yêu cầu hiệu chỉnh OEM",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "egr",
+      "name": "Van EGR / bộ làm mát EGR",
+      "group": "Khí thải",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra hoạt động, muội và rò rỉ theo tài liệu động cơ.",
+      "materials": "Van/gioăng theo cấu hình động cơ",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "dpf",
+      "name": "Bộ lọc hạt DPF",
+      "group": "Khí thải",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Đọc tải muội/chênh áp; phân biệt bảo dưỡng, tái sinh và thay.",
+      "materials": "DPF/cảm biến đúng chuẩn khí thải",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "turbo",
+      "name": "Turbo / đường tăng áp",
+      "group": "Động cơ",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra áp suất, rò rỉ và đường dầu trước khi kết luận.",
+      "materials": "Turbo/ống/gioăng đúng biến thể động cơ",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ice",
+        "hybrid"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "ev_battery_cooling",
+      "name": "Mạch làm mát pin / điện công suất",
+      "group": "Điện EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra theo tài liệu hãng; phân biệt mạch pin và mạch truyền động.",
+      "materials": "Dung dịch, ống/gioăng đúng mạch và chuẩn OEM",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev",
+        "hybrid"
+      ],
+      "highVoltage": true
+    },
+    {
+      "code": "ev_reduction_fluid",
+      "name": "Dầu hộp giảm tốc điện",
+      "group": "Truyền động EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Đối chiếu lịch riêng của hộp giảm tốc; không dùng dầu CVT/AT thay thế.",
+      "materials": "Dầu giảm tốc đúng chuẩn và dung tích từ tài liệu",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Thay theo đo kiểm và yêu cầu trong sách đúng xe.",
+      "powertrains": [
+        "ev"
+      ],
+      "highVoltage": false
+    },
+    {
+      "code": "ev_charge_port",
+      "name": "Cổng sạc / khóa cổng sạc",
+      "group": "Sạc EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Quan sát hư hại, báo lỗi và kín nước; chuyển người được đào tạo.",
+      "materials": "Cổng/khóa/giắc đúng chuẩn xe",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev"
+      ],
+      "highVoltage": true
+    },
+    {
+      "code": "ev_hv_harness",
+      "name": "Dây, giắc và liên động cao áp",
+      "group": "Điện EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Ghi nhận cảnh báo/hư hại; chỉ xử lý theo quy trình an toàn hãng.",
+      "materials": "Dây/giắc/khóa theo VIN",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev",
+        "hybrid"
+      ],
+      "highVoltage": true
+    },
+    {
+      "code": "ev_traction_battery",
+      "name": "Pin kéo và cụm quản lý pin",
+      "group": "Điện EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Đọc thông tin chẩn đoán được phép; không đặt lịch thay pin theo km chung.",
+      "materials": "Cụm hoặc module được hãng cho phép thay",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev",
+        "hybrid"
+      ],
+      "highVoltage": true
+    },
+    {
+      "code": "ev_inverter",
+      "name": "Biến tần / điều khiển truyền động",
+      "group": "Điện EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Chẩn đoán lỗi trước khi đề nghị thay cụm; cần người có đào tạo.",
+      "materials": "Biến tần đúng mã cấu hình và quy trình hiệu chỉnh",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev",
+        "hybrid"
+      ],
+      "highVoltage": true
+    },
+    {
+      "code": "ev_onboard_charger",
+      "name": "Bộ sạc trên xe / chuyển đổi DC-DC",
+      "group": "Sạc EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Phân biệt lỗi nguồn, cổng và bộ sạc từ tài liệu chẩn đoán.",
+      "materials": "OBC/DC-DC đúng điện áp, mã và phần mềm",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev"
+      ],
+      "highVoltage": true
+    },
+    {
+      "code": "ev_thermal",
+      "name": "Bơm nhiệt / máy nén điện",
+      "group": "Điều hòa EV",
+      "applicability": "Theo trang bị và cấu hình xe, cần xác minh VIN",
+      "inspection": "Kiểm tra lỗi và rò rỉ theo trang bị; không suy ra mọi EV có bơm nhiệt.",
+      "materials": "Máy nén/dầu chuyên dụng/gioăng đúng thiết kế",
+      "caution": "Không coi danh mục là mã phụ tùng tương thích hoặc lịch thay bắt buộc. Công việc cao áp cần người được đào tạo và tài liệu an toàn OEM.",
+      "powertrains": [
+        "ev",
+        "hybrid"
+      ],
+      "highVoltage": true
     }
   ],
   "brands": [
@@ -231,7 +574,34 @@
         "BR-V"
       ],
       "sourceUrl": "https://www.honda.com.vn/o-to/dich-vu-sau-ban-hang/huong-dan-su-dung",
-      "notes": "Xác định xăng/hybrid và loại bugi. Lịch City Malaysia không tự áp dụng cho City Việt Nam; thông báo CR-V e:HEV phải đối chiếu phạm vi sản xuất."
+      "notes": "Xác định xăng/hybrid và loại bugi. Lịch City Malaysia không tự áp dụng cho City Việt Nam; thông báo CR-V e:HEV phải đối chiếu phạm vi sản xuất.",
+      "modelProfiles": [
+        {
+          "model": "City",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Civic",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "CR-V",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "HR-V",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "BR-V",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     },
     {
       "brand": "Toyota",
@@ -244,7 +614,39 @@
         "Fortuner"
       ],
       "sourceUrl": "https://www.toyota.com.vn/hdsd/vios/2024",
-      "notes": "Vios có MT/AT/CVT theo đời xe; các loại dầu khác nhau. Nước làm mát và bugi phải tra đúng phiên bản. Hybrid có hạng mục làm mát pin riêng."
+      "notes": "Vios có MT/AT/CVT theo đời xe; các loại dầu khác nhau. Nước làm mát và bugi phải tra đúng phiên bản. Hybrid có hạng mục làm mát pin riêng.",
+      "modelProfiles": [
+        {
+          "model": "Vios",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Corolla Altis",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Corolla Cross",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Camry",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Innova",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Fortuner",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     },
     {
       "brand": "Hyundai",
@@ -257,7 +659,39 @@
         "Santa Fe"
       ],
       "sourceUrl": "https://baohanhdientu.hyundai.thanhcong.vn/warranty",
-      "notes": "Accent PE 2021 phân biệt bugi thường 40.000 km và iridium/platinum 100.000 km; chú thích dầu SP-IV 90.000 km/48 tháng cần ưu tiên khi đúng cấu hình. Không sao chép mục 4WD/đai cam của bảng chung sang mọi Accent."
+      "notes": "Accent PE 2021 phân biệt bugi thường 40.000 km và iridium/platinum 100.000 km; chú thích dầu SP-IV 90.000 km/48 tháng cần ưu tiên khi đúng cấu hình. Không sao chép mục 4WD/đai cam của bảng chung sang mọi Accent.",
+      "modelProfiles": [
+        {
+          "model": "Accent",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Grand i10",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Elantra",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Creta",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Tucson",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Santa Fe",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     },
     {
       "brand": "Kia",
@@ -272,7 +706,49 @@
         "Carnival"
       ],
       "sourceUrl": "https://www.kiavietnam.com.vn/bao-duong-dinh-ki",
-      "notes": "Cấp bảo dưỡng gồm kiểm tra phanh, lọc, đai và các hệ thống; đây không phải bằng chứng tất cả bộ phận phải thay ở một mốc. Xác định MPI/GDI/diesel, AT/DCT/MT và sách đúng mẫu."
+      "notes": "Cấp bảo dưỡng gồm kiểm tra phanh, lọc, đai và các hệ thống; đây không phải bằng chứng tất cả bộ phận phải thay ở một mốc. Xác định MPI/GDI/diesel, AT/DCT/MT và sách đúng mẫu.",
+      "modelProfiles": [
+        {
+          "model": "Morning",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Soluto",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "K3",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Seltos",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Sonet",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Sportage",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Sorento",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Carnival",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     },
     {
       "brand": "Mazda",
@@ -286,7 +762,44 @@
         "CX-8"
       ],
       "sourceUrl": "https://mazdamotors.vn/maintenance",
-      "notes": "Trang hãng có cấp 1: 5.000 km/3 tháng và kiểm tra dầu, nước làm mát, phanh, bình điện, đai. Bảo dưỡng cấp không có nghĩa thay toàn bộ. Xác định Skyactiv và bình điện phù hợp i-stop."
+      "notes": "Trang hãng có cấp 1: 5.000 km/3 tháng và kiểm tra dầu, nước làm mát, phanh, bình điện, đai. Bảo dưỡng cấp không có nghĩa thay toàn bộ. Xác định Skyactiv và bình điện phù hợp i-stop.",
+      "modelProfiles": [
+        {
+          "model": "Mazda2",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Mazda3",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Mazda6",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "CX-3",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "CX-30",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "CX-5",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "CX-8",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     },
     {
       "brand": "Ford",
@@ -297,7 +810,29 @@
         "Explorer"
       ],
       "sourceUrl": "https://www.ford.com.vn/content/dam/Ford/website-assets/ap/vn/Owner-Dashboard/Service%20%26%20Maintainance/maintenance-schedule-plan/lich-bao-duong-ranger.pdf",
-      "notes": "Lịch Ranger 2022- tách IOLM, đai cam Panther 2.0L, lọc nhiên liệu và dầu các hộp số/cầu. Bảng PDF nhiều cột phải kiểm tra trực quan trước khi nhập mốc. IOLM có thể yêu cầu thay dầu sớm; không áp lịch Ranger cho Territory."
+      "notes": "Lịch Ranger 2022- tách IOLM, đai cam Panther 2.0L, lọc nhiên liệu và dầu các hộp số/cầu. Bảng PDF nhiều cột phải kiểm tra trực quan trước khi nhập mốc. IOLM có thể yêu cầu thay dầu sớm; không áp lịch Ranger cho Territory.",
+      "modelProfiles": [
+        {
+          "model": "Ranger",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Everest",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Territory",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Explorer",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     },
     {
       "brand": "Mitsubishi",
@@ -309,7 +844,460 @@
         "Pajero Sport"
       ],
       "sourceUrl": "https://www.mitsubishi-motors.com.vn/dich-vu/bao-duong-dinh-ky",
-      "notes": "Hãng nêu kỳ dịch vụ 5.000 km/3 tháng, riêng All New Triton động cơ 4N16: 10.000 km/6 tháng. Đây là kỳ vào xưởng; từng bộ phận vẫn phân biệt I (kiểm tra), R (thay), L (bôi trơn)."
+      "notes": "Hãng nêu kỳ dịch vụ 5.000 km/3 tháng, riêng All New Triton động cơ 4N16: 10.000 km/6 tháng. Đây là kỳ vào xưởng; từng bộ phận vẫn phân biệt I (kiểm tra), R (thay), L (bôi trơn).",
+      "modelProfiles": [
+        {
+          "model": "Attrage",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Xpander",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Xforce",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Triton",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Pajero Sport",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "VinFast",
+      "models": [
+        "VF 2",
+        "VF 3",
+        "VF e34",
+        "VF 5",
+        "VF 6",
+        "VF 7",
+        "VF 8",
+        "VF 9",
+        "VF MPV 7",
+        "Minio Green",
+        "Herio Green",
+        "Nerio Green",
+        "Limo Green",
+        "EC Van",
+        "Fadil",
+        "Lux A2.0",
+        "Lux SA2.0",
+        "President"
+      ],
+      "sourceUrl": "https://vinfastauto.com/vn_vi/dich-vu-bao-duong-oto",
+      "notes": "Tách dòng xăng Fadil/Lux/President với VF điện. Lịch và vật tư phải khớp sách đúng dòng, đời xe và cấu hình; giữ hồ sơ lần thực hiện. Pin kéo không phải vật tư thay định kỳ theo km chung.",
+      "modelProfiles": [
+        {
+          "model": "VF 2",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF 3",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF e34",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF 5",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF 6",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF 7",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF 8",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF 9",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "VF MPV 7",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Minio Green",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Herio Green",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Nerio Green",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Limo Green",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "EC Van",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Fadil",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Lux A2.0",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Lux SA2.0",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "President",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "Nissan",
+      "models": [
+        "Almera",
+        "Navara",
+        "Kicks e-POWER",
+        "X-Trail"
+      ],
+      "sourceUrl": "https://www.nissanvietnam.vn/lich-bao-duong-c5.html",
+      "notes": "Chọn lịch riêng theo mẫu xe. Kicks e-POWER vẫn có động cơ đốt trong; không dùng danh mục xe thuần điện để bỏ bảo dưỡng động cơ.",
+      "modelProfiles": [
+        {
+          "model": "Almera",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Navara",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Kicks e-POWER",
+          "powertrain": "hybrid",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "X-Trail",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "Suzuki",
+      "models": [
+        "Swift",
+        "Ertiga",
+        "XL7",
+        "Ciaz",
+        "Carry"
+      ],
+      "sourceUrl": "https://suzuki.com.vn/pages/hau-mai",
+      "notes": "Xác định đúng mẫu, động cơ và cấu hình hybrid nếu có; lấy mã lọc, bugi, phanh từ tài liệu/VIN.",
+      "modelProfiles": [
+        {
+          "model": "Swift",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Ertiga",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "XL7",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Ciaz",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Carry",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "Isuzu",
+      "models": [
+        "D-MAX",
+        "mu-X"
+      ],
+      "sourceUrl": "https://isuzu-vietnam.com/cau-hoi-thuong-gap",
+      "notes": "Ưu tiên kiểm tra dữ liệu động cơ diesel, lọc nhiên liệu và trang bị xử lý khí thải của đúng phiên bản. Không chuyển lịch xe tải sang xe du lịch.",
+      "modelProfiles": [
+        {
+          "model": "D-MAX",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "mu-X",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "Subaru",
+      "models": [
+        "Forester",
+        "Outback",
+        "XV",
+        "Crosstrek",
+        "WRX",
+        "BRZ"
+      ],
+      "sourceUrl": "https://www.subaru.asia/vn/en/owners/subaru-service.php",
+      "notes": "Đối chiếu hệ truyền động AWD, loại hộp số và dầu từng cụm theo biến thể. Giữ hồ sơ đo kiểm và vật tư chính xác.",
+      "modelProfiles": [
+        {
+          "model": "Forester",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Outback",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "XV",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Crosstrek",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "WRX",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "BRZ",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "Mercedes-Benz",
+      "models": [
+        "C-Class",
+        "E-Class",
+        "S-Class",
+        "GLA",
+        "GLB",
+        "GLC",
+        "GLE",
+        "EQA",
+        "EQB",
+        "EQE",
+        "EQS"
+      ],
+      "sourceUrl": "https://www.mercedes-benz.com.vn/vi/passengercars/services/genuine-parts.html",
+      "notes": "Tách xe xăng/diesel/hybrid với EQ điện. Đối chiếu mã VIN, tiêu chuẩn dầu và quy trình hiệu chỉnh sau thay; không tạo một lịch cho toàn hãng.",
+      "modelProfiles": [
+        {
+          "model": "C-Class",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "E-Class",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "S-Class",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "GLA",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "GLB",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "GLC",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "GLE",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "EQA",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "EQB",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "EQE",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "EQS",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "BMW",
+      "models": [
+        "3 Series",
+        "5 Series",
+        "X1",
+        "X3",
+        "X5",
+        "i4",
+        "iX",
+        "iX3"
+      ],
+      "sourceUrl": "https://www.bmw.vn/vi/services-workshop/services-and-workshop-2025/",
+      "notes": "Theo dõi yêu cầu dịch vụ riêng của xe; tách dòng i điện. Mã phụ tùng, chuẩn chất lỏng và phần mềm cần tra theo VIN.",
+      "modelProfiles": [
+        {
+          "model": "3 Series",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "5 Series",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "X1",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "X3",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "X5",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "i4",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "iX",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "iX3",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
+    },
+    {
+      "brand": "MG",
+      "models": [
+        "MG5",
+        "ZS",
+        "HS",
+        "MG4",
+        "Cyberster"
+      ],
+      "sourceUrl": "https://mgmotor.vn/wp-content/uploads/2025/04/Chinh-sach-bao-hanh-MG.pdf",
+      "notes": "Tách dòng MG4/Cyberster điện khỏi xe có động cơ đốt trong. Hồ sơ bảo dưỡng và vật tư phải theo tài liệu xe tương ứng.",
+      "modelProfiles": [
+        {
+          "model": "MG5",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "ZS",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "HS",
+          "powertrain": "ice",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "MG4",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        },
+        {
+          "model": "Cyberster",
+          "powertrain": "ev",
+          "fitmentStatus": "requires_vin_check"
+        }
+      ]
     }
   ],
   "presets": [
@@ -413,5 +1401,105 @@
       ]
     }
   ],
-  "sourceLimitations": "Các mẫu tham khảo chưa được duyệt. Không có mã phụ tùng/VIN hay toàn bộ lịch của mọi mẫu xe. Một bảng thiếu mốc lặp sẽ hiện Cần xác minh thay vì tự bịa chu kỳ."
+  "sourceLimitations": "Các mẫu tham khảo chưa được duyệt. Không có mã phụ tùng/VIN hay toàn bộ lịch của mọi mẫu xe. Một bảng thiếu mốc lặp sẽ hiện Cần xác minh thay vì tự bịa chu kỳ.",
+  "powertrainComponents": {
+    "ice": [
+      "engine_oil",
+      "oil_filter",
+      "engine_air_filter",
+      "cabin_filter",
+      "spark_plugs",
+      "fuel_filter",
+      "coolant",
+      "brake_fluid",
+      "brake_pads",
+      "brake_discs",
+      "drum_brakes",
+      "tires",
+      "tire_rotation",
+      "battery_12v",
+      "drive_belt",
+      "timing_belt",
+      "transmission_fluid",
+      "differential_fluid",
+      "transfer_fluid",
+      "steering_suspension",
+      "wipers_lights",
+      "air_conditioning",
+      "diesel_emissions",
+      "hybrid_cooling",
+      "wheel_bearing",
+      "shock_absorber",
+      "tpms",
+      "ignition_coil",
+      "oxygen_sensor",
+      "fuel_injector",
+      "egr",
+      "dpf",
+      "turbo"
+    ],
+    "hybrid": [
+      "engine_oil",
+      "oil_filter",
+      "engine_air_filter",
+      "cabin_filter",
+      "spark_plugs",
+      "fuel_filter",
+      "coolant",
+      "brake_fluid",
+      "brake_pads",
+      "brake_discs",
+      "drum_brakes",
+      "tires",
+      "tire_rotation",
+      "battery_12v",
+      "drive_belt",
+      "timing_belt",
+      "transmission_fluid",
+      "differential_fluid",
+      "transfer_fluid",
+      "steering_suspension",
+      "wipers_lights",
+      "air_conditioning",
+      "diesel_emissions",
+      "hybrid_cooling",
+      "wheel_bearing",
+      "shock_absorber",
+      "tpms",
+      "ignition_coil",
+      "oxygen_sensor",
+      "fuel_injector",
+      "turbo",
+      "ev_battery_cooling",
+      "ev_hv_harness",
+      "ev_traction_battery",
+      "ev_inverter",
+      "ev_thermal"
+    ],
+    "ev": [
+      "cabin_filter",
+      "brake_fluid",
+      "brake_pads",
+      "brake_discs",
+      "drum_brakes",
+      "tires",
+      "tire_rotation",
+      "battery_12v",
+      "steering_suspension",
+      "wipers_lights",
+      "air_conditioning",
+      "wheel_bearing",
+      "shock_absorber",
+      "tpms",
+      "ev_battery_cooling",
+      "ev_reduction_fluid",
+      "ev_charge_port",
+      "ev_hv_harness",
+      "ev_traction_battery",
+      "ev_inverter",
+      "ev_onboard_charger",
+      "ev_thermal"
+    ]
+  },
+  "modelPolicy": "Gợi ý theo hệ truyền động chỉ giới hạn nhóm tra cứu; vẫn cần xác minh VIN, trang bị, năm và động cơ của xe thực tế. Không tự suy ra lịch thay hoặc mã OEM."
 }

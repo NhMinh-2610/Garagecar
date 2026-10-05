@@ -33,15 +33,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).join('') || '<tr><td colspan="7" class="empty-state">Không có xe phù hợp</td></tr>';
     }
     async function choices(editing = null) {
-        const [users, data] = await Promise.all([Garage.request('/auth/users'), Garage.request('/settings/brands')]);
+        const [users, data, catalog] = await Promise.all([Garage.request('/auth/users'), Garage.request('/settings/brands'), Garage.request('/maintenance/catalog')]);
         customers = users.filter(u => u.role === 'customer');
-        brands = data;
+        brands = [...data];
+        for (const entry of catalog.brands || []) {
+            if (!brands.some(b => b.name.toLowerCase() === entry.brand.toLowerCase())) brands.push({name:entry.brand});
+        }
         for (const id of ['customerSelect','editCustomerSelect']) {
             byId(id).replaceChildren(new Option('Khách vãng lai / chưa liên kết',''), ...customers.map(c => new Option(c.fullName + ' — ' + c.email,c.id)));
         }
         for (const id of ['brandSelect','editBrandSelect']) {
             byId(id).replaceChildren(new Option('-- Chọn hiệu xe --',''), ...brands.map(b => new Option(b.name,b.name)));
             if (editing && !brands.some(b => b.name === editing.carBrand)) byId(id).add(new Option(editing.carBrand,editing.carBrand));
+            const model = byId(id === 'brandSelect' ? 'modelSelect' : 'editModelSelect');
+            let list = byId(id + 'Models');
+            if (!list) { list = document.createElement('datalist'); list.id = id + 'Models'; model.after(list); model.setAttribute('list',list.id); }
+            model.placeholder = 'Chọn gợi ý hoặc nhập dòng xe khác';
+            const suggestions = () => {
+                const entry = (catalog.brands || []).find(b => b.brand.toLowerCase() === byId(id).value.toLowerCase());
+                list.replaceChildren(...(entry?.models || []).map(name => new Option(name,name)));
+            };
+            byId(id).onchange = () => { model.value = ''; suggestions(); };
+            if (editing) byId(id).value = editing.carBrand;
+            suggestions();
         }
     }
     byId('btnNewReception').onclick = async () => {

@@ -107,11 +107,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         .value.toLocaleLowerCase("vi-VN"),
       brand = host.querySelector("#careBrand").value,
       b = catalog.brands.find((b) => b.brand === brand);
+    let modelSelect = host.querySelector("#careModel");
+    if (!modelSelect) {
+      const label = document.createElement("label");
+      label.textContent = "Dòng xe / Hệ truyền động";
+      modelSelect = document.createElement("select");
+      modelSelect.id = "careModel";
+      label.append(modelSelect);
+      host.querySelector("#careBrand").parentElement.after(label);
+      modelSelect.onchange = library;
+    }
+    if (modelSelect.dataset.brand !== brand) {
+      modelSelect.dataset.brand = brand;
+      modelSelect.innerHTML =
+        '<option value="">Tất cả dòng / biến thể</option>' +
+        (b?.modelProfiles || [])
+          .map(
+            (p) =>
+              `<option value="${esc(p.model)}">${esc(p.model)} · ${p.powertrain === "ev" ? "Thuần điện" : p.powertrain === "hybrid" ? "Hybrid" : "Có động cơ đốt trong"}</option>`,
+          )
+          .join("");
+    }
+    const modelProfile = b?.modelProfiles?.find(
+      (p) => p.model === modelSelect.value,
+    );
     host.querySelector("#brandGuidance").innerHTML = b
-      ? `<p class="notice"><strong>${esc(b.brand)} · ${esc(b.models.join(", "))}</strong><br>${esc(b.notes)} <a href="${safeLink(b.sourceUrl)}" target="_blank" rel="noopener">Xem nguồn hãng</a></p>`
+      ? `<p class="notice"><strong>${esc(b.brand)} · ${esc(b.models.join(", "))}</strong><br>${esc(b.notes)}${modelProfile ? "<br>" + esc(modelProfile.note || catalog.modelPolicy) : ""} <a href="${safeLink(b.sourceUrl)}" target="_blank" rel="noopener">Xem nguồn hãng</a></p>`
       : '<p class="panel-note">Chọn hãng để xem lưu ý theo dòng xe. Khả năng tương thích vật tư cần đối chiếu VIN.</p>';
     host.querySelector("#componentLibrary").innerHTML =
       catalog.components
+        .filter(
+          (c) =>
+            !modelProfile ||
+            (
+              modelProfile.componentCodes ||
+              catalog.powertrainComponents?.[modelProfile.powertrain] ||
+              []
+            ).includes(c.code),
+        )
         .filter((c) =>
           [c.name, c.group, c.inspection]
             .join(" ")
