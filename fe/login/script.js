@@ -45,9 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRedirectUrl(role) {
         switch (role) {
-            case 'advisor':
-            case 'accountant':
-            case 'hr': return '/staff';
+            case 'advisor': return '/advisor';
+            case 'accountant': return '/accountant';
+            case 'hr': return '/hr';
             case 'admin':    return '/admin';
             case 'mechanic': return '/mechanic';
             case 'customer': return '/customer';

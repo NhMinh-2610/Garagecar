@@ -33,7 +33,7 @@ function checkAuth() {
         if (user.role !== 'customer') {
             // Redirect to correct portal
             const redirectMap = {
-                advisor: "/staff", accountant: "/staff", hr: "/staff",
+                advisor: "/advisor", accountant: "/accountant", hr: "/hr",
                 'admin': '../admin/index.html',
                 'mechanic': '../mechanic/index.html',
             };

@@ -6,6 +6,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.replace("/login");
     return;
   }
+  const expectedRole = document.body.dataset.staffRole;
+  if (expectedRole && user.role !== expectedRole) {
+    location.replace("/" + user.role);
+    return;
+  }
   const defaults = {
     advisor: ["reception", "workshop", "maintenance"],
     accountant: ["finance", "reports"],
@@ -123,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       [...pending, ...paid]
         .map((t) => {
           const v = visits.find((v) => v.id === t.serviceVisitId),
-            ready = !t.serviceVisitId || v?.qcAt;
+            ready = !t.serviceVisitId || t.qcAt || v?.qcAt;
           return `<tr><td>#${t.id} · ${esc(t.vehicle?.licensePlate)}</td><td>${money(t.totalAmount)}</td><td>${t.serviceVisitId ? (ready ? "Đã nghiệm thu" : "Chờ nghiệm thu") : "Phiếu cũ"}</td><td>${t.status === "paid" ? "Đã thu · " + esc(t.paidAt || "") : "Chưa thu"}</td><td>${t.status === "completed" ? `<button class="btn btn-primary btn-sm" data-staff="pay" data-id="${t.id}" ${ready ? "" : "disabled"}>Thu toàn bộ</button>` : ""}<button class="btn btn-sm" data-staff="receipt" data-id="${t.id}">Chi tiết</button></td></tr>`;
         })
         .join("") ||
@@ -261,6 +266,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           Garage.request("/service/employees/" + id, {
             method: "PUT",
             body: Object.fromEntries(new FormData(f)),
+          }),
+      );
+    }
+    if (a === "pay") {
+      const ticket = tickets.find((t) => t.id === id);
+      return dialog(
+        "Thu đủ tiền · Phiếu #" + id,
+        `<p>Tổng tiền: <strong>${money(ticket.totalAmount)}</strong></p><label class="form-group">Phương thức<select name="paymentMethod"><option value="cash">Tiền mặt</option><option value="bank">Chuyển khoản</option><option value="card">Thẻ</option></select></label><label class="form-group">Mã giao dịch (bắt buộc với ngân hàng/thẻ)<input name="paymentReference" maxlength="100"></label><p class="field-help">Chỉ xác nhận sau khi thực tế nhận đủ tiền. Phiếu thu lưu người nhận và thời điểm.</p>`,
+        (f) =>
+          Garage.request("/repairs/" + id, {
+            method: "PUT",
+            body: { status: "paid", ...Object.fromEntries(new FormData(f)) },
           }),
       );
     }

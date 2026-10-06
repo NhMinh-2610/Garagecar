@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AutoPro · Nhân sự</title>
+    <link rel="stylesheet" href="../shared/ui.css" />
+    <link rel="stylesheet" href="../shared/workspace.css" />
+    <link rel="stylesheet" href="../shared/portals.css" />
+    <link rel="stylesheet" href="../shared/care.css" />
+    <script src="../shared/core.js" defer></script>
+    <script src="../shared/access.js" defer></script>
+    <script src="../shared/portal.js" defer></script>
+    <script src="../staff/app.js" defer></script>
+    <script src="../shared/pwa.js" defer></script>
+    <link rel="stylesheet" href="../shared/professional.css" />
+    <script src="../shared/evidence.js" defer></script>
+    <script src="../shared/professional.js" defer></script>
+  </head>
+  <body data-staff-role="hr">
+    <aside id="sidebar">
+      <a class="brand" href="/"
+        ><span class="brand-mark">A</span
+        ><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
+      >
+      <p class="nav-caption">NHÂN SỰ</p>
+      <nav aria-label="Chức năng Nhân sự">
+        <button
+          class="nav-item"
+          data-permission="hr"
+          data-target="staffHR-section"
+        >
+          Hồ sơ nhân sự
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <h4>Nhân sự</h4>
+          <small id="staffRole"></small>
+        </div>
+        <button class="btn" id="logoutBtn">Đăng xuất</button>
+      </div>
+    </aside>
+    <div id="content">
+      <header class="topbar">
+        <button
+          class="btn-icon toggle-sidebar"
+          aria-label="Mở menu"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          ☰</button
+        ><span id="pageTitle">Công việc</span
+        ><span class="sync-label">Tự đồng bộ khi không thao tác</span
+        ><button id="staffRefresh" class="btn btn-sm">Làm mới</button>
+      </header>
+      <main class="content-body">
+        <p id="staffError" class="inline-message error" role="alert" hidden></p>
+        <div class="role-intro">
+          <strong>Nhân sự</strong>
+          <p>
+            Hồ sơ nhân viên, phân ca, duyệt nghỉ và xác minh năng lực kỹ thuật.
+          </p>
+        </div>
+        <section id="staffHR-section"><div id="staffHR"></div></section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = JSON.parse(localStorage.getItem('user'));
         if (localStorage.getItem('token') && ['admin','mechanic','customer','advisor','accountant','hr'].includes(user?.role)) {
             const link = document.getElementById('loginLink');
-            link.textContent = 'Vào không gian của tôi'; link.href = ['advisor','accountant','hr'].includes(user.role) ? '/staff' : '/' + user.role;
+            link.textContent = 'Vào không gian của tôi'; link.href = '/' + user.role;
             document.getElementById('workspaceLink').href = link.href;
             document.getElementById('workspaceLink').textContent = user.role === 'customer' ? 'Theo dõi xe của tôi' : 'Mở trang làm việc';
             document.getElementById('registerLink').hidden = true;
