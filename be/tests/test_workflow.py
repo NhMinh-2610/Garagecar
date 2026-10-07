@@ -21,7 +21,7 @@ from models import User, Mechanic, Vehicle, Inventory
 
 
 def migrate(connection):
-    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py"]:
+    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py", "004_garage_care.py"]:
         spec = importlib.util.spec_from_file_location("migration", Path(__file__).parents[1] / "migrations/versions" / filename)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

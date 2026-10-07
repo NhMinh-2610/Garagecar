@@ -226,7 +226,7 @@ async function portal(role, overrides = {}, options = {}) {
     w.HTMLDialogElement.prototype.close = function () { this.open = false; this.dispatchEvent(new w.Event('close')); };
     if (!options.anonymous) {
         w.localStorage.setItem('token','test');
-        w.localStorage.setItem('user',JSON.stringify({id:1,role,fullName:'Test'}));
+        w.localStorage.setItem('user',JSON.stringify({id:1,role:options.accountRole||role,fullName:'Test'}));
     }
     w.fetch = async (url, options={}) => {
         const pathname = new URL(url).pathname.replace('/api','');
@@ -237,7 +237,7 @@ async function portal(role, overrides = {}, options = {}) {
             '/repairs/my-repairs':[], '/repairs/my-tasks':[], '/inventory':[part],'/mechanics':[mechanic],
             '/auth/users':[{id:3,role:'customer',fullName:'Customer',email:'c@example.com'}],
             '/settings/brands':[{id:1,name:'Toyota'}], '/settings/wages':[{id:1,name:'Change oil',price:50}],
-            '/settings/params':{max_cars_per_day:'30'}, '/bookings':[], '/reports/revenue':[],
+            '/settings/params':{max_cars_per_day:'30'}, '/bookings':[], '/reports/revenue':[], '/service/visits':[], '/service/resources':{}, '/service/employees':[],
         }[pathname] ?? {};
         return new Response(JSON.stringify({success:true,data}),{headers:{'Content-Type':'application/json'}});
     };
@@ -352,4 +352,83 @@ test('reports render real aggregates and wage editor uses the selected record', 
         assert.ok(calls.some(c=>c.path==='/settings/wages/1' && c.method==='PUT' && c.body.price===75));
         assert.deepEqual(errors,[]);
     } finally {dom.window.close();}
+});
+
+test('maintenance catalogue, exact scopes and history editor use structured data', async()=>{
+    const catalog=JSON.parse(fs.readFileSync(path.join(root,'be/data/maintenance_catalog.json'),'utf8'));
+    const profile={id:2,...catalog.presets[0],status:'approved'};
+    const {dom,w,calls,errors}=await portal('admin',{
+        '/maintenance/catalog':catalog,'/maintenance/vehicles':[vehicle],'/maintenance/profiles':[profile],'/maintenance/reminders':[],
+        '/maintenance/vehicles/1':{state:'missing_vehicle_details',care:null,profile:null,rules:[],records:[]},
+    });
+    try{
+        w.document.querySelector('[data-target="maintenance-section"]').click();
+        const select=w.document.getElementById('careVehicle');select.value='1';select.dispatchEvent(new w.Event('change'));await delay(80);
+        assert.match(w.document.getElementById('careVehiclePanel').textContent,/Chưa có năm xe/);
+        const brand=w.document.getElementById('careBrand');brand.value='Mitsubishi';brand.dispatchEvent(new w.Event('change'));
+        assert.match(w.document.getElementById('brandGuidance').textContent,/4N16/);
+        assert.equal(w.document.querySelectorAll('.component-card').length,24);
+        w.document.querySelector('[data-care="profile"]').click();
+        const form=w.document.querySelector('.care-dialog form');
+        const preset=w.document.getElementById('carePreset');preset.value='0';preset.dispatchEvent(new w.Event('change'));
+        assert.equal(form.elements.market.value,'MY');
+        assert.equal(form.querySelectorAll('.care-rule').length,5);
+        form.dispatchEvent(new w.Event('submit',{cancelable:true}));await delay(80);
+        const call=calls.find(c=>c.path==='/maintenance/profiles'&&c.method==='POST');
+        assert.ok(call);assert.equal(call.body.scope.market,'MY');assert.equal(call.body.scope.yearFrom,2023);
+        assert.equal(call.body.rules.find(r=>r.component==='coolant').repeatKm,null);
+        assert.deepEqual(errors,[]);
+    }finally{dom.window.close();}
+});
+
+test('customer approves the displayed quotation revision and cannot edit scopes',async()=>{
+    const catalog=JSON.parse(fs.readFileSync(path.join(root,'be/data/maintenance_catalog.json'),'utf8'));
+    const visit={id:4,vehicleId:1,licensePlate:'30A12345',concern:'Oil <safe>',initialInspection:'Inspection',status:'awaiting_approval',quotes:[{id:10,revision:2,stage:'final',status:'pending',totalAmount:250,items:[{taskName:'Change <safe>',partName:'Oil',quantity:2,partPrice:'100',laborPrice:'50',totalPrice:'250'}]}]};
+    const {dom,w,calls,errors}=await portal('customer',{'/service/visits':[visit],'/maintenance/catalog':catalog,'/maintenance/vehicles':[vehicle],'/maintenance/reminders':[]});
+    try{
+        assert.ok(w.document.querySelector('[data-service="decision"][data-id="10"]'));
+        assert.equal(w.document.querySelector('[data-service="intake"]'),null);
+        assert.equal(w.document.querySelector('[data-care="profile"]'),null);
+        assert.equal(w.document.querySelector('#serviceWorkspace safe'),null);
+        w.document.querySelector('[data-service="decision"][data-approved="true"]').click();
+        const form=w.document.querySelector('.care-dialog form');form.elements.note.value='Please proceed';
+        form.dispatchEvent(new w.Event('submit',{cancelable:true}));await delay(80);
+        const call=calls.find(c=>c.path==='/service/quotes/10/decision');
+        assert.deepEqual(call.body,{approved:true,note:'Please proceed'});
+        assert.deepEqual(errors,[]);
+    }finally{dom.window.close();}
+});
+
+test('staff portals load only their job functions and accountant waits for QC',async()=>{
+    for(const role of ['advisor','accountant','hr']){
+        const overrides={'/auth/me':{id:1,role,fullName:'Staff',disabledPermissions:[]},'/auth/customer-lookup':[],'/service/employees':[],'/service/visits':[], '/maintenance/vehicles':[], '/maintenance/profiles':[],'/maintenance/reminders':[],'/maintenance/catalog':{components:[],brands:[],presets:[]},'/service/resources':{vehicles:[],mechanics:[],inventory:[]}};
+        if(role==='accountant')overrides['/repairs']=[{id:1,serviceVisitId:3,status:'completed',vehicle,totalAmount:250,items:[]}];
+        const {dom,w,calls,errors}=await portal('staff',overrides,{accountRole:role});
+        try{
+            assert.deepEqual(errors,[]);
+            const visible=[...w.document.querySelectorAll('.nav-item:not([hidden])')].map(n=>n.dataset.permission);
+            assert.ok(visible.includes(role==='advisor'?'workshop':role==='accountant'?'finance':'hr'));
+            assert.ok(!calls.some(c=>c.path==='/auth/users'));
+            if(role==='accountant'){
+                assert.equal(w.document.querySelector('[data-staff="pay"]').disabled,true);
+                assert.ok(!calls.some(c=>c.path==='/maintenance/profiles'));
+            }
+        }finally{dom.window.close();}
+    }
+});
+
+test('PWA precache files exist and authenticated APIs are never intercepted',async()=>{
+    const vm=require('node:vm'),handlers={};
+    const script=fs.readFileSync(path.join(root,'fe/service-worker.js'),'utf8');
+    vm.runInNewContext(script,{self:{location:{origin:'https://garage.example'},addEventListener:(type,fn)=>handlers[type]=fn},URL});
+    let intercepted=false;
+    for(const request of [{url:'https://garage.example/api/maintenance/vehicles/1',method:'GET',headers:new Headers(),mode:'cors'},{url:'https://garage.example/static/customer/index.html',method:'GET',headers:new Headers({Authorization:'Bearer x'}),mode:'navigate'}]){
+        handlers.fetch({request,respondWith:()=>{intercepted=true;}});
+    }
+    assert.equal(intercepted,false);
+    const files=[...script.matchAll(/["']\/static\/([^"']+)["']/g)].map(m=>m[1]);
+    for(const file of new Set(files))assert.ok(fs.existsSync(path.join(root,'fe',file)),file);
+    const manifest=JSON.parse(fs.readFileSync(path.join(root,'fe/manifest.webmanifest'),'utf8'));
+    assert.equal(manifest.display,'standalone');
+    for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,'fe',icon.src.slice(8))));
 });
