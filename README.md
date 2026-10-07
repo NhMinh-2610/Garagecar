@@ -1,6 +1,6 @@
 ﻿# GarageCar — Quản lý garage ô tô
 
-FastAPI + SQLAlchemy async + PostgreSQL; frontend HTML/CSS/JavaScript thuần cho admin, thợ và khách hàng.
+FastAPI + SQLAlchemy async + PostgreSQL; frontend HTML/CSS/JavaScript thuần và PWA cho quản trị, cố vấn dịch vụ, kế toán, nhân sự, thợ và khách hàng.
 
 ## Yêu cầu
 
@@ -64,6 +64,7 @@ Mở trình duyệt:
 | Admin | http://localhost:8000/admin |
 | Thợ | http://localhost:8000/mechanic |
 | Khách hàng | http://localhost:8000/customer |
+| Cố vấn / Kế toán / Nhân sự | http://localhost:8000/staff |
 | Tài liệu API | http://localhost:8000/docs |
 
 Tài khoản demo: `admin@autopro.com`, `mechanic@autopro.com`, `customer@autopro.com` — mật khẩu `123456`.
@@ -77,11 +78,11 @@ Admin dùng chung bố cục: tiêu đề và thao tác chính, thẻ số liệ
 | Phân hệ | Chức năng hiện có |
 |---|---|
 | Tiếp nhận & Lịch hẹn | Tìm xe, tiếp nhận lại, liên kết tài khoản khách, xem lịch sử sửa, giao xe sau thanh toán; xác nhận/hủy yêu cầu đặt lịch từ trang chủ. |
-| Sửa chữa & Dịch vụ | Thống kê theo trạng thái, tìm phiếu/lọc thợ, tạo phiếu nhiều hạng mục và số lượng vật tư, sửa phiếu chờ, phân công, checklist tiến độ, xem chi tiết và thu tiền. |
+| Sửa chữa & Dịch vụ | Thống kê theo trạng thái, tìm phiếu/lọc thợ, tạo phiếu nhiều hạng mục và số lượng vật tư, sửa phiếu chờ, phân công, checklist tiến độ, xem chi tiết và chuyển đến mục Thu tiền. |
 | Kho & Dữ liệu | Tổng mã vật tư/số lượng/giá trị theo đơn giá; tìm kiếm, lọc sắp hết/hết hàng; nhập mới hoặc nhập thêm, sửa tên/đơn giá, nhật ký nhập–xuất–hoàn kho. Thêm/sửa/xóa hiệu xe và tiền công; giới hạn tiếp nhận mỗi ngày. |
 | Tài chính · Thu tiền | Phân biệt số tiền chờ thu và đã thu; chọn phiếu hoàn thành, kiểm tra hạng mục, xác nhận nhận đủ tiền; tra cứu lịch sử, xem và in lại phiếu thu. |
 | Báo cáo & Thống kê | Chọn tháng, doanh thu thực thu, số phiếu, bình quân mỗi phiếu, số hiệu xe; biểu đồ/cơ cấu doanh thu, bảng chi tiết và xuất CSV. |
-| Quản trị Nhân sự | Tìm/lọc kỹ thuật viên và tài khoản theo vai trò, trạng thái; tạo tài khoản khách hàng/thợ/admin, liên kết xe hoặc hồ sơ thợ; sửa tên/email, khóa/mở khóa, đặt lại mật khẩu và xem lần đăng nhập gần nhất. Hiển thị xe chưa có tài khoản để xử lý liên kết. |
+| Quản trị Nhân sự | Tìm/lọc kỹ thuật viên và tài khoản theo vai trò, trạng thái; tạo tài khoản khách hàng/thợ/admin/cố vấn/kế toán/nhân sự, liên kết xe hoặc hồ sơ thợ; sửa tên/email, khóa/mở khóa, đặt lại mật khẩu và xem lần đăng nhập gần nhất. Hiển thị xe chưa có tài khoản để xử lý liên kết. |
 
 Thẻ số liệu và danh sách lấy từ API. Giao diện hiển thị trạng thái trống khi chưa có dữ liệu; không dùng doanh thu hoặc phiếu thu giả. Giá trị tồn kho là `số lượng × đơn giá hiện tại`, không phải báo cáo giá vốn kế toán.
 
@@ -105,7 +106,7 @@ Tiền chờ thanh toán chỉ gồm phiếu `completed`; đã thanh toán chỉ
 - **Khách hàng:** tự đăng ký hoặc được admin tạo tài khoản. Khi tạo trong admin có thể chọn một/nhiều xe chưa liên kết; tài khoản có sẵn được liên kết tại Tiếp nhận.
 - **Kỹ thuật viên:** nút Thêm kỹ thuật viên mở luồng tạo tài khoản và hồ sơ cùng lúc; có thể chọn hồ sơ cũ chưa liên kết. Từ nút Tài khoản tại hồ sơ thợ có thể cấp tài khoản ngay, tránh trùng nhân sự. Thông tin điện thoại, chuyên môn được bổ sung tại Sửa hồ sơ.
 - **Quản trị viên:** admin đang đăng nhập cấp tài khoản quản trị khác. Đăng ký công khai chỉ tạo khách hàng.
-- Cả ba vai trò có nút **Tài khoản của tôi** để xem thông tin và đổi mật khẩu bằng mật khẩu hiện tại. Đổi mật khẩu kết thúc các phiên đăng nhập và yêu cầu đăng nhập lại.
+- Các vai trò có nút **Tài khoản của tôi** để xem thông tin và đổi mật khẩu bằng mật khẩu hiện tại. Đổi mật khẩu kết thúc các phiên đăng nhập và yêu cầu đăng nhập lại.
 - Admin quản lý thông tin, trạng thái và đặt lại mật khẩu tại **Quản trị Nhân sự → Tài khoản**. Khóa tài khoản giữ nguyên hồ sơ/lịch sử và thu hồi phiên cũ; không tự thay trạng thái hồ sơ nhân sự. Không thể tự khóa tài khoản đang sử dụng. Vai trò được giữ cố định sau khi tạo để bảo toàn các liên kết dữ liệu.
 - Email phải do chủ tài khoản cung cấp. Không tự tạo email hoặc ghép danh tính từ tên của hồ sơ cũ. Mật khẩu được băm ở backend và không xuất hiện trong danh sách tài khoản.
 
@@ -155,7 +156,7 @@ Nginx proxy `/api` về backend. Container backend chạy migration tự động
 - **Tồn kho:** Vật tư bị trừ khi tạo phiếu; hoàn kho khi xóa phiếu chờ. Tồn kho được khóa giao dịch để tránh xuất quá số dư.
 - **Doanh thu:** Chỉ tính phiếu đã `paid`, theo `paidAt`, múi giờ Việt Nam.
 - **Đặt lịch:** Yêu cầu từ trang chủ lưu vào database với trạng thái `pending`; admin xác nhận hoặc huỷ tại tab Tiếp nhận.
-- **Tự động làm mới:** Các portal polling mỗi 20 giây và đồng bộ qua `localStorage` khi có thao tác ghi.
+- **Tự động làm mới:** Các portal polling mỗi 20 giây và đồng bộ qua `localStorage` khi có thao tác ghi; trì hoãn cập nhật khi đang nhập liệu/mở form, không tải lại toàn trang.
 - **Tính tiền:** Backend lấy giá vật tư từ kho và tính `số lượng × đơn giá + tiền công hạng mục`. Giá/tên trên phiếu là thông tin lưu tại thời điểm lập phiếu; sửa đơn giá danh mục không thay đổi phiếu đã lập.
 - **Nhân sự:** Không thể ngừng hoạt động thợ còn phiếu chờ/đang sửa. Sửa hồ sơ hoặc trạng thái không làm mất liên kết tài khoản.
 - **Lưu lịch sử:** Chỉ xóa phiếu chưa bắt đầu; xe và vật tư có lịch sử được bảo vệ. Hệ thống hiện thu đủ tiền một lần cho mỗi phiếu, chưa có trả góp/thanh toán một phần/hoàn tiền.
@@ -187,8 +188,9 @@ be/
                    #       InventoryMovement, Mechanic, Booking, Settings
   schemas/         # Pydantic: validate input & shape response
   routers/         # API: auth, vehicles, repairs, inventory, mechanics,
-                   #       bookings, reports, settings, ai
-  services/        # repair_service.py: tinh tien, xuat/hoan kho, chuyen trang thai
+                   #       bookings, reports, settings, ai, maintenance, service, employees
+  data/            # Danh mục bộ phận và mẫu lịch có nguồn
+  services/        # Sửa chữa, tính lịch bảo dưỡng và tác vụ nhắc hạn
   middleware/      # JWT auth, phan quyen role
   migrations/      # Alembic versioned migrations
   core/            # response helpers, time utils, constants
@@ -206,6 +208,41 @@ fe/
   admin/           # portal quản trị
   mechanic/        # portal tho (tasks, inventory)
   customer/        # portal khách: xe cá nhân, tiến độ và lịch sử sửa
+  staff/           # Cố vấn, kế toán và nhân sự
+  manifest.webmanifest # PWA dùng chung
+  service-worker.js    # Cache giao diện công khai
   login/           # trang dang nhap
   index.html       # trang chu + form dat lich
 ```
+
+## Bảo dưỡng, quy trình gara và PWA (bản 3)
+
+Đã triển khai [nghiên cứu 24 bộ phận và 7 hãng xe](docs/BAO_DUONG_VA_VAN_HANH.md), gồm cách kiểm tra, vật tư liên quan, nguồn hãng và giới hạn từng cấu hình. Admin/khách/thợ đều có **Bảo dưỡng & Nhắc hạn** và **Báo giá / Kiểm tra kỹ**.
+
+| Vị trí | Quyền và màn hình |
+|---|---|
+| Quản trị | Các phân hệ hiện có; nhập/xác minh lịch hãng; điều phối, báo giá, nghiệm thu; cấp tài khoản 6 vai trò và khóa chức năng; hồ sơ mọi vị trí |
+| Cố vấn dịch vụ (`advisor`) | `/staff`: tiếp nhận, lịch hẹn, liên kết khách, kiểm tra đầu vào, báo giá, phân công, hồ sơ bảo dưỡng, kiểm tra nhắc hạn, nghiệm thu/giao xe |
+| Kế toán (`accountant`) | `/staff`: thu đủ tiền một lần, chi tiết phiếu và doanh thu theo tháng/quý/năm; không sửa nội dung phiếu, xuất kho hoặc cấp tài khoản |
+| Nhân sự (`hr`) | `/staff`: hồ sơ/liên hệ/bộ phận/vị trí/ngày vào làm; không cấp quyền hoặc đặt lại mật khẩu |
+| Thợ | `/mechanic`: chẩn đoán lượt được giao, checklist phiếu, tra vật tư; đọc hồ sơ bảo dưỡng/nhắc hạn của xe được giao |
+| Khách | `/customer`: xe cá nhân, lịch bảo dưỡng, thông báo trong app, duyệt/từ chối đúng phiên bản báo giá, tiến độ, chi phí và đặt lịch |
+
+**Luồng mới:** kiểm tra đầu vào → khách xác nhận sơ bộ → thợ kiểm tra kỹ → báo giá chính thức → khách duyệt → tạo phiếu/xuất kho → thợ hoàn thành → cố vấn nghiệm thu → kế toán thu tiền → giao xe. Nếu xác nhận tại quầy/điện thoại, cố vấn phải ghi căn cứ khách xác nhận. Báo giá lưu từng phiên bản và chưa trừ vật tư; đổi giá, thiếu tồn hoặc xác nhận lỗi thời sẽ chặn chuyển phiếu. Phiếu theo báo giá không sửa các dòng khách đã duyệt. Phiếu cũ không bị dựng lịch sử phê duyệt hay nghiệm thu hồi tố.
+
+**Lịch bảo dưỡng:** hồ sơ phải khớp hãng/dòng/năm/động cơ/hộp số/thị trường/điều kiện dùng. Cố vấn lập lịch nháp kèm nguồn/trang/phiên bản; admin xác minh trước khi áp dụng. Có mốc đầu, mốc lặp theo km/tháng; kiểm tra không reset lịch thay. Mốc lặp chưa biết hiện “Cần xác minh”. ODO cũ trên 90 ngày được đánh dấu để cập nhật.
+
+**Nhắc hạn:** tác vụ server quét mỗi 5 phút, có thể quét thủ công; hàng đợi không tạo trùng trong cùng chu kỳ. Cố vấn xem lại lịch sử/ODO rồi gửi thông báo vào app của chủ xe đã liên kết. Đây là thông báo trong ứng dụng, chưa phải push/SMS/email khi đóng app.
+
+**Cài PWA:** Chrome Android chọn **Cài AutoPro**; Safari iPhone chọn **Chia sẻ → Thêm vào Màn hình chính**. Trên điện thoại cần địa chỉ HTTPS; HTTP localhost dùng để thử trên máy chạy server. Manifest và service worker dùng chung các portal; chỉ cache file giao diện công khai, không cache API có dữ liệu cá nhân và không gửi lại giao dịch khi mất mạng. Xem [yêu cầu cài PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable).
+
+**Database:** migration `004_garage_care` thêm 7 bảng cho lịch/lịch sử/nhắc hạn/lượt dịch vụ/báo giá/nhân sự; thêm `users.disabledPermissions` và `repair_tickets.serviceVisitId`. Với database đã có dữ liệu, chạy:
+
+```powershell
+cd be
+python manage.py upgrade
+```
+
+Lệnh yêu cầu `pg_dump` trong PATH và backup thành công trước khi migrate. Sau đó khởi động lại server. Không có lịch hãng được tự duyệt hoặc gán vào xe cũ; mẫu nghiên cứu khác thị trường vẫn là mẫu nháp cần kiểm tra.
+
+Xem [bản thiết kế gốc](docs/NGHIEN_CUU_NANG_CAP_GARAGE.md) và [dữ liệu nghiên cứu trước](docs/research/maintenance-reference.json). Hóa đơn điện tử, tính lương, mã phụ tùng theo VIN, thanh toán một phần và push nền chưa triển khai.
