@@ -1,11 +1,11 @@
 # Bộ phận phổ biến và cách áp dụng vào AutoPro
 
-Đối chiếu ngày 07/10/2026. Phạm vi là xe con, SUV và bán tải thường được gara đa hãng tiếp nhận. Danh sách dòng xe là phạm vi tra cứu, không phải thống kê thị phần.
+Đối chiếu bổ sung ngày 08/10/2026. Phạm vi là xe con, SUV và bán tải thường được gara đa hãng tiếp nhận. Danh sách dòng xe là phạm vi tra cứu, không phải thống kê thị phần.
 
 ## 1. Kết quả đã triển khai
 
-- Danh mục **24 bộ phận**, gợi ý kiểm tra, vật tư và điều kiện áp dụng; lưu trong `be/data/maintenance_catalog.json`, có API và giao diện tra cứu.
-- Tra cứu **7 hãng**: Honda, Toyota, Hyundai, Kia, Mazda, Ford, Mitsubishi.
+- Danh mục **41 nhóm bộ phận**, gợi ý kiểm tra, vật tư và điều kiện áp dụng; lưu trong `be/data/maintenance_catalog.json`, có API và giao diện tra cứu.
+- Tra cứu **15 hãng**: Honda, Toyota, Hyundai, Kia, Mazda, Ford, Mitsubishi, VinFast, Nissan, Suzuki, Isuzu, Subaru, Mercedes-Benz, BMW, MG. Có **100 dòng xe**, gồm mẫu mới và mẫu cũ đang lưu hành.
 - Hồ sơ xe theo năm model, VIN nếu có, động cơ, hộp số, thị trường, điều kiện sử dụng, ngày dùng lần đầu và ODO.
 - Lịch bảo dưỡng riêng từng cấu hình, có nguồn/trang/phiên bản. Cố vấn lập nháp, quản trị xác minh; lịch đã xác minh không sửa đè.
 - Tính mốc đầu và mốc lặp; km hoặc tháng, điều kiện nào đến trước. Không có mốc lặp thì yêu cầu xác minh, không tự tạo chu kỳ.
@@ -16,6 +16,8 @@
 - PWA cho khách/thợ dùng chung backend. Chỉ cache giao diện công khai; cần mạng để lưu công việc và đọc dữ liệu cá nhân.
 
 Chưa có danh mục mã phụ tùng theo VIN, push khi đóng ứng dụng, SMS/email, thanh toán một phần, hóa đơn điện tử hoặc tính lương. Giao diện thể hiện đúng các giới hạn này.
+
+Bổ sung portal độc lập, bằng chứng ảnh, mã vật tư, thu–chi, phân ca/chứng chỉ và dữ liệu VinFast được trình bày tại [nghiệp vụ chuyên sâu](NGHIEP_VU_CHUYEN_SAU.md).
 
 ## 2. Phân biệt bốn loại dữ liệu
 

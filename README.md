@@ -64,7 +64,9 @@ Mở trình duyệt:
 | Admin | http://localhost:8000/admin |
 | Thợ | http://localhost:8000/mechanic |
 | Khách hàng | http://localhost:8000/customer |
-| Cố vấn / Kế toán / Nhân sự | http://localhost:8000/staff |
+| Cố vấn dịch vụ | http://localhost:8000/advisor |
+| Kế toán | http://localhost:8000/accountant |
+| Nhân sự | http://localhost:8000/hr |
 | Tài liệu API | http://localhost:8000/docs |
 
 Tài khoản demo: `admin@autopro.com`, `mechanic@autopro.com`, `customer@autopro.com` — mật khẩu `123456`.
@@ -208,7 +210,10 @@ fe/
   admin/           # portal quản trị
   mechanic/        # portal tho (tasks, inventory)
   customer/        # portal khách: xe cá nhân, tiến độ và lịch sử sửa
-  staff/           # Cố vấn, kế toán và nhân sự
+  advisor/         # portal cố vấn riêng
+  accountant/      # portal kế toán riêng
+  hr/              # portal nhân sự riêng
+  staff/           # adapter giao diện dùng chung và chuyển vai trò cũ
   manifest.webmanifest # PWA dùng chung
   service-worker.js    # Cache giao diện công khai
   login/           # trang dang nhap
@@ -217,15 +222,15 @@ fe/
 
 ## Bảo dưỡng, quy trình gara và PWA (bản 3)
 
-Đã triển khai [nghiên cứu 24 bộ phận và 7 hãng xe](docs/BAO_DUONG_VA_VAN_HANH.md), gồm cách kiểm tra, vật tư liên quan, nguồn hãng và giới hạn từng cấu hình. Admin/khách/thợ đều có **Bảo dưỡng & Nhắc hạn** và **Báo giá / Kiểm tra kỹ**.
+Đã triển khai [nghiên cứu 41 nhóm bộ phận và 15 hãng xe](docs/BAO_DUONG_VA_VAN_HANH.md), gồm cách kiểm tra, vật tư liên quan, nguồn hãng và giới hạn từng cấu hình. Admin/khách/thợ đều có **Bảo dưỡng & Nhắc hạn** và **Báo giá / Kiểm tra kỹ**.
 
 | Vị trí | Quyền và màn hình |
 |---|---|
 | Quản trị | Các phân hệ hiện có; nhập/xác minh lịch hãng; điều phối, báo giá, nghiệm thu; cấp tài khoản 6 vai trò và khóa chức năng; hồ sơ mọi vị trí |
-| Cố vấn dịch vụ (`advisor`) | `/staff`: tiếp nhận, lịch hẹn, liên kết khách, kiểm tra đầu vào, báo giá, phân công, hồ sơ bảo dưỡng, kiểm tra nhắc hạn, nghiệm thu/giao xe |
-| Kế toán (`accountant`) | `/staff`: thu đủ tiền một lần, chi tiết phiếu và doanh thu theo tháng/quý/năm; không sửa nội dung phiếu, xuất kho hoặc cấp tài khoản |
-| Nhân sự (`hr`) | `/staff`: hồ sơ/liên hệ/bộ phận/vị trí/ngày vào làm; không cấp quyền hoặc đặt lại mật khẩu |
-| Thợ | `/mechanic`: chẩn đoán lượt được giao, checklist phiếu, tra vật tư; đọc hồ sơ bảo dưỡng/nhắc hạn của xe được giao |
+| Cố vấn dịch vụ (`advisor`) | `/advisor`: tiếp nhận, lịch hẹn, liên kết khách, kiểm tra đầu vào, báo giá, phân công, hồ sơ bảo dưỡng, kiểm tra nhắc hạn, nghiệm thu/giao xe |
+| Kế toán (`accountant`) | `/accountant`: thu đủ tiền một lần, phiếu thu có phương thức/người nhận/mã giao dịch, đề nghị chi và chi sau duyệt, doanh thu theo tháng/quý/năm; không sửa nội dung phiếu, xuất kho hoặc cấp tài khoản |
+| Nhân sự (`hr`) | `/hr`: hồ sơ/liên hệ/bộ phận/vị trí/ngày vào làm, phân ca, duyệt nghỉ và xác minh/thu hồi chứng chỉ; không cấp quyền hoặc đặt lại mật khẩu |
+| Thợ | `/mechanic`: chẩn đoán lượt được giao, checklist có ảnh kết quả, ảnh bao bì và mã sản phẩm, tra vật tư; đọc hồ sơ bảo dưỡng/nhắc hạn của xe được giao |
 | Khách | `/customer`: xe cá nhân, lịch bảo dưỡng, thông báo trong app, duyệt/từ chối đúng phiên bản báo giá, tiến độ, chi phí và đặt lịch |
 
 **Luồng mới:** kiểm tra đầu vào → khách xác nhận sơ bộ → thợ kiểm tra kỹ → báo giá chính thức → khách duyệt → tạo phiếu/xuất kho → thợ hoàn thành → cố vấn nghiệm thu → kế toán thu tiền → giao xe. Nếu xác nhận tại quầy/điện thoại, cố vấn phải ghi căn cứ khách xác nhận. Báo giá lưu từng phiên bản và chưa trừ vật tư; đổi giá, thiếu tồn hoặc xác nhận lỗi thời sẽ chặn chuyển phiếu. Phiếu theo báo giá không sửa các dòng khách đã duyệt. Phiếu cũ không bị dựng lịch sử phê duyệt hay nghiệm thu hồi tố.
@@ -246,3 +251,18 @@ python manage.py upgrade
 Lệnh yêu cầu `pg_dump` trong PATH và backup thành công trước khi migrate. Sau đó khởi động lại server. Không có lịch hãng được tự duyệt hoặc gán vào xe cũ; mẫu nghiên cứu khác thị trường vẫn là mẫu nháp cần kiểm tra.
 
 Xem [bản thiết kế gốc](docs/NGHIEN_CUU_NANG_CAP_GARAGE.md) và [dữ liệu nghiên cứu trước](docs/research/maintenance-reference.json). Hóa đơn điện tử, tính lương, mã phụ tùng theo VIN, thanh toán một phần và push nền chưa triển khai.
+
+## Nghiệp vụ chuyên sâu (08/10/2026)
+
+Ba portal `/advisor`, `/accountant`, `/hr` có menu riêng; `/staff` chuyển về vai trò hiện tại. Phân quyền API và khóa tính năng vẫn do backend kiểm soát.
+
+- **Thợ:** khi xác nhận một hạng mục phải gửi ảnh kết quả và ghi chú. Có vật tư thì thêm ảnh bao bì, mã sản phẩm/SKU hoặc barcode, số lô nếu có. Mở lại hạng mục cần ảnh mới; ảnh cũ giữ lịch sử. Khách, thợ phụ trách, cố vấn và quản trị có quyền xem ảnh; kế toán/nhân sự không truy cập ảnh.
+- **Kho:** Sửa vật tư để nhập SKU thật, barcode, hãng sản xuất và cờ cao áp. Nút Tương thích quản lý hãng/dòng/năm/động cơ và nguồn xác nhận; cấu hình đã khai báo không khớp hồ sơ xe sẽ chặn xuất vật tư.
+- **Kế toán:** phiếu thu mới lưu người nhận, phương thức và mã giao dịch. Đề nghị chi có số chứng từ duy nhất; quản trị duyệt, người lập không tự duyệt; chỉ chi một lần sau duyệt.
+- **Nhân sự:** phân ca không trùng, xử lý nghỉ phép có kiểm tra ca, xác minh chứng chỉ có đơn vị cấp/mã/thời hạn và thu hồi có căn cứ. Vật tư cao áp yêu cầu hồ sơ an toàn EV còn hiệu lực; hồ sơ không thay thế đào tạo thực tế.
+- **Cố vấn:** xem bằng chứng khi nghiệm thu; ghi nhận phản hồi sau bàn giao, đánh giá, ngày gọi lại hoặc yêu cầu kiểm tra lại.
+- **Danh mục:** 15 hãng, 100 dòng xe, 41 nhóm bộ phận, có VinFast. Bộ lọc theo dòng/hệ truyền động tách VF thuần điện khỏi Fadil/Lux/President có động cơ đốt trong. Gợi ý nhóm bộ phận không phải mã OEM hoặc lịch thay đã được hãng duyệt.
+
+Cần migration `005_professional_workflow` và `006_car_brands` (bổ sung hãng vào danh mục database, giữ hãng cũ). Chạy `python be/manage.py upgrade` để sao lưu và nâng cấp, rồi khởi động lại server. Phiếu/lịch sử cũ giữ nguyên; không tự tạo thông tin thanh toán, mã phụ tùng hoặc chứng chỉ cho dữ liệu cũ.
+
+Ảnh được lưu riêng trong PostgreSQL, cùng giao dịch và backup; không có URL công khai, không cache trong PWA. File sau nén tối đa 3 MB, server kiểm tra ảnh thật, bỏ EXIF và giới hạn kích thước. Xem [hướng dẫn nghiệp vụ và nguồn nghiên cứu](docs/NGHIEP_VU_CHUYEN_SAU.md). Chưa có OCR, quét barcode tự động, hóa đơn điện tử, tính lương, chấm công, chốt quỹ hoặc đặt phụ tùng tự động theo VIN.
