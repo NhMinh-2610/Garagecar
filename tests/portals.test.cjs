@@ -124,6 +124,7 @@ test('mechanic starts assigned ticket, toggles checklist, completes, and filters
         '/repairs/my-tasks':()=>response([ticket]),
         '/repairs/7':options=>{ ticket.status=JSON.parse(options.body).status; return response(ticket); },
         '/repairs/7/items/10/toggle':options=>{ ticket.items[0].isCompleted=JSON.parse(options.body).isCompleted; return response(ticket); },
+        '/workshop/tickets/7/items/10/evidence':options=>response({id:1}),
         '/inventory':[part,{...part,id:2,name:'Empty stock',quantity:0},{...part,id:3,name:'Low stock',quantity:2}],
     });
     try {
@@ -135,6 +136,14 @@ test('mechanic starts assigned ticket, toggles checklist, completes, and filters
         assert.equal(w.document.querySelector('[data-complete]').disabled,true);
         const checkbox = w.document.querySelector('[data-item]');
         checkbox.checked=true; checkbox.dispatchEvent(new w.Event('change',{bubbles:true})); await delay(80);
+        assert.equal(ticket.items[0].isCompleted,false);
+        const form=w.document.querySelector('.evidence-dialog form');
+        assert.ok(form);
+        Object.defineProperty(form.elements.resultPhoto,'files',{value:[new w.File(['photo bytes'],'result.png',{type:'image/png'})]});
+        form.reportValidity=()=>true; // jsdom does not update native file validity for injected files.
+        form.elements.note.value='Measured and checked';
+        form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true})); await delay(150);
+        assert.ok(calls.some(c=>c.path==='/workshop/tickets/7/items/10/evidence' && c.body.kind==='completion'));
         assert.equal(w.document.querySelector('[data-complete]').disabled,false);
         assert.equal(ticket.items[0].isCompleted,true);
         w.document.querySelector('[data-complete]').click(); await delay(80);
@@ -153,13 +162,17 @@ test('mechanic starts assigned ticket, toggles checklist, completes, and filters
 
 test('mechanic restores server checklist on failed update', async () => {
     const ticket = repairFixture(7,'working');
-    const {dom,w} = await portal('mechanic',{'/repairs/my-tasks':[ticket],'/repairs/7/items/10/toggle':()=>response(null,409,'Phiếu đã thay đổi')});
+    const {dom,w} = await portal('mechanic',{'/repairs/my-tasks':[ticket],'/repairs/7/items/10/toggle':()=>response(null,409,'Phiếu đã thay đổi'),'/workshop/tickets/7/items/10/evidence':()=>response({id:1})});
     try {
         const checkbox = w.document.querySelector('[data-item]'); checkbox.checked=true;
         checkbox.dispatchEvent(new w.Event('change',{bubbles:true})); await delay(80);
+        const form=w.document.querySelector('.evidence-dialog form');
+        Object.defineProperty(form.elements.resultPhoto,'files',{value:[new w.File(['photo bytes'],'result.png',{type:'image/png'})]});
+        form.reportValidity=()=>true;
+        form.elements.note.value='Checked result';form.dispatchEvent(new w.Event('submit',{cancelable:true}));await delay(150);
         assert.equal(w.document.querySelector('[data-item]').checked,false);
         assert.equal(w.document.querySelector('[data-item]').disabled,false);
-        assert.ok(w.document.getElementById('toast-container').textContent.includes('Phiếu đã thay đổi'));
+        assert.ok(w.document.querySelector('.evidence-dialog .care-error').textContent.includes('Phiếu đã thay đổi'));
     } finally { dom.window.close(); }
 });
 
@@ -237,7 +250,7 @@ async function portal(role, overrides = {}, options = {}) {
             '/repairs/my-repairs':[], '/repairs/my-tasks':[], '/inventory':[part],'/mechanics':[mechanic],
             '/auth/users':[{id:3,role:'customer',fullName:'Customer',email:'c@example.com'}],
             '/settings/brands':[{id:1,name:'Toyota'}], '/settings/wages':[{id:1,name:'Change oil',price:50}],
-            '/settings/params':{max_cars_per_day:'30'}, '/bookings':[], '/reports/revenue':[], '/service/visits':[], '/service/resources':{}, '/service/employees':[],
+            '/hr/operations':{shifts:[],certificates:[],leave:[]},'/finance/expenses':[], '/finance/receipts':[], '/advisor/followups':[], '/workshop/tickets/7/evidence':[], '/settings/params':{max_cars_per_day:'30'}, '/bookings':[], '/reports/revenue':[], '/service/visits':[], '/service/resources':{}, '/service/employees':[],
         }[pathname] ?? {};
         return new Response(JSON.stringify({success:true,data}),{headers:{'Content-Type':'application/json'}});
     };
@@ -367,7 +380,7 @@ test('maintenance catalogue, exact scopes and history editor use structured data
         assert.match(w.document.getElementById('careVehiclePanel').textContent,/Chưa có năm xe/);
         const brand=w.document.getElementById('careBrand');brand.value='Mitsubishi';brand.dispatchEvent(new w.Event('change'));
         assert.match(w.document.getElementById('brandGuidance').textContent,/4N16/);
-        assert.equal(w.document.querySelectorAll('.component-card').length,24);
+        assert.equal(w.document.querySelectorAll('.component-card').length,catalog.components.length);
         w.document.querySelector('[data-care="profile"]').click();
         const form=w.document.querySelector('.care-dialog form');
         const preset=w.document.getElementById('carePreset');preset.value='0';preset.dispatchEvent(new w.Event('change'));
@@ -403,7 +416,7 @@ test('staff portals load only their job functions and accountant waits for QC',a
     for(const role of ['advisor','accountant','hr']){
         const overrides={'/auth/me':{id:1,role,fullName:'Staff',disabledPermissions:[]},'/auth/customer-lookup':[],'/service/employees':[],'/service/visits':[], '/maintenance/vehicles':[], '/maintenance/profiles':[],'/maintenance/reminders':[],'/maintenance/catalog':{components:[],brands:[],presets:[]},'/service/resources':{vehicles:[],mechanics:[],inventory:[]}};
         if(role==='accountant')overrides['/repairs']=[{id:1,serviceVisitId:3,status:'completed',vehicle,totalAmount:250,items:[]}];
-        const {dom,w,calls,errors}=await portal('staff',overrides,{accountRole:role});
+        const {dom,w,calls,errors}=await portal(role,overrides,{accountRole:role});
         try{
             assert.deepEqual(errors,[]);
             const visible=[...w.document.querySelectorAll('.nav-item:not([hidden])')].map(n=>n.dataset.permission);
@@ -431,4 +444,30 @@ test('PWA precache files exist and authenticated APIs are never intercepted',asy
     const manifest=JSON.parse(fs.readFileSync(path.join(root,'fe/manifest.webmanifest'),'utf8'));
     assert.equal(manifest.display,'standalone');
     for(const icon of manifest.icons)assert.ok(fs.existsSync(path.join(root,'fe',icon.src.slice(8))));
+});
+
+
+test('VinFast model filter excludes combustion parts on an EV',async()=>{
+    const catalog=JSON.parse(fs.readFileSync(path.join(root,'be/data/maintenance_catalog.json'),'utf8'));
+    const {dom,w,errors}=await portal('advisor',{'/maintenance/catalog':catalog,'/maintenance/vehicles':[],'/maintenance/profiles':[],'/maintenance/reminders':[],'/auth/customer-lookup':[], '/service/resources':{vehicles:[],mechanics:[],inventory:[]}});
+    try{
+        const brand=w.document.getElementById('careBrand');brand.value='VinFast';brand.dispatchEvent(new w.Event('change'));
+        const model=w.document.getElementById('careModel');model.value='VF 8';model.dispatchEvent(new w.Event('change'));
+        const library=w.document.getElementById('componentLibrary').textContent;
+        assert.ok(library.includes('Mạch làm mát pin'));assert.ok(!library.includes('Dầu động cơ'));assert.deepEqual(errors,[]);
+    } finally{dom.window.close();}
+});
+
+test('independent staff pages contain only their job menus and operations',async()=>{
+    for(const role of ['advisor','accountant','hr']){
+        const {dom,w,calls,errors}=await portal(role,{'/maintenance/catalog':{components:[],brands:[],presets:[]},'/maintenance/vehicles':[],'/maintenance/profiles':[],'/maintenance/reminders':[],'/auth/customer-lookup':[]});
+        try{
+            assert.equal(w.document.body.dataset.staffRole,role);
+            const pages=[...w.document.querySelectorAll('main section')].map(x=>x.id);
+            if(role==='advisor'){assert.ok(pages.includes('advisorOps-section'));assert.ok(!pages.includes('finance-section'));assert.ok(!calls.some(x=>x.path.startsWith('/finance/')));}
+            if(role==='accountant'){assert.ok(pages.includes('financeOps-section'));assert.ok(!pages.includes('staffHR-section'));assert.ok(!calls.some(x=>x.path==='/service/employees'));}
+            if(role==='hr'){assert.ok(pages.includes('hrOps-section'));assert.ok(!pages.includes('service-section'));assert.ok(!calls.some(x=>x.path==='/repairs'));}
+            assert.deepEqual(errors,[]);
+        } finally{dom.window.close();}
+    }
 });
