@@ -21,7 +21,7 @@ from models import User, Mechanic, Vehicle, Inventory
 
 
 def migrate(connection):
-    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py", "004_garage_care.py"]:
+    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py", "004_garage_care.py", "005_professional_workflow.py", "006_car_brands.py"]:
         spec = importlib.util.spec_from_file_location("migration", Path(__file__).parents[1] / "migrations/versions" / filename)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -47,7 +47,7 @@ async def api():
             db.add_all(users)
             await db.flush()
             mechanic = Mechanic(fullName="Same Name", userId=users[1].id)
-            stock = Inventory(name="Oil", quantity=5, unitPrice=100)
+            stock = Inventory(name="Oil", quantity=5, unitPrice=100, sku="OIL-001")
             db.add_all([mechanic, stock])
             await db.commit()
             ids = {u.username: u.id for u in users}
@@ -168,6 +168,7 @@ async def test_complete_workflow_and_permissions(api):
     assert (await client.put(path, headers=auth("mechanic"), json={"mechanicId":None})).status_code == 403
     assert (await client.put(path, headers=auth("mechanic"), json={"status":"working"})).status_code == 200
     assert (await client.put(path, headers=auth("mechanic"), json={"status":"completed"})).status_code == 400
+    await evidence(client, auth, ticket)
     item_path = f"{path}/items/{ticket['items'][0]['id']}/toggle"
     assert (await client.put(item_path, headers=auth("mechanic"), json={"isCompleted":True})).status_code == 200
     assert (await client.put(path, headers=auth("mechanic"), json={"status":"completed"})).status_code == 200
@@ -324,3 +325,16 @@ async def test_catalog_edits_update_vehicle_brand(api):
     wid = wages[0]['id']
     response = await client.put(f'/api/settings/wages/{wid}',headers=auth('admin'),json={'name':'Updated task','price':75000})
     assert response.status_code == 200 and float(response.json()['data']['price']) == 75000
+
+
+async def evidence(client, auth, ticket):
+    import base64
+    import io
+    from PIL import Image
+    image = io.BytesIO()
+    Image.new("RGB", (8, 8), "blue").save(image, format="PNG")
+    encoded = base64.b64encode(image.getvalue()).decode()
+    for item in ticket["items"]:
+        for kind in (["package", "completion"] if item.get("inventoryId") else ["completion"]):
+            result = await client.post(f"/api/workshop/tickets/{ticket['id']}/items/{item['id']}/evidence", headers=auth("mechanic"), json={"kind":kind,"image":encoded,"productCode":"OIL-001" if kind == "package" else None,"note":"Measured and verified"})
+            assert result.status_code == 201, result.text
