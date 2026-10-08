@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         byId('inventoryLow').textContent = inventoryItems.filter(i => i.quantity <= 5).length;
         const search = byId('inventorySearch').value.toLowerCase();
         const filter = byId('inventoryFilter').value;
-        const items = inventoryItems.filter(i => (i.name + ' ' + i.id).toLowerCase().includes(search) && (!filter || (filter === 'empty' ? i.quantity === 0 : i.quantity > 0 && i.quantity <= 5)));
-        byId('inventoryTable').querySelector('tbody').innerHTML = items.map(i => `<tr><td>#${i.id}</td><td><strong>${Garage.escape(i.name)}</strong></td>
+        const items = inventoryItems.filter(i => (i.name + ' ' + i.id + ' ' + (i.sku || '') + ' ' + (i.barcode || '')).toLowerCase().includes(search) && (!filter || (filter === 'empty' ? i.quantity === 0 : i.quantity > 0 && i.quantity <= 5)));
+        byId('inventoryTable').querySelector('tbody').innerHTML = items.map(i => `<tr><td>#${i.id}</td><td><strong>${Garage.escape(i.name)}</strong><small>${Garage.escape(i.sku || "Chưa khai báo SKU")} · ${Garage.escape(i.manufacturer || "")}${i.highVoltage ? " · Cao áp / EV" : ""}</small></td>
             <td><span class="badge ${i.quantity > 5 ? 'badge-done' : 'badge-warning'}">${i.quantity}${i.quantity === 0 ? ' · Hết hàng' : i.quantity <= 5 ? ' · Sắp hết' : ''}</span></td>
             <td>${formatCurrency(i.unitPrice)}</td><td>${formatDate(i.updatedAt || i.createdAt)}</td>
-            <td><button class="btn btn-sm" data-stock="${i.id}" data-action="receive">Nhập</button><button class="btn btn-sm" data-stock="${i.id}" data-action="edit">Sửa</button><button class="btn btn-sm" data-stock="${i.id}" data-action="history">Lịch sử</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">Không tìm thấy vật tư phù hợp.</td></tr>';
+            <td><button class="btn btn-sm" data-stock="${i.id}" data-action="receive">Nhập</button><button class="btn btn-sm" data-stock="${i.id}" data-action="edit">Sửa</button><button class="btn btn-sm" data-stock="${i.id}" data-action="history">Lịch sử</button><button class="btn btn-sm" data-stock="${i.id}" data-action="fitment">Tương thích</button></td></tr>`).join('') || '<tr><td colspan="6" class="empty-state">Không tìm thấy vật tư phù hợp.</td></tr>';
     }
     async function loadInventoryList(context = {}) {
         const canRender = Garage.refreshGuard(context);
@@ -42,16 +42,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const button = event.target.closest('[data-stock]');
         if (!button) return;
         const item = inventoryItems.find(i => i.id === Number(button.dataset.stock));
+        if (button.dataset.action === 'fitment') return Garage.openPartFitments(item, loadInventoryList);
         if (button.dataset.action === 'history') return showStockHistory(item.id);
         if (button.dataset.action === 'receive') { existingSelect.value = item.id; existingSelect.onchange(); byId('invQuantity').focus(); return; }
         let dialog = byId('editStockDialog');
         if (!dialog) { dialog = document.createElement('dialog'); dialog.id='editStockDialog'; document.body.append(dialog); }
-        dialog.innerHTML = '<h3>Thông tin vật tư #' + item.id + '</h3><form id="stockEditForm"><div class="form-group"><label>Tên vật tư<input name="name" required></label></div><div class="form-group"><label>Đơn giá hiện tại (đ)<input name="unitPrice" type="number" min="0" required></label></div><p class="field-help">Giữ nguyên tồn kho. Dùng Nhập kho để bổ sung số lượng.</p><div class="form-actions"><button class="btn btn-primary">Lưu thay đổi</button></div></form><form method="dialog"><button class="btn btn-secondary">Đóng</button></form>';
+        dialog.innerHTML = '<h3>Thông tin vật tư #' + item.id + '</h3><form id="stockEditForm"><div class="form-group"><label>Tên vật tư<input name="name" required></label></div><div class="form-group"><label>Đơn giá hiện tại (đ)<input name="unitPrice" type="number" min="0" required></label></div><div class="form-grid"><label class="form-group">Mã SKU trên sản phẩm<input name="sku" maxlength="100"></label><label class="form-group">Mã vạch<input name="barcode" maxlength="100"></label><label class="form-group">Hãng sản xuất phụ tùng<input name="manufacturer" maxlength="200"></label></div><label><input name="highVoltage" type="checkbox"> Vật tư thuộc hệ thống điện cao áp (cần hồ sơ an toàn EV khi thực hiện)</label><p class="field-help">Mã thực tế lấy từ nhãn hoặc tài liệu nhà cung cấp. Mã đã dùng trên phiếu giữ cố định để truy vết.</p><p class="field-help">Giữ nguyên tồn kho. Dùng Nhập kho để bổ sung số lượng.</p><div class="form-actions"><button class="btn btn-primary">Lưu thay đổi</button></div></form><form method="dialog"><button class="btn btn-secondary">Đóng</button></form>';
         const form = dialog.querySelector('#stockEditForm');
-        form.elements.name.value = item.name; form.elements.unitPrice.value = item.unitPrice;
+        form.elements.name.value = item.name; form.elements.unitPrice.value = item.unitPrice; form.elements.sku.value = item.sku || ""; form.elements.barcode.value = item.barcode || ""; form.elements.manufacturer.value = item.manufacturer || ""; form.elements.highVoltage.checked = !!item.highVoltage;
         form.onsubmit = async event => {
             event.preventDefault();
-            try { await Garage.request('/inventory/' + item.id,{method:'PUT',body:{name:form.elements.name.value,unitPrice:Number(form.elements.unitPrice.value)}}); dialog.close(); showToast('Đã lưu vật tư.','success'); await loadInventoryList(); }
+            try { await Garage.request('/inventory/' + item.id,{method:'PUT',body:{name:form.elements.name.value,unitPrice:Number(form.elements.unitPrice.value),sku:form.elements.sku.value || null,barcode:form.elements.barcode.value || null,manufacturer:form.elements.manufacturer.value,highVoltage:form.elements.highVoltage.checked}}); dialog.close(); showToast('Đã lưu vật tư.','success'); await loadInventoryList(); }
             catch(error) { showToast(error.message,'error'); }
         };
         dialog.showModal();

@@ -3,6 +3,10 @@
     const byId = id => document.getElementById(id);
     const select = byId('paymentSelect');
     const button = byId('confirmPayment');
+    const paymentControls = document.createElement('div');
+    paymentControls.className = 'form-grid payment-controls';
+    paymentControls.innerHTML = '<label class="form-group">Phương thức thu<select id="receiptMethod"><option value="cash">Tiền mặt</option><option value="bank">Chuyển khoản</option><option value="card">Thẻ</option></select></label><label class="form-group">Mã giao dịch (bắt buộc với ngân hàng/thẻ)<input id="receiptReference" maxlength="100"></label>';
+    button.before(paymentControls);
     const details = document.querySelector('.invoice-details');
     const print = document.createElement('button');
     print.className = 'btn btn-secondary'; print.textContent = 'In phiếu';
@@ -10,7 +14,7 @@
     let all = [], visits = [], selectedId = null;
     const esc = Garage.escape;
     function preview(ticket = null) {
-        button.disabled = !ticket || ticket.status === 'paid' || (ticket.serviceVisitId && !visits.some(v=>v.id===ticket.serviceVisitId&&v.qcAt));
+        button.disabled = !ticket || ticket.status === 'paid' || (ticket.serviceVisitId && !ticket.qcAt && !visits.some(v=>v.id===ticket.serviceVisitId&&v.qcAt));
         print.disabled = !ticket;
         details.innerHTML = ticket ? `<div class="summary-row"><span>Phiếu sửa</span><strong>#${ticket.id}</strong></div>
             <div class="summary-row"><span>Khách hàng</span><strong>${esc(ticket.vehicle.customerName)}</strong></div>
@@ -19,7 +23,7 @@
             ${ticket.items.map(i => `<tr><td>${esc(i.taskName)}</td><td>${i.quantity}</td><td>${formatCurrency(i.totalPrice)}</td></tr>`).join('')}</tbody></table>
             <div class="summary-row"><strong>Tổng thanh toán</strong><strong>${formatCurrency(ticket.totalAmount)}</strong></div>
             <p><span class="badge ${ticket.status === 'paid' ? 'badge-done':'badge-warning'}">${ticket.status === 'paid' ? 'Đã thu tiền' : 'Chưa thu tiền'}</span>
-            ${ticket.paidAt ? Garage.date(ticket.paidAt).toLocaleString('vi-VN') : ''}</p>${ticket.serviceVisitId&&!visits.some(v=>v.id===ticket.serviceVisitId&&v.qcAt)?'<p class="notice">Cần nghiệm thu tại mục Cố vấn & Báo giá trước khi thu tiền.</p>':''}`
+            ${ticket.paidAt ? Garage.date(ticket.paidAt).toLocaleString('vi-VN') : ''}</p>${ticket.serviceVisitId&&!ticket.qcAt&&!visits.some(v=>v.id===ticket.serviceVisitId&&v.qcAt)?'<p class="notice">Cần nghiệm thu tại mục Cố vấn & Báo giá trước khi thu tiền.</p>':''}`
             : '<p class="empty-state">Chọn phiếu đã hoàn thành để xem chi tiết và thu tiền.</p>';
     }
     function renderHistory() {
@@ -78,7 +82,9 @@
         if (!selectedId || !confirm('Xác nhận garage đã nhận đủ tiền cho phiếu #' + selectedId + '?')) return;
         button.disabled = true;
         try {
-            await Garage.request('/repairs/'+selectedId,{method:'PUT',body:{status:'paid'}});
+            const method = byId('receiptMethod').value, reference = byId('receiptReference').value.trim();
+            await Garage.request('/repairs/'+selectedId,{method:'PUT',body:{status:'paid',...(method !== 'cash' || reference ? {paymentMethod:method,paymentReference:reference} : {})}});
+            byId('receiptReference').value = '';
             showToast('Đã ghi nhận thu tiền.','success'); await load();
         } catch(error) { showToast(error.message,'error'); button.disabled=false; }
     };
