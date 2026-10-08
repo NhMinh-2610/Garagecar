@@ -52,7 +52,7 @@
     function renderRepairs() {
         const query = $('repairSearch').value.trim().toLocaleLowerCase('vi'), status = $('repairStatus').value, vehicle = $('repairVehicle').value;
         const rows = repairs.filter(r => (!status || status === r.status) && (!vehicle || String(r.vehicleId) === vehicle) && `#${r.id} ${r.vehicle?.licensePlate || ''} ${r.mechanicName || ''}`.toLocaleLowerCase('vi').includes(query));
-        document.querySelector('#repairsTable tbody').innerHTML = rows.map(r => `<tr><td><strong>#${r.id}</strong><br><small>${formatDate(r.createdAt)}</small></td><td>${e(r.vehicle?.licensePlate || '—')}</td><td>${e(r.mechanicName || 'Chưa phân công')}</td><td>${progress(r)}</td><td><strong>${formatCurrency(r.totalAmount)}</strong></td><td>${badge(r.status)}</td><td><button class="btn btn-sm" data-detail="${r.id}">Xem chi tiết</button></td></tr>`).join('') || '<tr><td colspan="7" class="empty-state">Không có phiếu phù hợp với bộ lọc.</td></tr>';
+        document.querySelector('#repairsTable tbody').innerHTML = rows.map(r => `<tr><td><strong>#${r.id}</strong><br><small>${formatDate(r.createdAt)}</small></td><td>${e(r.vehicle?.licensePlate || '—')}</td><td>${e(r.mechanicName || 'Chưa phân công')}</td><td>${progress(r)}</td><td><strong>${formatCurrency(r.totalAmount)}</strong></td><td>${badge(r.status)}</td><td><button class="btn btn-sm" data-detail="${r.id}">Xem chi tiết</button><button class="btn btn-sm" data-evidence-ticket="${r.id}">Ảnh công việc</button></td></tr>`).join('') || '<tr><td colspan="7" class="empty-state">Không có phiếu phù hợp với bộ lọc.</td></tr>';
     }
     async function detail(id, quiet = false) {
         selectedRepairId = id;

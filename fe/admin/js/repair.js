@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? `<button class="btn btn-success btn-sm" data-action="start" data-id="${t.id}" ${!t.mechanicId ? 'disabled' : ''}>Bắt đầu</button>
                            <button class="btn btn-primary btn-sm" data-action="edit" data-id="${t.id}">Sửa</button>
                            <button class="btn btn-danger btn-sm" data-action="delete" data-id="${t.id}">Xóa</button>`
-                        : `${!t.mechanicId ? `<button class="btn btn-secondary btn-sm" data-action="edit" data-id="${t.id}">Liên kết thợ</button>` : ''}<button class="btn btn-secondary btn-sm" data-action="view" data-id="${t.id}">Chi tiết</button>${t.status === 'completed'
+                        : `${!t.mechanicId ? `<button class="btn btn-secondary btn-sm" data-action="edit" data-id="${t.id}">Liên kết thợ</button>` : ''}<button class="btn btn-secondary btn-sm" data-action="view" data-id="${t.id}">Chi tiết</button><button class="btn btn-sm" data-evidence-ticket="${t.id}">Ảnh</button>${t.status === 'completed'
                           ? `<button class="btn btn-success btn-sm" data-action="pay" data-id="${t.id}">Thu tiền</button>` : ''}`;
                     return `<tr><td>${esc(v.licensePlate)}</td><td>${esc(v.carBrand)}</td><td>${esc(names)}</td><td>${esc(t.mechanicName)}</td>
                         ${t.status !== 'draft' ? `<td>${money(t.totalAmount)}</td>` : ''}
@@ -172,6 +172,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     byId('repair-section').addEventListener('change', async event => {
         const input = event.target.closest('[data-item]');
         if (!input) return;
+        if (input.checked) {
+            input.checked = false;
+            const ticket = tickets.find(t => t.id === Number(input.dataset.ticket));
+            return Garage.openEvidence(ticket.id, ticket.items.find(i => i.id === Number(input.dataset.item)), true, load);
+        }
         input.disabled = true;
         try {
             await Garage.request(`/repairs/${input.dataset.ticket}/items/${input.dataset.item}/toggle`, {method:'PUT',body:{isCompleted:input.checked}});
