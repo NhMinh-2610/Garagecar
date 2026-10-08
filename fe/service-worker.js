@@ -1,6 +1,8 @@
 /* Update by changing the cache version. Never intercept authenticated API requests. */
-const CACHE = "autopro-public-shell-v1";
+const CACHE = "autopro-public-shell-v2";
 const FILES = [
+  "/static/shared/evidence.js", "/static/shared/professional.js", "/static/shared/professional.css",
+  "/static/advisor/index.html", "/static/accountant/index.html", "/static/hr/index.html", "/static/staff/app.js",
   "/static/offline.html",
   "/static/shared/ui.css",
   "/static/shared/workspace.css",
