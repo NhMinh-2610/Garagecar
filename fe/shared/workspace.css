@@ -422,7 +422,7 @@ textarea {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #95a0b2;
+  color: #607482;
 }
 input:focus,
 select:focus,
@@ -1034,6 +1034,12 @@ dialog table {
 body.workspace-shell {
   --sidebar-width: 248px;
   --workspace-header-height: 72px;
+  --workspace-content-width: 1400px;
+  --workspace-gutter: 32px;
+  --workspace-inline-space: max(
+    var(--workspace-gutter),
+    calc((100% - var(--workspace-content-width)) / 2 + var(--workspace-gutter))
+  );
   overflow-x: clip;
 }
 .workspace-shell #sidebar {
@@ -1147,13 +1153,14 @@ body.workspace-shell {
   z-index: 30;
   min-height: var(--workspace-header-height);
   height: var(--workspace-header-height);
-  padding: 0 32px;
+  padding: 0 var(--workspace-inline-space);
   gap: 12px;
   box-shadow: none;
 }
 .workspace-shell #pageTitle {
   color: var(--text-main);
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 600;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1168,8 +1175,8 @@ body.workspace-shell {
   flex-shrink: 0;
 }
 .workspace-shell .content-body {
-  max-width: 1400px;
-  padding: 32px 32px 48px;
+  max-width: var(--workspace-content-width);
+  padding: 32px var(--workspace-gutter) 48px;
 }
 .workspace-shell .section-heading {
   margin-bottom: 24px;
@@ -1194,32 +1201,26 @@ body.workspace-shell {
   z-index: 25;
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 0 32px;
+  padding: 0 var(--workspace-inline-space);
   min-height: 52px;
   background: white;
   border-bottom: 1px solid var(--border-color);
-}
-.workspace-subnav-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  font-weight: 600;
 }
 .workspace-subnav-links {
   display: flex;
   align-self: stretch;
   min-width: 0;
-  gap: 7px;
+  gap: 28px;
+  width: 100%;
   overflow-x: auto;
   scrollbar-width: thin;
 }
 .workspace-subnav-button {
   border: 0;
   border-bottom: 2px solid transparent;
-  padding: 13px 10px 12px;
+  padding: 13px 0 12px;
   background: transparent;
-  color: #6b7890;
+  color: #43596a;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
@@ -1385,20 +1386,17 @@ body.workspace-shell {
   resize: vertical;
 }
 @media (min-width: 1600px) {
-  .workspace-shell .content-body {
-    padding: 32px 42px 48px;
+  body.workspace-shell {
+    --workspace-gutter: 40px;
   }
 }
 @media (max-width: 1100px) {
   body.workspace-shell {
     --sidebar-width: 225px;
+    --workspace-gutter: 24px;
   }
   .workspace-shell .content-body {
-    padding: 24px;
-  }
-  .workspace-shell .topbar,
-  .workspace-subnav {
-    padding-inline: 24px;
+    padding-block: 24px;
   }
   .workspace-dashboard-grid {
     gap: 16px;
@@ -1447,11 +1445,14 @@ body.workspace-shell {
   }
 }
 @media (max-width: 650px) {
+  body.workspace-shell {
+    --workspace-gutter: 16px;
+  }
   .workspace-shell .topbar {
     height: var(--workspace-header-height) !important;
     min-height: var(--workspace-header-height) !important;
     flex-wrap: nowrap !important;
-    padding: 0 16px !important;
+    padding: 0 var(--workspace-inline-space) !important;
     gap: 9px;
   }
   .workspace-shell .topbar .sync-label {
@@ -1468,24 +1469,20 @@ body.workspace-shell {
     min-height: 30px;
   }
   .workspace-shell .content-body {
-    padding: 21px 16px 32px;
+    padding-block: 24px 32px;
   }
   .workspace-shell .card {
     padding: 16px;
   }
   .workspace-subnav {
-    padding: 0 16px;
     min-height: 50px;
   }
-  .workspace-subnav-label {
-    display: none;
-  }
   .workspace-subnav-links {
-    width: 100%;
+    gap: 22px;
   }
   .workspace-subnav-button {
-    padding: 14px 8px 12px;
-    font-size: 12px;
+    padding: 14px 0 12px;
+    font-size: 13px;
   }
   .workspace-dashboard-grid {
     grid-template-columns: 1fr;
@@ -1538,14 +1535,6 @@ body.workspace-shell {
   gap: 2px;
   min-width: 0;
   margin-right: auto;
-}
-.workspace-role-label {
-  color: var(--text-muted);
-  font-size: 10px;
-}
-.workspace-shell #pageTitle {
-  font-size: 13px;
-  font-weight: 600;
 }
 .workspace-shell .sync-label {
   margin-left: 0;
@@ -1785,9 +1774,6 @@ body.workspace-shell {
   .workspace-shell .workspace-title-stack {
     flex: 1;
     min-width: 0;
-  }
-  .workspace-role-label {
-    font-size: 9px;
   }
   .workspace-shell .topbar #myAccountButton,
   .workspace-shell .topbar .workspace-topbar-action {

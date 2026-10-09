@@ -131,6 +131,34 @@ test("dynamic professional sections join the correct group and forbidden section
   }
 });
 
+test("finance navigation contains only page tabs and keeps its group name as an accessible label", async () => {
+  const { dom, w } = await shell("accountant", {
+    targets: ["finance-section", "staffReport-section", "financeOps-section"],
+  });
+  try {
+    w.Garage.navigate("finance-section");
+    const navigation = w.document.querySelector(".workspace-subnav");
+    assert.equal(navigation.hidden, false);
+    assert.equal(navigation.getAttribute("aria-label"), "Chức năng tài chính");
+    assert.equal(navigation.querySelector(".workspace-subnav-label"), null);
+    assert.deepEqual(
+      [...navigation.querySelectorAll("button")].map((node) => node.textContent),
+      ["Thu tiền", "Báo cáo doanh thu", "Đề nghị chi & Sổ thu"],
+    );
+    assert.equal(w.document.querySelector(".workspace-role-label"), null);
+    assert.equal(w.document.getElementById("pageTitle").textContent, "Thu tiền");
+    navigation.querySelector('[data-workspace-target="staffReport-section"]').click();
+    assert.equal(w.document.getElementById("staffReport-section").hidden, false);
+    assert.equal(w.document.getElementById("pageTitle").textContent, "Báo cáo doanh thu");
+    assert.equal(
+      w.document.querySelector('.workspace-subnav-button[aria-current="page"]').textContent,
+      "Báo cáo doanh thu",
+    );
+  } finally {
+    dom.window.close();
+  }
+});
+
 test("saved dynamic workspaces restore after mount without overriding a later user choice", async () => {
   for (const userChoosesFirst of [false, true]) {
     const { dom, w } = await shell("accountant", {

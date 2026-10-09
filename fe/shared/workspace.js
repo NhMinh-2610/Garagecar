@@ -162,7 +162,6 @@
     const pageTitle = document.getElementById("pageTitle");
     if (pageTitle) {
       const titleStack = element("div", "workspace-title-stack");
-      titleStack.append(element("span", "workspace-role-label", names[role] || "AutoPro"));
       pageTitle.before(titleStack);
       titleStack.append(pageTitle);
     }
@@ -359,7 +358,7 @@
       );
       secondary.hidden = activeGroup === "home" || related.length < 2;
       if (secondary.hidden) return;
-      secondary.append(element("span", "workspace-subnav-label", groupName(activeGroup)));
+      secondary.setAttribute("aria-label", `Chức năng ${groupName(activeGroup).toLowerCase()}`);
       const links = element("div", "workspace-subnav-links");
       related.forEach((original) => {
         const button = element("button", "workspace-subnav-button", label(original));
