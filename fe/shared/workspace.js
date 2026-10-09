@@ -249,7 +249,7 @@
           }).format(new Date()),
         ),
       );
-      visual.append(date, symbol(role === "customer" ? "car" : "tool", "workspace-welcome-icon"));
+      visual.append(date);
       welcome.append(visual);
     }
     const secondary = element("div", "workspace-subnav");
@@ -542,14 +542,17 @@
       const attention = element("div", "card workspace-attention");
       attention.append(
         element("h2", "", "Việc cần xử lý"),
-        element("p", "muted", "Số liệu từ các chức năng bạn được phép truy cập."),
+        element("p", "muted", "Theo dõi các hạng mục đang chờ xử lý."),
       );
       priority = element("div", "workspace-priority-list");
       status = element("p", "workspace-update-status", "Đang tải công việc…");
       status.setAttribute("role", "status");
       attention.append(priority, status);
       const shortcuts = element("div", "card workspace-shortcuts");
-      shortcuts.append(element("h2", "", "Không gian làm việc"));
+      shortcuts.append(
+        element("h2", "", "Không gian làm việc"),
+        element("p", "muted", "Mở một nhóm để chọn công việc cần thực hiện."),
+      );
       shortcutContainer = element("div", "workspace-shortcut-list");
       shortcuts.append(shortcutContainer);
       columns.append(attention, shortcuts);
@@ -597,27 +600,43 @@
       if (signature === shortcutsSignature) return;
       shortcutsSignature = signature;
       actions.replaceChildren();
-      (quick[role] || []).forEach(([target, title], index) => {
+      actions.append(element("span", "workspace-actions-label", "Thao tác nhanh"));
+      (quick[role] || []).forEach(([target, title]) => {
         if (!available.some((node) => node.dataset.target === target)) return;
         const button = element(
           "button",
-          `btn ${index === 0 ? "btn-primary" : "btn-secondary"}`,
+          `btn ${actions.querySelector("button") ? "btn-secondary" : "btn-primary"}`,
           title,
         );
         button.type = "button";
         button.dataset.workspaceGo = target;
+        button.prepend(symbol(targetIcon(target)));
         actions.append(button);
       });
+      actions.hidden = !actions.querySelector("button");
       if (!shortcutContainer) return;
+      const openGroups = new Set(
+        [...shortcutContainer.querySelectorAll("details[open]")].map((node) => node.dataset.group),
+      );
       shortcutContainer.replaceChildren();
       (order[role] || []).forEach((group) => {
         const related = available.filter((node) => grouping(node.dataset.target, role) === group);
         if (!related.length) return;
-        const article = element("article", "workspace-shortcut");
-        article.prepend(symbol(groupIcons[group] || "grid", "workspace-shortcut-icon"));
-        article.append(
+        const article = element("details", "workspace-shortcut");
+        article.dataset.group = group;
+        article.open = openGroups.has(group);
+        const heading = element("summary", "workspace-shortcut-heading");
+        const copy = element("span", "workspace-shortcut-copy");
+        copy.append(
           element("strong", "", groupName(group)),
-          element("p", "muted", groups[group].text),
+          element("small", "", `${related.length} chức năng · ${groups[group].text}`),
+        );
+        const chevron = element("span", "workspace-shortcut-chevron", "›");
+        chevron.setAttribute("aria-hidden", "true");
+        heading.append(
+          symbol(groupIcons[group] || "grid", "workspace-shortcut-icon"),
+          copy,
+          chevron,
         );
         const links = element("div", "workspace-shortcut-links");
         related.forEach((node) => {
@@ -626,7 +645,7 @@
           button.dataset.workspaceGo = node.dataset.target;
           links.append(button);
         });
-        article.append(links);
+        article.append(heading, links);
         shortcutContainer.append(article);
       });
     }
@@ -787,6 +806,8 @@
             ).length,
         );
         priority.replaceChildren();
+        summary.hidden = !rows.length;
+        summary.style.setProperty("--summary-columns", Math.max(1, Math.min(rows.length, 4)));
         rows.forEach((row, index) => {
           const item = element("button", "workspace-priority-row");
           item.type = "button";

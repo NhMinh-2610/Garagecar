@@ -93,6 +93,11 @@ test("dynamic professional sections join the correct group and forbidden section
     permissions: [],
   });
   try {
+    const shortcutGroup = () =>
+      w.document.querySelector('.workspace-shortcut[data-group="finance"]');
+    assert.equal(shortcutGroup().open, false);
+    shortcutGroup().querySelector("summary").click();
+    assert.equal(shortcutGroup().open, true);
     const section = w.document.createElement("section");
     section.id = "financeOps-section";
     section.innerHTML = "<h1>Expense records</h1>";
@@ -106,6 +111,9 @@ test("dynamic professional sections join the correct group and forbidden section
         .forEach((node) => node.classList.toggle("active-section", node === section));
     w.document.querySelector("#sidebar nav").append(nav);
     await tick();
+    assert.equal(shortcutGroup().open, true, "new menu items must not collapse the active group");
+    shortcutGroup().querySelector('[data-workspace-go="financeOps-section"]').click();
+    assert.equal(section.hidden, false);
     assert.equal(nav.closest(".workspace-nav-group").dataset.workspaceGroup, "finance");
     nav.click();
     await tick();
@@ -114,6 +122,7 @@ test("dynamic professional sections join the correct group and forbidden section
     nav.hidden = true;
     nav.disabled = true;
     await tick();
+    assert.equal(shortcutGroup().querySelector('[data-workspace-go="financeOps-section"]'), null);
     assert.equal(w.Garage.navigate(section.id), false);
     assert.equal(section.hidden, true);
     assert.notEqual(w.localStorage.getItem("garage:accountant:section"), section.id);
@@ -206,6 +215,10 @@ test("dashboard summaries fetch only enabled capabilities and leave unloaded cou
       (node) => node.textContent,
     );
     assert.deepEqual(summary, counts);
+    assert.equal(
+      w.document.querySelector(".workspace-stats").style.getPropertyValue("--summary-columns"),
+      "3",
+    );
     assert.ok(
       w.document.querySelector(".workspace-update-status").textContent.includes("chưa tải được"),
     );
