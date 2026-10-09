@@ -3,122 +3,66 @@ GarageCar — Python/FastAPI Backend
 Entry point: uvicorn main:app --reload
 """
 
-from contextlib import asynccontextmanager
+import asyncio
+from contextlib import asynccontextmanager, suppress
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.exc import IntegrityError
-from core.response import error_response
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import models  # noqa: F401 - Dang ky ORM models truoc khi khoi dong.
 from config.settings import settings
+from core.response import error_response
 from database.engine import engine
-import models  # noqa: F401 — registers all ORM models with metadata
-
-from routers import auth, vehicles, repairs, inventory, mechanics, ai
+from routers import (
+    accounts,
+    advisor_operations,
+    ai,
+    auth,
+    bookings,
+    employees,
+    evidence,
+    finance_operations,
+    hr_operations,
+    inventory,
+    maintenance,
+    mechanics,
+    messaging,
+    repairs,
+    reports,
+    service,
+    vehicles,
+)
 from routers import settings as settings_router
-from routers import reports
-from routers import bookings, accounts, maintenance, service, employees
-from routers import evidence, finance_operations, hr_operations, advisor_operations
 
 
-# ── Lifespan: verify schema readiness ─────────────────────────────────────────
-
-
+# Lifespan: verify schema readiness
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Schema changes are explicit: python -m alembic upgrade head.
-    from sqlalchemy import inspect
-
-    async with engine.connect() as conn:
-        columns = await conn.run_sync(
-            lambda sync: {c["name"] for c in inspect(sync).get_columns("vehicles")}
-        )
-        if "customerId" not in columns:
-            raise RuntimeError(
-                "Database needs migration: cd be && python -m alembic upgrade head"
-            )
-        user_columns = await conn.run_sync(
-            lambda sync: {c["name"] for c in inspect(sync).get_columns("users")}
-        )
-        if not {"isActive", "sessionVersion", "lastLoginAt"}.issubset(user_columns):
-            raise RuntimeError(
-                "Database needs account migration: python be/manage.py upgrade"
-            )
-        ticket_columns = await conn.run_sync(
-            lambda sync: {
-                c["name"] for c in inspect(sync).get_columns("repair_tickets")
-            }
-        )
-        if (
-            not {
-                "maintenance_profiles",
-                "vehicle_care",
-                "maintenance_records",
-                "maintenance_reminders",
-                "service_visits",
-                "service_quotes",
-                "employee_profiles",
-            }.issubset(
-                await conn.run_sync(lambda sync: set(inspect(sync).get_table_names()))
-            )
-            or "disabledPermissions" not in user_columns
-            or "serviceVisitId" not in ticket_columns
-        ):
-            raise RuntimeError(
-                "Database needs garage migration: python be/manage.py upgrade"
-            )
-    import asyncio
-
-    async with engine.connect() as conn:
-        if not {
-            "repair_evidence",
-            "payment_receipts",
-            "expenses",
-            "staff_shifts",
-            "staff_certificates",
-            "leave_requests",
-            "service_followups",
-        }.issubset(
-            await conn.run_sync(lambda sync: set(inspect(sync).get_table_names()))
-        ):
-            raise RuntimeError(
-                "Database needs professional workflow migration: python be/manage.py upgrade"
-            )
-        for table, expected in {
-            "inventories": {"sku", "barcode", "fitments", "highVoltage"},
-            "repair_items": {"evidenceRound", "partCode"},
-            "staff_certificates": {"status", "revokedBy", "revokedAt", "revokeReason"},
-        }.items():
-            existing = await conn.run_sync(
-                lambda sync: {
-                    column["name"] for column in inspect(sync).get_columns(table)
-                }
-            )
-            if not expected.issubset(existing):
-                raise RuntimeError(
-                    "Database needs professional workflow migration: python be/manage.py upgrade"
-                )
+    from database.schema import ensure_schema
     from services.reminder_worker import reminder_loop
 
-    worker = asyncio.create_task(reminder_loop())
+    worker = None
     try:
+        await ensure_schema(engine)
+        worker = asyncio.create_task(reminder_loop())
         yield
     finally:
-        worker.cancel()
-        from contextlib import suppress
+        try:
+            if worker is not None:
+                worker.cancel()
+                with suppress(asyncio.CancelledError):
+                    await worker
+        finally:
+            await engine.dispose()
 
-        with suppress(asyncio.CancelledError):
-            await worker
-    # Teardown (optional cleanup)
-    await engine.dispose()
 
-
-# ── App factory ────────────────────────────────────────────────────────────────
-
+# App factory
 app = FastAPI(
     title="GarageCar API",
     description=(
@@ -131,8 +75,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── CORS ───────────────────────────────────────────────────────────────────────
-
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.cors_origin] if settings.cors_origin != "*" else ["*"],
@@ -162,8 +105,7 @@ async def integrity_error(request, exc):
     )
 
 
-# ── Routers ────────────────────────────────────────────────────────────────────
-
+# Routers
 app.include_router(auth.router)
 app.include_router(accounts.router)
 app.include_router(vehicles.router)
@@ -181,11 +123,10 @@ app.include_router(evidence.router)
 app.include_router(finance_operations.router)
 app.include_router(hr_operations.router)
 app.include_router(advisor_operations.router)
+app.include_router(messaging.router)
 
 
-# ── Health check ───────────────────────────────────────────────────────────────
-
-
+# Health check
 @app.get("/api/health", tags=["Health"])
 async def health():
     return {
@@ -196,15 +137,12 @@ async def health():
     }
 
 
-# ── Serve static frontend ─────────────────────────────────────────────────────
-# Frontend được serve tại /static/
-# Các route dưới đây redirect để người dùng có thể truy cập trực tiếp
-# thay vì phải mở file:// (gây lỗi localStorage & CORS)
-
+# Serve static frontend
+# Phuc vu frontend cung origin de dung chung API va phien dang nhap.
 _fe_dir = Path(__file__).parent.parent / "fe"
 
 if _fe_dir.exists():
-    # Convenience redirects — giúp frontend chạy đúng origin http://localhost:8000
+
     @app.get("/", include_in_schema=False)
     async def root():
         return RedirectResponse(url="/static/index.html")
@@ -257,8 +195,7 @@ if _fe_dir.exists():
     app.mount("/static", StaticFiles(directory=str(_fe_dir)), name="frontend-static")
 
 
-# ── Dev entry point ────────────────────────────────────────────────────────────
-
+# Dev entry point
 if __name__ == "__main__":
     import uvicorn
 

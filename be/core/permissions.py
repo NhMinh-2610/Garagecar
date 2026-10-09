@@ -10,12 +10,13 @@ ROLE_PERMISSIONS = {
         "reports",
         "hr",
         "accounts",
+        "messages",
     },
-    "advisor": {"reception", "workshop", "maintenance"},
+    "advisor": {"reception", "workshop", "maintenance", "messages"},
     "accountant": {"finance", "reports"},
     "hr": {"hr"},
     "mechanic": {"workshop", "maintenance"},
-    "customer": {"maintenance"},
+    "customer": {"maintenance", "messages"},
 }
 
 

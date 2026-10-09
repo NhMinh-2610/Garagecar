@@ -1,22 +1,33 @@
-from fastapi import APIRouter, Depends
+import logging
+from collections import deque
+from time import monotonic
 
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.response import error_response, success_response
+from database.session import get_db
+from middleware.auth import get_current_user
 from schemas.ai import (
-    DiagnoseRequest,
-    DiagnoseResponse,
-    CostEstimateRequest,
-    CostEstimateResponse,
-    SummarizeRepairRequest,
-    SummarizeResponse,
-    MaintenanceAdviceRequest,
-    MaintenanceAdviceResponse,
     ChatRequest,
-    ChatResponse,
+    CostEstimateRequest,
+    DiagnoseRequest,
+    MaintenanceAdviceRequest,
+    SummarizeRepairRequest,
 )
 from services.ai_service import ai_service
-from core.response import success_response
-from middleware.auth import get_current_user
+from services.chat_context import build_chat_context
 
 router = APIRouter(prefix="/api/ai", tags=["AI Assistant"])
+logger = logging.getLogger(__name__)
+_chat_requests = {}
+_chat_active = set()
+
+
+@router.get("/chat/info", summary="Chat provider and privacy information")
+async def chat_info(_: dict = Depends(get_current_user)):
+    return success_response(ai_service.chat_info())
 
 
 @router.post(
@@ -101,11 +112,50 @@ async def maintenance_advice(
 )
 async def chat(
     body: ChatRequest,
-    _: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
 ):
     """
     Multi-turn conversation endpoint for general automotive Q&A.
     Maintains context via the messages array sent by the client.
     """
-    result = await ai_service.chat(body.messages)
-    return success_response(result.model_dump())
+    context, sources = None, []
+    if body.vehicleId:
+        context, sources = await build_chat_context(
+            db, body.vehicleId, user, body.messages[-1].content
+        )
+    now = monotonic()
+    for key in list(_chat_requests):
+        if not _chat_requests[key] or now - _chat_requests[key][-1] >= 60:
+            del _chat_requests[key]
+    recent = _chat_requests.setdefault(user["id"], deque())
+    while recent and now - recent[0] >= 60:
+        recent.popleft()
+    if user["id"] in _chat_active or len(recent) >= 8 or len(_chat_active) >= 4:
+        raise HTTPException(
+            429, "AI đang bận hoặc bạn gửi quá nhanh. Hãy chờ một lát rồi thử lại."
+        )
+    recent.append(now)
+    _chat_active.add(user["id"])
+    try:
+        result = await ai_service.chat(body.messages, context, sources)
+        response = success_response(result.model_dump())
+        response.headers["Cache-Control"] = "private, no-store"
+        return response
+    except (TimeoutError, httpx.TimeoutException):
+        return error_response(
+            "AI trả lời quá lâu. Hãy thử lại sau hoặc liên hệ cố vấn dịch vụ.", 504
+        )
+    except ValueError:
+        return error_response(
+            "AI chưa trả về câu trả lời. Hãy thử mô tả lại câu hỏi.", 502
+        )
+    except Exception as exc:
+        # Do not log prompts, keys, provider payloads or URLs containing credentials.
+        logger.warning("Chat provider failed: %s", type(exc).__name__)
+        return error_response(
+            "Chưa kết nối được AI. Garage cần kiểm tra model, API key hoặc dịch vụ LLM.",
+            503,
+        )
+    finally:
+        _chat_active.discard(user["id"])
