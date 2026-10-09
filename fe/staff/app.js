@@ -12,13 +12,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
   const defaults = {
-    advisor: ["reception", "workshop", "maintenance"],
+    advisor: ["reception", "workshop", "maintenance", "messages"],
     accountant: ["finance", "reports"],
     hr: ["hr"],
   };
-  let allowed = defaults[user.role].filter(
-    (p) => !(user.disabledPermissions || []).includes(p),
-  );
+  let allowed = defaults[user.role].filter((p) => !(user.disabledPermissions || []).includes(p));
   const esc = Garage.escape,
     money = (v) =>
       new Intl.NumberFormat("vi-VN", {
@@ -35,13 +33,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       n.hidden = !allowed.includes(n.dataset.permission);
     });
     Garage.initPortal(user.role);
-    document
-      .querySelectorAll(".nav-item[hidden]")
-      .forEach((n) => (n.disabled = true));
-    (
-      document.querySelector(".nav-item.active:not([hidden])") ||
-      document.querySelector(".nav-item:not([hidden])")
-    )?.click();
+    document.querySelectorAll(".nav-item[hidden]").forEach((n) => (n.disabled = true));
+    if (!Garage.workspace?.active)
+      (
+        document.querySelector(".nav-item.active:not([hidden])") ||
+        document.querySelector(".nav-item:not([hidden])")
+      )?.click();
     if (!allowed.length) {
       document.getElementById("staffError").hidden = false;
       document.getElementById("staffError").textContent =
@@ -92,7 +89,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     `<label class="form-group">${label}<input name="${name}" type="${type}" value="${esc(value ?? "")}" ${extra}></label>`;
   function reception() {
     const h = document.getElementById("staffReception");
-    h.innerHTML = `<div class="section-heading"><div><p class="eyebrow">CỐ VẤN / TIẾP NHẬN</p><h1>Tiếp nhận & Lịch hẹn</h1><p class="section-description">Liên kết đúng tài khoản khách, kiểm tra đầu vào và điều phối vào xưởng.</p></div><button class="btn btn-primary" data-staff="intake">＋ Tiếp nhận xe</button></div><div class="card"><h3>Xe trong garage</h3><div class="table-responsive"><table><thead><tr><th>Biển số / Xe</th><th>Khách / Điện thoại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${vehicles.map((v) => `<tr><td>${esc(v.licensePlate)}<small>${esc(v.carBrand)} ${esc(v.carModel)}</small></td><td>${esc(v.customerName)}<small>${esc(v.phone)}</small></td><td>${esc(v.status)}</td><td><button class="btn btn-sm" data-staff="edit" data-id="${v.id}">Thông tin / Liên kết</button><button class="btn btn-primary btn-sm" data-staff="service" data-id="${v.id}">Kiểm tra & Báo giá</button>${v.status === "completed" ? `<button class="btn btn-sm" data-staff="deliver" data-id="${v.id}">Giao xe</button>` : v.status === "delivered" ? `<button class="btn btn-sm" data-staff="return" data-id="${v.id}">Tiếp nhận lại</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="4">Chưa có xe.</td></tr>'}</tbody></table></div></div><div class="card"><h3>Yêu cầu đặt lịch</h3><div class="table-responsive"><table><thead><tr><th>Khách / Điện thoại</th><th>Ngày / Dịch vụ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${bookings.map((b) => `<tr><td>${esc(b.customerName)}<small>${esc(b.phone)}</small></td><td>${esc(b.preferredDate)}<small>${esc(b.service)} · ${esc(b.note)}</small></td><td>${esc(b.status)}</td><td>${b.status === "pending" ? `<button class="btn btn-sm" data-staff="booking" data-id="${b.id}" data-status="confirmed">Xác nhận</button><button class="btn btn-sm" data-staff="booking" data-id="${b.id}" data-status="cancelled">Hủy</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="4">Chưa có lịch hẹn.</td></tr>'}</tbody></table></div></div>`;
+    const selectedTab =
+      h.querySelector(".tab-btn.active")?.dataset.tab || "staff-reception-vehicles";
+    h.innerHTML = `<div class="section-heading"><div><p class="eyebrow">CỐ VẤN / TIẾP NHẬN</p><h1>Tiếp nhận & Lịch hẹn</h1><p class="section-description">Liên kết đúng tài khoản khách, kiểm tra đầu vào và điều phối vào xưởng.</p></div><button class="btn btn-primary" data-staff="intake">＋ Tiếp nhận xe</button></div><div class="card"><h3>Xe trong garage</h3><div class="table-responsive"><table data-page-size="8"><thead><tr><th>Biển số / Xe</th><th>Khách / Điện thoại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${vehicles.map((v) => `<tr><td>${esc(v.licensePlate)}<small>${esc(v.carBrand)} ${esc(v.carModel)}</small></td><td>${esc(v.customerName)}<small>${esc(v.phone)}</small></td><td>${esc(v.status)}</td><td><button class="btn btn-sm" data-staff="edit" data-id="${v.id}">Thông tin / Liên kết</button><button class="btn btn-primary btn-sm" data-staff="service" data-id="${v.id}">Kiểm tra & Báo giá</button>${v.status === "completed" ? `<button class="btn btn-sm" data-staff="deliver" data-id="${v.id}">Giao xe</button>` : v.status === "delivered" ? `<button class="btn btn-sm" data-staff="return" data-id="${v.id}">Tiếp nhận lại</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="4">Chưa có xe.</td></tr>'}</tbody></table></div></div><div class="card"><h3>Yêu cầu đặt lịch</h3><div class="table-responsive"><table data-page-size="8"><thead><tr><th>Khách / Điện thoại</th><th>Ngày / Dịch vụ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${bookings.map((b) => `<tr><td>${esc(b.customerName)}<small>${esc(b.phone)}</small></td><td>${esc(b.preferredDate)}<small>${esc(b.service)} · ${esc(b.note)}</small></td><td>${esc(b.status)}</td><td>${b.status === "pending" ? `<button class="btn btn-sm" data-staff="booking" data-id="${b.id}" data-status="confirmed">Xác nhận</button><button class="btn btn-sm" data-staff="booking" data-id="${b.id}" data-status="cancelled">Hủy</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="4">Chưa có lịch hẹn.</td></tr>'}</tbody></table></div></div>`;
+    const panels = [...h.querySelectorAll(":scope > .card")];
+    const tabs = document.createElement("div");
+    tabs.className = "tabs";
+    tabs.setAttribute("aria-label", "Tiếp nhận và lịch hẹn");
+    panels.forEach((panel, index) => {
+      const id = index ? "staff-reception-bookings" : "staff-reception-vehicles";
+      panel.id = id;
+      panel.classList.add("tab-content");
+      panel.classList.toggle("active", id === selectedTab);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "tab-btn";
+      button.dataset.tab = id;
+      button.textContent = index ? "Lịch hẹn" : "Xe tại garage";
+      button.classList.toggle("active", id === selectedTab);
+      tabs.append(button);
+    });
+    h.querySelector(".section-heading").after(tabs);
   }
   function vehicleForm(v = null) {
     const d = dialog(
@@ -124,20 +141,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const h = document.getElementById("staffFinance"),
       pending = tickets.filter((t) => t.status === "completed"),
       paid = tickets.filter((t) => t.status === "paid");
-    h.innerHTML = `<div class="section-heading"><div><p class="eyebrow">KẾ TOÁN / THU TIỀN</p><h1>Thu tiền & Lịch sử thanh toán</h1><p class="section-description">Phiếu qua luồng báo giá phải được nghiệm thu trước khi thu tiền. Hệ thống ghi nhận thanh toán toàn bộ tại garage.</p></div></div><div class="care-summary"><div class="card"><strong>${pending.length}</strong><span>Phiếu chờ thu</span></div><div class="card"><strong>${money(pending.reduce((s, t) => s + t.totalAmount, 0))}</strong><span>Chưa thu</span></div><div class="card"><strong>${money(paid.reduce((s, t) => s + t.totalAmount, 0))}</strong><span>Đã thu</span></div></div><div class="card"><div class="table-responsive"><table><thead><tr><th>Phiếu / Xe</th><th>Tổng tiền</th><th>Nghiệm thu</th><th>Thanh toán</th><th>Thao tác</th></tr></thead><tbody>${
+    h.innerHTML = `<div class="section-heading"><div><p class="eyebrow">KẾ TOÁN / THU TIỀN</p><h1>Thu tiền & Lịch sử thanh toán</h1><p class="section-description">Phiếu qua luồng báo giá phải được nghiệm thu trước khi thu tiền. Hệ thống ghi nhận thanh toán toàn bộ tại garage.</p></div></div><div class="care-summary"><div class="card"><strong>${pending.length}</strong><span>Phiếu chờ thu</span></div><div class="card"><strong>${money(pending.reduce((s, t) => s + t.totalAmount, 0))}</strong><span>Chưa thu</span></div><div class="card"><strong>${money(paid.reduce((s, t) => s + t.totalAmount, 0))}</strong><span>Đã thu</span></div></div><div class="card"><div class="table-responsive"><table data-page-size="8"><thead><tr><th>Phiếu / Xe</th><th>Tổng tiền</th><th>Nghiệm thu</th><th>Thanh toán</th><th>Thao tác</th></tr></thead><tbody>${
       [...pending, ...paid]
         .map((t) => {
           const v = visits.find((v) => v.id === t.serviceVisitId),
             ready = !t.serviceVisitId || t.qcAt || v?.qcAt;
           return `<tr><td>#${t.id} · ${esc(t.vehicle?.licensePlate)}</td><td>${money(t.totalAmount)}</td><td>${t.serviceVisitId ? (ready ? "Đã nghiệm thu" : "Chờ nghiệm thu") : "Phiếu cũ"}</td><td>${t.status === "paid" ? "Đã thu · " + esc(t.paidAt || "") : "Chưa thu"}</td><td>${t.status === "completed" ? `<button class="btn btn-primary btn-sm" data-staff="pay" data-id="${t.id}" ${ready ? "" : "disabled"}>Thu toàn bộ</button>` : ""}<button class="btn btn-sm" data-staff="receipt" data-id="${t.id}">Chi tiết</button></td></tr>`;
         })
-        .join("") ||
-      '<tr><td colspan="5">Không có phiếu cần thu tiền.</td></tr>'
+        .join("") || '<tr><td colspan="5">Không có phiếu cần thu tiền.</td></tr>'
     }</tbody></table></div></div>`;
   }
   function hr() {
     document.getElementById("staffHR").innerHTML =
-      `<div class="section-heading"><div><p class="eyebrow">NHÂN SỰ / HỒ SƠ</p><h1>Hồ sơ nhân sự</h1><p class="section-description">Quản lý liên hệ, vị trí và ngày vào làm. Tài khoản và quyền truy cập do quản trị viên cấp.</p></div></div><div class="card"><div class="table-responsive"><table><thead><tr><th>Nhân viên</th><th>Vai trò / Bộ phận</th><th>Điện thoại</th><th>Ngày vào làm</th><th>Thao tác</th></tr></thead><tbody>${employees.map((u) => `<tr><td>${esc(u.fullName)}<small>${esc(u.email)} · ${u.isActive ? "Hoạt động" : "Đã khóa"}</small></td><td>${esc(names[u.role] || { mechanic: "Kỹ thuật viên", admin: "Quản trị viên" }[u.role] || u.role)}<small>${esc(u.profile?.department || "Chưa nhập")} · ${esc(u.profile?.jobTitle || "")}</small></td><td>${esc(u.profile?.phone || "—")}</td><td>${esc(u.profile?.startDate || "—")}</td><td><button class="btn btn-sm" data-staff="employee" data-id="${u.id}">Cập nhật hồ sơ</button></td></tr>`).join("") || '<tr><td colspan="5">Chưa có nhân viên.</td></tr>'}</tbody></table></div></div>`;
+      `<div class="section-heading"><div><p class="eyebrow">NHÂN SỰ / HỒ SƠ</p><h1>Hồ sơ nhân sự</h1><p class="section-description">Quản lý liên hệ, vị trí và ngày vào làm. Tài khoản và quyền truy cập do quản trị viên cấp.</p></div></div><div class="card"><div class="table-responsive"><table data-page-size="8"><thead><tr><th>Nhân viên</th><th>Vai trò / Bộ phận</th><th>Điện thoại</th><th>Ngày vào làm</th><th>Thao tác</th></tr></thead><tbody>${employees.map((u) => `<tr><td>${esc(u.fullName)}<small>${esc(u.email)} · ${u.isActive ? "Hoạt động" : "Đã khóa"}</small></td><td>${esc(names[u.role] || { mechanic: "Kỹ thuật viên", admin: "Quản trị viên" }[u.role] || u.role)}<small>${esc(u.profile?.department || "Chưa nhập")} · ${esc(u.profile?.jobTitle || "")}</small></td><td>${esc(u.profile?.phone || "—")}</td><td>${esc(u.profile?.startDate || "—")}</td><td><button class="btn btn-sm" data-staff="employee" data-id="${u.id}">Cập nhật hồ sơ</button></td></tr>`).join("") || '<tr><td colspan="5">Chưa có nhân viên.</td></tr>'}</tbody></table></div></div>`;
   }
   async function load(context = {}) {
     const guard = Garage.refreshGuard(context);
@@ -184,13 +200,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       '<div class="section-heading"><div><p class="eyebrow">KẾ TOÁN / BÁO CÁO</p><h1>Doanh thu đã thu</h1></div></div><div class="card"><form id="staffReportForm" class="toolbar"><label>Năm<input name="year" type="number" min="2000" max="2100" value="' +
       new Date().getFullYear() +
       '" required></label><label>Tháng / Quý<select name="period"><option value="year">Cả năm</option>' +
-      [1, 2, 3, 4]
-        .map((q) => '<option value="q' + q + '">Quý ' + q + "</option>")
-        .join("") +
+      [1, 2, 3, 4].map((q) => '<option value="q' + q + '">Quý ' + q + "</option>").join("") +
       Array.from(
         { length: 12 },
-        (_, i) =>
-          '<option value="' + (i + 1) + '">Tháng ' + (i + 1) + "</option>",
+        (_, i) => '<option value="' + (i + 1) + '">Tháng ' + (i + 1) + "</option>",
       ).join("") +
       '</select></label><button class="btn btn-primary" type="submit">Xem báo cáo</button></form><div id="staffRevenue"></div></div>';
     report.querySelector("form").onsubmit = async (e) => {
@@ -212,10 +225,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           months.map(async (m) => ({
             month: m,
             rows: await Garage.request(
-              "/reports/revenue?month=" +
-                year +
-                "-" +
-                String(m).padStart(2, "0"),
+              "/reports/revenue?month=" + year + "-" + String(m).padStart(2, "0"),
             ),
           })),
         );
@@ -241,9 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.disabled = false;
       }
     };
-    report
-      .querySelector("form")
-      .dispatchEvent(new Event("submit", { cancelable: true }));
+    report.querySelector("form").dispatchEvent(new Event("submit", { cancelable: true }));
   }
   document.querySelector("main").onclick = async (e) => {
     const btn = e.target.closest("[data-staff]");
@@ -285,7 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const t = tickets.find((t) => t.id === id);
       return dialog(
         "Chi tiết phiếu #" + id,
-        `<p>${esc(t.vehicle?.licensePlate)} · ${money(t.totalAmount)} · ${t.status === "paid" ? "Đã thu" : "Chưa thu"}</p><div class="table-responsive"><table><thead><tr><th>Công việc / Vật tư</th><th>SL</th><th>Vật tư</th><th>Tiền công</th><th>Tổng</th></tr></thead><tbody>${t.items.map((i) => `<tr><td>${esc(i.taskName)}<small>${esc(i.partName)}</small></td><td>${i.quantity}</td><td>${money(i.partPrice)}</td><td>${money(i.laborPrice)}</td><td>${money(i.totalPrice)}</td></tr>`).join("")}</tbody></table></div>`,
+        `<p>${esc(t.vehicle?.licensePlate)} · ${money(t.totalAmount)} · ${t.status === "paid" ? "Đã thu" : "Chưa thu"}</p><div class="table-responsive"><table data-page-size="8"><thead><tr><th>Công việc / Vật tư</th><th>SL</th><th>Vật tư</th><th>Tiền công</th><th>Tổng</th></tr></thead><tbody>${t.items.map((i) => `<tr><td>${esc(i.taskName)}<small>${esc(i.partName)}</small></td><td>${i.quantity}</td><td>${money(i.partPrice)}</td><td>${money(i.laborPrice)}</td><td>${money(i.totalPrice)}</td></tr>`).join("")}</tbody></table></div>`,
         () => Promise.resolve(),
       );
     }
@@ -304,11 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.disabled = true;
       try {
         await Garage.request(
-          a === "pay"
-            ? "/repairs/" + id
-            : a === "booking"
-              ? "/bookings/" + id
-              : "/vehicles/" + id,
+          a === "pay" ? "/repairs/" + id : a === "booking" ? "/bookings/" + id : "/vehicles/" + id,
           {
             method: "PUT",
             body: {
@@ -339,14 +343,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   Promise.resolve(user)
     .then((me) => {
       localStorage.setItem("user", JSON.stringify(me));
-      allowed = defaults[me.role].filter(
-        (p) => !(me.disabledPermissions || []).includes(p),
-      );
+      allowed = defaults[me.role].filter((p) => !(me.disabledPermissions || []).includes(p));
       document.querySelectorAll(".nav-item").forEach((n) => {
         n.hidden = !allowed.includes(n.dataset.permission);
         n.disabled = n.hidden;
       });
-      document.querySelector(".nav-item:not([hidden])")?.click();
+      if (!Garage.workspace?.active) document.querySelector(".nav-item:not([hidden])")?.click();
       return load();
     })
     .catch((e) => {

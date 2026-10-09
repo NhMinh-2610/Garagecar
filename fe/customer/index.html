@@ -1,55 +1,444 @@
-<!DOCTYPE html>
-<html lang="vi"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AutoPro · Khách hàng</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="../shared/ui.css"><link rel="stylesheet" href="../shared/workspace.css"><link rel="stylesheet" href="../shared/portals.css">
-<script src="../shared/core.js" defer></script><script src="../shared/access.js" defer></script><script src="../shared/portal.js" defer></script>
-<script src="js/app.js" defer></script><script src="js/auth.js" defer></script><script src="js/workspace.js" defer></script><script src="../shared/booking.js" defer></script>
-<link rel="stylesheet" href="../shared/care.css"><script src="../shared/maintenance.js" defer></script><script src="../shared/service.js" defer></script><script src="../shared/pwa.js" defer></script><link rel="stylesheet" href="../shared/professional.css"><script src="../shared/evidence.js" defer></script></head><body>
-<aside id="sidebar">
-<a class="brand" href="../index.html"><span class="brand-mark">A</span><span>AutoPro<small>GARAGE WORKSPACE</small></span></a>
-<p class="nav-caption">DÀNH CHO KHÁCH HÀNG</p>
-<nav aria-label="Menu khách hàng">
-<button class="nav-item" data-target="dashboard-section"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i>Tổng quan</button>
-<button class="nav-item" data-target="vehicles-section"><i class="fa-solid fa-car" aria-hidden="true"></i>Xe của tôi</button>
-<button class="nav-item" data-target="repairs-section"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>Sửa chữa & Chi phí</button>
-<button class="nav-item" data-target="booking-section"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>Đặt lịch dịch vụ</button>
-<button class="nav-item" data-target="service-section">Báo giá & Xác nhận</button><button class="nav-item" data-target="maintenance-section">Bảo dưỡng & Nhắc hạn</button></nav>
-<div class="sidebar-footer"><div class="user-info"><h4>Khách hàng</h4><small>Tài khoản cá nhân</small></div><button id="logoutBtn" class="btn-icon" aria-label="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i></button></div>
-</aside>
-<div id="content">
-<header class="topbar"><button class="btn-icon toggle-sidebar" aria-label="Mở menu" aria-controls="sidebar" aria-expanded="false">☰</button><span id="pageTitle">Tổng quan</span><span class="sync-label">Dữ liệu từ garage · tự làm mới</span><button id="refreshData" class="btn btn-sm">Làm mới</button></header>
-<main class="content-body">
-<p id="loadError" class="inline-message error" role="alert" hidden></p>
-<section id="service-section"><div id="serviceWorkspace"></div></section><section id="maintenance-section"><div id="maintenanceWorkspace"></div></section><section id="dashboard-section" class="active-section">
-<div class="section-heading"><div><p class="eyebrow">KHÁCH HÀNG / TỔNG QUAN</p><h1>Đồng hành cùng chiếc xe của bạn</h1><p class="section-description">Theo dõi tiến độ, kiểm tra chi phí và chủ động lên lịch chăm sóc xe.</p></div><button class="btn btn-primary" data-go="booking-section">＋ Đặt lịch dịch vụ</button></div>
-<div class="metrics">
-<div class="metric"><span>Xe của tôi</span><strong id="statVehicles">—</strong><small>Xe đã liên kết tài khoản</small></div>
-<div class="metric"><span>Đang tiếp nhận / sửa chữa</span><strong id="statActiveRepairs">—</strong><small>Phiếu chờ xử lý và đang sửa</small></div>
-<div class="metric"><span>Chờ thanh toán</span><strong id="statOutstanding">—</strong><small>Chi phí của phiếu đã hoàn thành</small></div>
-<div class="metric"><span>Đã thanh toán</span><strong id="statPaid">—</strong><small>Tổng chi phí đã thanh toán</small></div>
-</div>
-<div class="split-layout">
-<div class="card"><div class="card-heading"><h3>Phiếu sửa chữa gần đây</h3><button class="btn btn-sm" data-go="repairs-section">Xem tất cả</button></div><ul id="recentRepairs" class="flow-list"><li>Đang tải dữ liệu…</li></ul></div>
-<div class="card"><h3>Mỗi bước đều rõ ràng</h3><ol class="flow-list"><li><div><strong>01 · Tiếp nhận & báo giá</strong><small>Garage kiểm tra xe và lập các hạng mục sửa chữa.</small></div></li><li><div><strong>02 · Theo dõi sửa chữa</strong><small>Tiến độ cập nhật theo checklist của kỹ thuật viên.</small></div></li><li><div><strong>03 · Thanh toán & nhận xe</strong><small>Kiểm tra chi phí, thanh toán tại garage và lưu phiếu thu.</small></div></li></ol></div>
-</div></section>
-<section id="vehicles-section">
-<div class="section-heading"><div><p class="eyebrow">KHÁCH HÀNG / PHƯƠNG TIỆN</p><h1>Xe của tôi</h1><p class="section-description">Thông tin tiếp nhận và lịch sử chăm sóc cho từng xe.</p></div><button class="btn btn-primary" data-go="booking-section">Đặt lịch cho xe</button></div>
-<div class="card"><div class="toolbar"><input id="vehicleSearch" type="search" aria-label="Tìm xe" placeholder="Tìm biển số, hiệu xe, dòng xe…"><select id="vehicleStatus" aria-label="Lọc trạng thái xe"><option value="">Tất cả trạng thái</option><option value="waiting">Chờ xử lý</option><option value="repairing">Đang sửa</option><option value="completed">Đã hoàn thành</option><option value="delivered">Đã giao xe</option></select></div><div class="table-responsive"><table id="vehiclesTable"><thead><tr><th>Biển số</th><th>Hiệu / dòng xe</th><th>Trạng thái</th><th>Ngày tiếp nhận</th><th>Lịch sử</th></tr></thead><tbody><tr><td colspan="5" class="empty-state">Đang tải dữ liệu…</td></tr></tbody></table></div><p class="panel-note">Nếu chưa thấy xe của mình, hãy nhờ bộ phận tiếp nhận liên kết xe với email tài khoản của bạn.</p></div>
-</section>
-<section id="repairs-section">
-<div class="section-heading"><div><p class="eyebrow">KHÁCH HÀNG / SỬA CHỮA</p><h1>Sửa chữa & Chi phí</h1><p class="section-description">Xem tiến độ từng hạng mục, chi phí vật tư và tiền công.</p></div></div>
-<div class="card"><div class="toolbar"><input id="repairSearch" type="search" aria-label="Tìm phiếu sửa chữa" placeholder="Tìm mã phiếu, biển số, kỹ thuật viên…"><select id="repairVehicle" aria-label="Lọc theo xe"><option value="">Tất cả xe</option></select><select id="repairStatus" aria-label="Lọc trạng thái phiếu"><option value="">Tất cả trạng thái</option><option value="draft">Chờ xử lý</option><option value="working">Đang sửa</option><option value="completed">Chờ thanh toán</option><option value="paid">Đã thanh toán</option></select></div><div class="table-responsive"><table id="repairsTable"><thead><tr><th>Phiếu / Ngày tạo</th><th>Xe</th><th>Kỹ thuật viên</th><th>Tiến độ</th><th>Tổng chi phí</th><th>Trạng thái</th><th>Chi tiết</th></tr></thead><tbody><tr><td colspan="7" class="empty-state">Đang tải dữ liệu…</td></tr></tbody></table></div></div>
-</section>
-<section id="booking-section">
-<div class="section-heading"><div><p class="eyebrow">KHÁCH HÀNG / LỊCH HẸN</p><h1>Đặt lịch dịch vụ</h1><p class="section-description">Gửi ngày mong muốn. Garage sẽ liên hệ qua số điện thoại để xác nhận lịch.</p></div></div>
-<div class="split-layout"><div class="card">
-<form id="bookingForm">
-<div class="form-grid"><div class="form-group"><label for="bookingName">Họ và tên</label><input id="bookingName" name="customerName" autocomplete="name" maxlength="255" required></div><div class="form-group"><label for="bookingPhone">Số điện thoại liên hệ</label><input id="bookingPhone" name="phone" type="tel" autocomplete="tel" maxlength="30" required></div><div class="form-group"><label for="preferredDate">Ngày mong muốn</label><input id="preferredDate" name="preferredDate" type="date" required></div><div class="form-group"><label for="bookingService">Dịch vụ</label><select id="bookingService" name="service" required><option value="">Chọn nhu cầu</option><option value="maintenance">Bảo dưỡng</option><option value="repair">Sửa chữa</option><option value="spa">Chăm sóc xe</option><option value="other">Tư vấn khác</option></select></div></div>
-<div class="form-group"><label for="bookingNote">Biển số, tình trạng xe và ghi chú</label><textarea id="bookingNote" name="note" rows="4" maxlength="2000" placeholder="Ví dụ: 30A-123.45, xe phát tiếng kêu khi phanh…"></textarea></div>
-<p id="bookingResult" class="inline-message" role="status" hidden></p><button class="btn btn-primary" type="submit">Gửi yêu cầu đặt lịch</button>
-</form>
-</div><div class="card"><h3>Chuẩn bị trước khi đến</h3><ul class="flow-list"><li>Mô tả dấu hiệu bất thường và thời điểm xuất hiện.</li><li>Cung cấp biển số để garage tra cứu lịch sử.</li><li>Yêu cầu chỉ được chốt sau khi garage xác nhận.</li></ul><p class="panel-note">Chi phí chính thức được ghi trong phiếu sửa chữa sau khi kiểm tra xe.</p></div></div>
-</section></main></div>
-<dialog id="repairDetailModal" class="detail-dialog" aria-labelledby="repairDetailTitle"><div class="modal-header"><h3 id="repairDetailTitle">Chi tiết phiếu sửa chữa</h3><button id="closeRepairDetail" class="btn-icon" aria-label="Đóng chi tiết">×</button></div><div id="repairDetailContent"></div></dialog>
-</body></html>
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AutoPro · Khách hàng</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../shared/ui.css" />
+    <link rel="stylesheet" href="../shared/workspace.css" />
+    <link rel="stylesheet" href="../shared/records.css" />
+    <link rel="stylesheet" href="../shared/portals.css" />
+    <script src="../shared/core.js" defer></script>
+    <script src="../shared/access.js" defer></script>
+    <script src="../shared/portal.js" defer></script>
+    <script src="../shared/workspace.js" defer></script>
+    <script src="../shared/tables.js" defer></script>
+    <script src="../shared/session.js" defer></script>
+    <script src="js/workspace.js" defer></script>
+    <script src="../shared/booking.js" defer></script>
+    <link rel="stylesheet" href="../shared/chat.css" />
+    <script src="js/chat.js" defer></script>
+    <link rel="stylesheet" href="../shared/messaging.css" />
+    <script src="../shared/messaging.js" defer></script>
+    <link rel="stylesheet" href="../shared/care.css" />
+    <script src="../shared/maintenance.js" defer></script>
+    <script src="../shared/service.js" defer></script>
+    <script src="../shared/pwa.js" defer></script>
+    <link rel="stylesheet" href="../shared/professional.css" />
+    <script src="../shared/evidence.js" defer></script>
+  </head>
+  <body data-role="customer">
+    <aside id="sidebar">
+      <a class="brand" href="../index.html"
+        ><span class="brand-mark">A</span><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
+      >
+      <p class="nav-caption">DÀNH CHO KHÁCH HÀNG</p>
+      <nav aria-label="Menu khách hàng">
+        <button class="nav-item" data-target="dashboard-section">
+          <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>Tổng quan
+        </button>
+        <button class="nav-item" data-target="vehicles-section">
+          <i class="fa-solid fa-car" aria-hidden="true"></i>Xe của tôi
+        </button>
+        <button class="nav-item" data-target="repairs-section">
+          <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>Sửa chữa & Chi phí
+        </button>
+        <button class="nav-item" data-target="booking-section">
+          <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>Đặt lịch dịch vụ
+        </button>
+        <button class="nav-item" data-target="chat-section">
+          <i class="fa-solid fa-comments" aria-hidden="true"></i>Hỏi AI về xe
+        </button>
+        <button class="nav-item" data-title="Nhắn garage" data-target="messages-section">
+          Nhắn garage <span id="supportUnread" class="support-badge" hidden>0</span>
+        </button>
+        <button class="nav-item" data-target="service-section">Báo giá & Xác nhận</button
+        ><button class="nav-item" data-target="maintenance-section">Bảo dưỡng & Nhắc hạn</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <h4>Khách hàng</h4>
+          <small>Tài khoản cá nhân</small>
+        </div>
+        <button id="logoutBtn" class="btn-icon" aria-label="Đăng xuất">
+          <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+        </button>
+      </div>
+    </aside>
+    <div id="content">
+      <header class="topbar">
+        <button
+          class="btn-icon toggle-sidebar"
+          aria-label="Mở menu"
+          aria-controls="sidebar"
+          aria-expanded="false"
+        >
+          ☰</button
+        ><span id="pageTitle">Tổng quan</span
+        ><span class="sync-label">Dữ liệu từ garage · tự làm mới</span
+        ><button id="refreshData" class="btn btn-sm">Làm mới</button>
+      </header>
+      <main class="content-body">
+        <p id="loadError" class="inline-message error" role="alert" hidden></p>
+        <section id="service-section"><div id="serviceWorkspace"></div></section>
+        <section id="maintenance-section"><div id="maintenanceWorkspace"></div></section>
+        <section id="dashboard-section" class="active-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">KHÁCH HÀNG / TỔNG QUAN</p>
+              <h1>Đồng hành cùng chiếc xe của bạn</h1>
+              <p class="section-description">
+                Theo dõi tiến độ, kiểm tra chi phí và chủ động lên lịch chăm sóc xe.
+              </p>
+            </div>
+            <button class="btn btn-primary" data-go="booking-section">＋ Đặt lịch dịch vụ</button>
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <span>Xe của tôi</span><strong id="statVehicles">—</strong
+              ><small>Xe đã liên kết tài khoản</small>
+            </div>
+            <div class="metric">
+              <span>Đang tiếp nhận / sửa chữa</span><strong id="statActiveRepairs">—</strong
+              ><small>Phiếu chờ xử lý và đang sửa</small>
+            </div>
+            <div class="metric">
+              <span>Chờ thanh toán</span><strong id="statOutstanding">—</strong
+              ><small>Chi phí của phiếu đã hoàn thành</small>
+            </div>
+            <div class="metric">
+              <span>Đã thanh toán</span><strong id="statPaid">—</strong
+              ><small>Tổng chi phí đã thanh toán</small>
+            </div>
+          </div>
+          <div class="split-layout">
+            <div class="card">
+              <div class="card-heading">
+                <h3>Phiếu sửa chữa gần đây</h3>
+                <button class="btn btn-sm" data-go="repairs-section">Xem tất cả</button>
+              </div>
+              <ul id="recentRepairs" class="flow-list">
+                <li>Đang tải dữ liệu…</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Mỗi bước đều rõ ràng</h3>
+              <ol class="flow-list">
+                <li>
+                  <div>
+                    <strong>01 · Tiếp nhận & báo giá</strong
+                    ><small>Garage kiểm tra xe và lập các hạng mục sửa chữa.</small>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <strong>02 · Theo dõi sửa chữa</strong
+                    ><small>Tiến độ cập nhật theo checklist của kỹ thuật viên.</small>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <strong>03 · Thanh toán & nhận xe</strong
+                    ><small>Kiểm tra chi phí, thanh toán tại garage và lưu phiếu thu.</small>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </section>
+        <section id="vehicles-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">KHÁCH HÀNG / PHƯƠNG TIỆN</p>
+              <h1>Xe của tôi</h1>
+              <p class="section-description">
+                Thông tin tiếp nhận và lịch sử chăm sóc cho từng xe.
+              </p>
+            </div>
+            <button class="btn btn-primary" data-go="booking-section">Đặt lịch cho xe</button>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <input
+                id="vehicleSearch"
+                type="search"
+                aria-label="Tìm xe"
+                placeholder="Tìm biển số, hiệu xe, dòng xe…"
+              /><select id="vehicleStatus" aria-label="Lọc trạng thái xe">
+                <option value="">Tất cả trạng thái</option>
+                <option value="waiting">Chờ xử lý</option>
+                <option value="repairing">Đang sửa</option>
+                <option value="completed">Đã hoàn thành</option>
+                <option value="delivered">Đã giao xe</option>
+              </select>
+            </div>
+            <div class="table-responsive">
+              <table data-page-size="8" id="vehiclesTable">
+                <thead>
+                  <tr>
+                    <th>Biển số</th>
+                    <th>Hiệu / dòng xe</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tiếp nhận</th>
+                    <th>Lịch sử</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="panel-note">
+              Nếu chưa thấy xe của mình, hãy nhờ bộ phận tiếp nhận liên kết xe với email tài khoản
+              của bạn.
+            </p>
+          </div>
+        </section>
+        <section id="repairs-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">KHÁCH HÀNG / SỬA CHỮA</p>
+              <h1>Sửa chữa & Chi phí</h1>
+              <p class="section-description">
+                Xem tiến độ từng hạng mục, chi phí vật tư và tiền công.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="toolbar">
+              <input
+                id="repairSearch"
+                type="search"
+                aria-label="Tìm phiếu sửa chữa"
+                placeholder="Tìm mã phiếu, biển số, kỹ thuật viên…"
+              /><select id="repairVehicle" aria-label="Lọc theo xe">
+                <option value="">Tất cả xe</option></select
+              ><select id="repairStatus" aria-label="Lọc trạng thái phiếu">
+                <option value="">Tất cả trạng thái</option>
+                <option value="draft">Chờ xử lý</option>
+                <option value="working">Đang sửa</option>
+                <option value="completed">Chờ thanh toán</option>
+                <option value="paid">Đã thanh toán</option>
+              </select>
+            </div>
+            <div class="table-responsive">
+              <table data-page-size="8" id="repairsTable">
+                <thead>
+                  <tr>
+                    <th>Phiếu / Ngày tạo</th>
+                    <th>Xe</th>
+                    <th>Kỹ thuật viên</th>
+                    <th>Tiến độ</th>
+                    <th>Tổng chi phí</th>
+                    <th>Trạng thái</th>
+                    <th>Chi tiết</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="7" class="empty-state">Đang tải dữ liệu…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section id="booking-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">KHÁCH HÀNG / LỊCH HẸN</p>
+              <h1>Đặt lịch dịch vụ</h1>
+              <p class="section-description">
+                Gửi ngày mong muốn. Garage sẽ liên hệ qua số điện thoại để xác nhận lịch.
+              </p>
+            </div>
+          </div>
+          <div class="split-layout">
+            <div class="card">
+              <form id="bookingForm">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="bookingName">Họ và tên</label
+                    ><input
+                      id="bookingName"
+                      name="customerName"
+                      autocomplete="name"
+                      maxlength="255"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="bookingPhone">Số điện thoại liên hệ</label
+                    ><input
+                      id="bookingPhone"
+                      name="phone"
+                      type="tel"
+                      autocomplete="tel"
+                      maxlength="30"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="preferredDate">Ngày mong muốn</label
+                    ><input id="preferredDate" name="preferredDate" type="date" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="bookingService">Dịch vụ</label
+                    ><select id="bookingService" name="service" required>
+                      <option value="">Chọn nhu cầu</option>
+                      <option value="maintenance">Bảo dưỡng</option>
+                      <option value="repair">Sửa chữa</option>
+                      <option value="spa">Chăm sóc xe</option>
+                      <option value="other">Tư vấn khác</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="bookingNote">Biển số, tình trạng xe và ghi chú</label
+                  ><textarea
+                    id="bookingNote"
+                    name="note"
+                    rows="4"
+                    maxlength="2000"
+                    placeholder="Ví dụ: 30A-123.45, xe phát tiếng kêu khi phanh…"
+                  ></textarea>
+                </div>
+                <p id="bookingResult" class="inline-message" role="status" hidden></p>
+                <button class="btn btn-primary" type="submit">Gửi yêu cầu đặt lịch</button>
+              </form>
+            </div>
+            <div class="card">
+              <h3>Chuẩn bị trước khi đến</h3>
+              <ul class="flow-list">
+                <li>Mô tả dấu hiệu bất thường và thời điểm xuất hiện.</li>
+                <li>Cung cấp biển số để garage tra cứu lịch sử.</li>
+                <li>Yêu cầu chỉ được chốt sau khi garage xác nhận.</li>
+              </ul>
+              <p class="panel-note">
+                Chi phí chính thức được ghi trong phiếu sửa chữa sau khi kiểm tra xe.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section id="chat-section" aria-labelledby="chatTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">KHÁCH HÀNG / TRỢ LÝ XE</p>
+              <h1 id="chatTitle">Hỏi AI về xe</h1>
+              <p class="section-description">
+                Mô tả dấu hiệu bất thường, hỏi cách chăm sóc xe hoặc tìm hiểu một hạng mục sửa chữa.
+              </p>
+            </div>
+            <button id="chatReset" class="btn" type="button">Cuộc trò chuyện mới</button>
+          </div>
+          <div class="chat-layout">
+            <div class="card chat-card">
+              <div class="chat-toolbar">
+                <span id="chatProvider" class="chat-provider" role="status"
+                  >Đang kiểm tra kết nối…</span
+                ><span class="muted">Trợ lý tư vấn ô tô</span>
+              </div>
+              <div
+                id="chatMessages"
+                class="chat-messages"
+                role="log"
+                aria-label="Cuộc trò chuyện với trợ lý AI"
+                aria-live="polite"
+                aria-relevant="additions text"
+              >
+                <p class="chat-empty">
+                  Xin chào! Bạn đang gặp vấn đề gì với xe? Hãy cho biết triệu chứng, lúc xảy ra và
+                  đèn báo nếu có.
+                </p>
+              </div>
+              <p id="chatError" class="text-red" role="alert" hidden></p>
+              <form id="chatForm" class="chat-composer">
+                <label for="chatInput">Câu hỏi của bạn</label
+                ><textarea
+                  id="chatInput"
+                  rows="3"
+                  maxlength="2000"
+                  required
+                  placeholder="Ví dụ: Xe rung khi phanh ở tốc độ thấp, tôi nên kiểm tra gì?"
+                ></textarea>
+                <div class="chat-actions">
+                  <span id="chatCount" class="muted">0 / 2000</span
+                  ><span id="chatPending" role="status" hidden>AI đang trả lời…</span
+                  ><button id="chatStop" class="btn" type="button" hidden>Dừng chờ</button
+                  ><button id="chatSend" class="btn btn-primary" type="submit" disabled>
+                    Gửi câu hỏi
+                  </button>
+                </div>
+              </form>
+            </div>
+            <aside class="card chat-context">
+              <h3>Hỏi theo xe của tôi</h3>
+              <div class="form-group">
+                <label for="chatVehicle">Chọn xe</label
+                ><select id="chatVehicle">
+                  <option value="">Hỏi chung về xe</option>
+                </select>
+              </div>
+              <label class="chat-consent"
+                ><input id="chatUseHistory" type="checkbox" disabled /><span
+                  >Sử dụng hồ sơ và lịch sử sửa chữa của xe đã chọn</span
+                ></label
+              >
+              <p id="chatPrivacy" class="field-help">
+                Chỉ gửi hồ sơ khi bạn bật lựa chọn này. Lịch sử chat giữ trong trang đang mở và mất
+                khi tải lại.
+              </p>
+              <h3>Gợi ý câu hỏi</h3>
+              <div class="chat-suggestions">
+                <button
+                  class="btn"
+                  type="button"
+                  data-chat-question="Xe có tiếng kêu khi phanh, tôi nên kiểm tra gì?"
+                >
+                  Tiếng kêu khi phanh</button
+                ><button
+                  class="btn"
+                  type="button"
+                  data-chat-question="Xe VinFast báo lỗi khi sạc, tôi nên làm gì?"
+                >
+                  Lỗi sạc xe điện</button
+                ><button
+                  class="btn"
+                  type="button"
+                  data-chat-question="Xe của tôi cần kiểm tra những gì trước chuyến đi dài?"
+                >
+                  Chuẩn bị chuyến đi
+                </button>
+              </div>
+              <p class="panel-note">
+                AI hỗ trợ tìm hiểu ban đầu. Chẩn đoán, mã phụ tùng, chu kỳ bảo dưỡng và báo giá cần
+                được garage đối chiếu đúng xe. Nếu mất phanh, có khói/cháy hoặc rò nhiên liệu, hãy
+                dừng an toàn và gọi cứu hộ.
+              </p>
+              <button id="chatToGarage" class="btn" type="button">Chuyển câu hỏi cho cố vấn</button
+              ><button id="chatBooking" class="btn" type="button">
+                Đặt lịch kiểm tra tại garage
+              </button>
+            </aside>
+          </div>
+        </section>
+        <section id="messages-section" aria-labelledby="supportTitle">
+          <div id="supportWorkspace"></div>
+        </section>
+      </main>
+    </div>
+    <dialog id="repairDetailModal" class="detail-dialog" aria-labelledby="repairDetailTitle">
+      <div class="modal-header">
+        <h3 id="repairDetailTitle">Chi tiết phiếu sửa chữa</h3>
+        <button id="closeRepairDetail" class="btn-icon" aria-label="Đóng chi tiết">×</button>
+      </div>
+      <div id="repairDetailContent"></div>
+    </dialog>
+  </body>
+</html>

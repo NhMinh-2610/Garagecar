@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   const host = document.getElementById("serviceWorkspace");
   if (!host) return;
-  const user = JSON.parse(localStorage.getItem("user") || "{}"),
+  const user = Garage.permissionsReady
+      ? await Garage.permissionsReady
+      : JSON.parse(localStorage.getItem("user") || "{}"),
     esc = Garage.escape,
     advisor = ["admin", "advisor"].includes(user.role);
   const statuses = {
@@ -56,37 +58,165 @@ document.addEventListener("DOMContentLoaded", async () => {
     return d;
   }
   const mechanicOptions = () =>
-    mechanics
-      .map((m) => `<option value="${m.id}">${esc(m.fullName)}</option>`)
-      .join("");
-  function render() {
-    host.innerHTML = `<div class="section-heading"><div><p class="eyebrow">TIẾP NHẬN → XƯỞNG → NGHIỆM THU</p><h1>${advisor ? "Cố vấn & Báo giá" : user.role === "mechanic" ? "Kiểm tra kỹ được giao" : "Báo giá & Xác nhận"}</h1><p class="section-description">Báo giá sơ bộ trước khi kiểm tra kỹ; duyệt bản chính thức trước khi xuất vật tư.</p></div>${advisor ? '<button class="btn btn-primary" data-service="intake">＋ Kiểm tra đầu vào</button>' : ""}</div><div class="visit-grid">${
-      visits
-        .map((v) => {
-          const latest = [...v.quotes]
-            .reverse()
-            .find((q) =>
-              ["pending", "approved", "converted"].includes(q.status),
-            );
-          return `<article class="visit-card"><div class="card-heading"><h3>#${v.id} · ${esc(v.licensePlate)}</h3><span class="badge">${esc(statuses[v.status] || v.status)}</span></div><p><strong>Nhu cầu:</strong> ${esc(v.concern)}</p><details><summary>Kiểm tra & Chẩn đoán</summary><p><strong>Đầu vào:</strong> ${esc(v.initialInspection)}</p><p><strong>Kiểm tra kỹ:</strong> ${esc(v.diagnosis || "Chưa ghi nhận")}</p>${v.qcAt ? `<p>Đã nghiệm thu · ${esc(v.qc.roadTestOrReason)} · ${esc(v.qc.note)}</p>` : ""}</details>
-            ${latest ? `<div class="notice"><strong>${latest.stage === "final" ? "Chính thức" : "Sơ bộ"} · phiên bản ${latest.revision}</strong><p>${money(latest.totalAmount)} · ${esc({ pending: "Chờ xác nhận", approved: "Đã duyệt", converted: "Đã chuyển phiếu" }[latest.status])}</p><details><summary>Chi tiết công việc và chi phí</summary>${quoteTable(latest)}<p>${esc(latest.decisionNote || "")}</p></details></div>` : '<p class="panel-note">Chưa có báo giá.</p>'}
-            <div class="form-actions">
-            ${advisor && !["in_workshop", "qc_passed", "closed"].includes(v.status) ? `<button class="btn btn-sm" data-service="assignment" data-id="${v.id}">Phân công kiểm tra kỹ</button>` : ""}
-            ${advisor && v.status === "intake" ? `<button class="btn btn-sm" data-service="quote" data-stage="preliminary" data-id="${v.id}">Lập báo giá sơ bộ</button>` : ""}
-            ${(advisor || user.role === "mechanic") && ["diagnosis", "awaiting_approval", "ready"].includes(v.status) ? `<button class="btn btn-sm" data-service="diagnosis" data-id="${v.id}">Ghi kiểm tra kỹ</button>` : ""}
-            ${advisor && v.diagnosis && ["diagnosis", "awaiting_approval", "ready"].includes(v.status) ? `<button class="btn btn-sm" data-service="quote" data-stage="final" data-id="${v.id}">Lập báo giá chính thức</button>` : ""}
-            ${(advisor || user.role === "customer") && latest?.status === "pending" ? `<button class="btn btn-primary btn-sm" data-service="decision" data-approved="true" data-id="${latest.id}">Xác nhận ${money(latest.totalAmount)}</button><button class="btn btn-sm" data-service="decision" data-approved="false" data-id="${latest.id}">Yêu cầu điều chỉnh</button>` : ""}
-            ${advisor && latest?.status === "approved" && latest.stage === "final" ? `<button class="btn btn-primary btn-sm" data-service="convert" data-id="${latest.id}">Phân công & Chuyển vào xưởng</button>` : ""}
-            ${advisor && v.ticketStatus === "completed" && !v.qcAt ? `<button class="btn btn-primary btn-sm" data-service="qc" data-id="${v.id}">Nghiệm thu</button>` : ""}
-            ${v.ticketId && user.role !== "accountant" ? `<button class="btn btn-sm" data-evidence-ticket="${v.ticketId}">Xem ảnh công việc</button>` : ""}
-            ${v.ticketId ? `<a class="btn btn-sm" href="${user.role === "mechanic" ? "/mechanic" : user.role === "customer" ? "/customer" : user.role === "admin" ? "/admin" : "/advisor"}">Phiếu #${v.ticketId}</a>` : ""}
-            ${advisor && v.qcAt && v.ticketStatus === "completed" ? '<button class="btn btn-sm" data-service="finance">Đến Thu tiền</button>' : ""}
-            ${advisor && !v.ticketId && v.status !== "closed" ? `<button class="btn btn-sm" data-service="cancel" data-id="${v.id}">Kết thúc lượt chưa sửa</button>` : ""}</div>
-            <details><summary>Lịch sử ${v.quotes.length} phiên bản báo giá</summary>${v.quotes.map((q) => `<p>Phiên bản ${q.revision} · ${q.stage === "final" ? "Chính thức" : "Sơ bộ"} · ${money(q.totalAmount)} · ${esc(q.status)}</p>${quoteTable(q)}`).join("")}</details></article>`;
-        })
+    mechanics.map((m) => `<option value="${m.id}">${esc(m.fullName)}</option>`).join("");
+  const serviceView = {
+    query: "",
+    status: "all",
+    page: 0,
+    expanded: new Set(),
+  };
+  const latestQuote = (visit) =>
+    [...(visit.quotes || [])]
+      .reverse()
+      .find((quote) => ["pending", "approved", "converted"].includes(quote.status));
+  const requiresAction = (visit) => {
+    const quote = latestQuote(visit);
+    if (user.role === "customer") return quote?.status === "pending";
+    if (user.role === "mechanic")
+      return ["diagnosis", "awaiting_approval", "ready"].includes(visit.status);
+    return !["in_workshop", "closed"].includes(visit.status) && visit.ticketStatus !== "paid";
+  };
+  const serviceButton = (action, title, id, extra = "") =>
+    `<button type="button" class="btn btn-sm" data-service="${action}" data-id="${id}" ${extra}>${title}</button>`;
+  function visitCard(v) {
+    const latest = latestQuote(v),
+      actions = [];
+    const add = (action, title, id = v.id, extra = "", priority = 0) =>
+      actions.push({
+        action,
+        priority,
+        html: serviceButton(action, title, id, extra),
+      });
+    if (advisor && !["in_workshop", "qc_passed", "closed"].includes(v.status))
+      add("assignment", "Phân công kiểm tra", v.id, "", 10);
+    if (advisor && v.status === "intake")
+      add("quote", "Lập báo giá sơ bộ", v.id, 'data-stage="preliminary"', latest ? 10 : 60);
+    if (
+      (advisor || user.role === "mechanic") &&
+      ["diagnosis", "awaiting_approval", "ready"].includes(v.status)
+    )
+      add("diagnosis", "Ghi kiểm tra kỹ", v.id, "", v.diagnosis ? 20 : 65);
+    if (advisor && v.diagnosis && ["diagnosis", "awaiting_approval", "ready"].includes(v.status))
+      add("quote", "Lập báo giá chính thức", v.id, 'data-stage="final"', 70);
+    if ((advisor || user.role === "customer") && latest?.status === "pending") {
+      add(
+        "decision",
+        `Xác nhận ${money(latest.totalAmount)}`,
+        latest.id,
+        'data-approved="true"',
+        100,
+      );
+      add("decision", "Yêu cầu điều chỉnh", latest.id, 'data-approved="false"', 95);
+    }
+    if (advisor && latest?.status === "approved" && latest.stage === "final")
+      add("convert", "Chuyển vào xưởng", latest.id, "", 110);
+    if (advisor && v.ticketStatus === "completed" && !v.qcAt)
+      add("qc", "Nghiệm thu", v.id, "", 120);
+    if (
+      advisor &&
+      user.permissions?.includes("finance") &&
+      v.qcAt &&
+      v.ticketStatus === "completed"
+    )
+      add("finance", "Đến Thu tiền", v.id, "", 130);
+    if (advisor && !v.ticketId && v.status !== "closed") add("cancel", "Kết thúc lượt chưa sửa");
+    actions.sort((a, b) => b.priority - a.priority);
+    const primary = actions[0];
+    const secondaryDecision =
+      primary?.action === "decision"
+        ? actions.find((a) => a !== primary && a.action === "decision")
+        : null;
+    const secondary = actions.filter((a) => a !== primary && a !== secondaryDecision);
+    const ticketControl = !v.ticketId
+      ? ""
+      : ["admin", "customer", "mechanic"].includes(user.role)
+        ? serviceButton("ticket", `Phiếu #${v.ticketId}`, v.ticketId)
+        : `<span class="badge">Phiếu #${v.ticketId}</span>`;
+    const quotation = latest
+      ? `${latest.stage === "final" ? "Báo giá chính thức" : "Báo giá sơ bộ"} · ${money(latest.totalAmount)}`
+      : "Chưa lập báo giá";
+    return `<article class="visit-card visit-row" data-visit-id="${v.id}">
+      <div class="visit-row-summary"><div class="visit-identity"><h3>#${v.id} · ${esc(v.licensePlate)}</h3><p class="visit-concern">${esc(v.concern)}</p><div class="visit-meta"><span class="badge">${esc(statuses[v.status] || v.status)}</span><span>${esc(quotation)}</span></div></div>
+        <div class="visit-next-action">${primary ? primary.html.replace('class="btn btn-sm"', 'class="btn btn-primary btn-sm"') : '<span class="panel-note">Theo dõi tiến độ</span>'}${secondaryDecision?.html || ""}</div></div>
+      <details class="visit-details" data-visit-detail="${v.id}" ${serviceView.expanded.has(String(v.id)) ? "open" : ""}><summary>Thông tin, chi phí và thao tác khác</summary><div class="visit-details-body">
+        <div class="visit-inspection"><h4>Kiểm tra & Chẩn đoán</h4><p><strong>Nhu cầu:</strong> ${esc(v.concern)}</p><p><strong>Đầu vào:</strong> ${esc(v.initialInspection)}</p><p><strong>Kiểm tra kỹ:</strong> ${esc(v.diagnosis || "Chưa ghi nhận")}</p>${v.qcAt ? `<p><strong>Nghiệm thu:</strong> ${esc(v.qc?.roadTestOrReason)} · ${esc(v.qc?.note)}</p>` : ""}</div>
+        ${latest ? `<div class="visit-quotation"><div class="card-heading"><h4>${latest.stage === "final" ? "Báo giá chính thức" : "Báo giá sơ bộ"} · phiên bản ${latest.revision}</h4><span class="badge">${esc({ pending: "Chờ xác nhận", approved: "Đã duyệt", converted: "Đã chuyển phiếu" }[latest.status])}</span></div>${quoteTable(latest)}${latest.decisionNote ? `<p>${esc(latest.decisionNote)}</p>` : ""}</div>` : '<p class="panel-note">Cố vấn sẽ bổ sung báo giá sau kiểm tra.</p>'}
+        <div class="form-actions">${secondary.map((action) => action.html).join("")}${v.ticketId && user.role !== "accountant" ? `<button type="button" class="btn btn-sm" data-evidence-ticket="${v.ticketId}">Xem ảnh công việc</button>` : ""}${ticketControl}</div>
+        <details><summary>Lịch sử ${(v.quotes || []).length} phiên bản báo giá</summary>${(v.quotes || []).map((q) => `<p>Phiên bản ${q.revision} · ${q.stage === "final" ? "Chính thức" : "Sơ bộ"} · ${money(q.totalAmount)} · ${esc(q.status)}</p>${quoteTable(q)}`).join("") || '<p class="panel-note">Chưa có phiên bản báo giá.</p>'}</details>
+      </div></details></article>`;
+  }
+  function renderVisits() {
+    const query = serviceView.query.trim().toLocaleLowerCase("vi-VN");
+    const visible = visits.filter((visit) => {
+      const statusMatch =
+        serviceView.status === "all" ||
+        (serviceView.status === "attention"
+          ? requiresAction(visit)
+          : serviceView.status === "active"
+            ? visit.status !== "closed"
+            : visit.status === serviceView.status);
+      return (
+        statusMatch &&
+        [visit.id, visit.licensePlate, visit.concern, visit.diagnosis]
+          .join(" ")
+          .toLocaleLowerCase("vi-VN")
+          .includes(query)
+      );
+    });
+    const pages = Math.max(1, Math.ceil(visible.length / 12));
+    serviceView.page = Math.min(serviceView.page, pages - 1);
+    host.querySelector("#serviceVisitCount").textContent =
+      `${visible.length} / ${visits.length} lượt dịch vụ`;
+    host.querySelector("#serviceVisitList").innerHTML =
+      visible
+        .slice(serviceView.page * 12, (serviceView.page + 1) * 12)
+        .map(visitCard)
         .join("") ||
-      '<div class="card empty-state">Chưa có lượt dịch vụ phù hợp.</div>'
-    }</div>`;
+      '<div class="card empty-state">Không có lượt dịch vụ phù hợp. Thử đổi bộ lọc hoặc từ khóa.</div>';
+    const pager = host.querySelector("#servicePagination");
+    pager.hidden = visible.length <= 12;
+    pager.querySelector("span").textContent = `Trang ${serviceView.page + 1} / ${pages}`;
+    pager.querySelector('[data-service-page="previous"]').disabled = serviceView.page === 0;
+    pager.querySelector('[data-service-page="next"]').disabled = serviceView.page >= pages - 1;
+    host.querySelectorAll("[data-visit-detail]").forEach((detail) => {
+      detail.ontoggle = () =>
+        detail.open
+          ? serviceView.expanded.add(detail.dataset.visitDetail)
+          : serviceView.expanded.delete(detail.dataset.visitDetail);
+    });
+  }
+  function render() {
+    // Keep the toolbar mounted so polling never replaces a focused search field.
+    if (!host.querySelector("#serviceVisitList")) {
+      host.innerHTML = `<div class="section-heading"><div><p class="eyebrow">TIẾP NHẬN → XƯỞNG → NGHIỆM THU</p><h1>${advisor ? "Cố vấn & Báo giá" : user.role === "mechanic" ? "Kiểm tra kỹ được giao" : "Báo giá & Xác nhận"}</h1><p class="section-description">Theo dõi từng xe và thực hiện bước tiếp theo. Mở chi tiết khi cần xem chẩn đoán, công việc hoặc lịch sử.</p></div>${advisor ? '<button type="button" class="btn btn-primary" data-service="intake">＋ Kiểm tra đầu vào</button>' : ""}</div>
+        <div class="care-toolbar"><label>Tìm lượt dịch vụ<input id="serviceSearch" type="search" placeholder="Biển số, nhu cầu, chẩn đoán…"></label><label>Trạng thái<select id="serviceStatus"><option value="all">Tất cả lượt</option><option value="attention">Cần xử lý</option><option value="active">Đang thực hiện</option>${Object.entries(
+          statuses,
+        )
+          .map(([value, label]) => `<option value="${value}">${esc(label)}</option>`)
+          .join(
+            "",
+          )}</select></label><p id="serviceVisitCount" class="panel-note" aria-live="polite"></p></div>
+        <div class="visit-grid visit-list" id="serviceVisitList"></div><div class="care-pagination" id="servicePagination"><button type="button" class="btn btn-sm" data-service-page="previous">Trước</button><span aria-live="polite"></span><button type="button" class="btn btn-sm" data-service-page="next">Sau</button></div>`;
+      host.querySelector("#serviceSearch").value = serviceView.query;
+      host.querySelector("#serviceStatus").value = serviceView.status;
+      host.querySelector("#serviceSearch").oninput = (event) => {
+        serviceView.query = event.target.value;
+        serviceView.page = 0;
+        renderVisits();
+      };
+      host.querySelector("#serviceStatus").onchange = (event) => {
+        serviceView.status = event.target.value;
+        serviceView.page = 0;
+        renderVisits();
+      };
+      host.querySelector("#servicePagination").onclick = (event) => {
+        const button = event.target.closest("[data-service-page]");
+        if (!button || button.disabled) return;
+        serviceView.page += button.dataset.servicePage === "next" ? 1 : -1;
+        renderVisits();
+      };
+    }
+    renderVisits();
   }
   function quoteTable(q) {
     return `<div class="table-responsive"><table><thead><tr><th>Công việc / Vật tư</th><th>SL</th><th>Đơn giá</th><th>Tiền công</th><th>Thành tiền</th></tr></thead><tbody>${q.items.map((r) => `<tr><td>${esc(r.taskName)}<small>${esc(r.partName)}</small></td><td>${r.quantity}</td><td>${money(r.partPrice)}</td><td>${money(r.laborPrice)}</td><td>${money(r.totalPrice)}</td></tr>`).join("")}</tbody></table></div>`;
@@ -97,9 +227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const values = await Promise.all([
         Garage.request("/service/visits"),
         advisor ? Garage.request("/service/resources") : Promise.resolve({}),
-        advisor
-          ? Garage.request("/maintenance/catalog")
-          : Promise.resolve(null),
+        advisor ? Garage.request("/maintenance/catalog") : Promise.resolve(null),
       ]);
       if (!guard()) return;
       visits = values[0];
@@ -116,10 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function quoteEditor(v, stage) {
     let lines = [];
     const d = dialog(
-      "Báo giá " +
-        (stage === "final" ? "chính thức" : "sơ bộ") +
-        " · " +
-        v.licensePlate,
+      "Báo giá " + (stage === "final" ? "chính thức" : "sơ bộ") + " · " + v.licensePlate,
       `<p class="notice">Kiểm tra mã phụ tùng theo VIN trước khi chọn. Vật tư chưa được xuất kho; giá được lấy từ dữ liệu kho khi lưu. Tiền công tính một lần cho mỗi dòng.</p><div class="form-grid"><label class="form-group">Bộ phận để gợi ý công việc<select id="quoteComponent"><option value="">Chọn bộ phận</option>${parts.map((p) => `<option value="${p.code}">${esc(p.name)}</option>`).join("")}</select></label><label class="form-group">Công việc<input id="quoteTask" maxlength="255"></label><label class="form-group">Vật tư đã xác nhận tương thích<select id="quotePart"><option value="">Không dùng vật tư</option>${stock.map((p) => `<option value="${p.id}">${esc(p.name)} · ${money(p.unitPrice)} · còn ${p.quantity}</option>`).join("")}</select></label><label class="form-group">Số lượng<input id="quoteQuantity" type="number" min="1" max="100000" value="1"></label><label class="form-group">Tiền công / dòng<input id="quoteLabor" type="number" min="0" max="999999999999" step="0.01" value="0"></label></div><p id="quoteComponentHelp" class="field-help"></p><button type="button" class="btn btn-sm" id="quoteAdd">＋ Thêm dòng</button><div id="quoteLines"></div>`,
       async () => {
         if (!lines.length) throw Error("Thêm ít nhất một công việc.");
@@ -127,14 +252,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           method: "POST",
           body: {
             stage,
-            items: lines.map(
-              ({ taskName, inventoryId, quantity, laborPrice }) => ({
-                taskName,
-                inventoryId,
-                quantity,
-                laborPrice,
-              }),
-            ),
+            items: lines.map(({ taskName, inventoryId, quantity, laborPrice }) => ({
+              taskName,
+              inventoryId,
+              quantity,
+              laborPrice,
+            })),
           },
         });
       },
@@ -154,9 +277,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const task = d.querySelector("#quoteTask").value.trim(),
         quantity = Number(d.querySelector("#quoteQuantity").value),
         labor = Number(d.querySelector("#quoteLabor").value),
-        part = stock.find(
-          (p) => p.id === Number(d.querySelector("#quotePart").value),
-        );
+        part = stock.find((p) => p.id === Number(d.querySelector("#quotePart").value));
       if (
         !task ||
         !Number.isInteger(quantity) ||
@@ -165,8 +286,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         !Number.isFinite(labor) ||
         labor < 0
       ) {
-        d.querySelector(".care-error").textContent =
-          "Kiểm tra công việc, số lượng và tiền công.";
+        d.querySelector(".care-error").textContent = "Kiểm tra công việc, số lượng và tiền công.";
         return;
       }
       lines.push({
@@ -195,6 +315,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const action = btn.dataset.service,
       v = visits.find((v) => v.id === Number(btn.dataset.id));
     if (action === "retry") return load();
+    if (action === "ticket") {
+      const target =
+        user.role === "mechanic"
+          ? "tasks-section"
+          : user.role === "customer"
+            ? "repairs-section"
+            : user.role === "admin"
+              ? "repair-section"
+              : "staffReception-section";
+      const nav = document.querySelector(`[data-target="${target}"]`);
+      if (Garage.navigate) Garage.navigate(target);
+      else nav?.click();
+      return;
+    }
     if (action === "intake")
       return dialog(
         "Kiểm tra đầu vào",
@@ -237,9 +371,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (action === "quote") return quoteEditor(v, btn.dataset.stage);
     if (action === "decision")
       return dialog(
-        btn.dataset.approved === "true"
-          ? "Xác nhận báo giá"
-          : "Yêu cầu điều chỉnh",
+        btn.dataset.approved === "true" ? "Xác nhận báo giá" : "Yêu cầu điều chỉnh",
         `<p class="notice">Xác nhận chỉ áp dụng đúng phiên bản đang xem, gồm công việc, vật tư và tổng tiền.</p><label class="form-group">${advisor ? "Cách liên hệ & nội dung khách đã xác nhận" : "Ghi chú cho garage"}<textarea name="note" rows="4" maxlength="2000" ${advisor ? 'required minlength="10"' : ""}></textarea></label>`,
         (f) =>
           Garage.request("/service/quotes/" + btn.dataset.id + "/decision", {
@@ -277,14 +409,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     if (action === "finance") {
       const nav = document.querySelector('[data-target="finance-section"]');
-      if (nav) nav.click();
+      if (Garage.navigate) Garage.navigate("finance-section");
+      else if (nav) nav.click();
       else Garage.toast("Chuyển bộ phận kế toán để thu tiền.");
       return;
     }
-    if (
-      action === "cancel" &&
-      confirm("Kết thúc lượt chưa có phiếu sửa chữa?")
-    ) {
+    if (action === "cancel" && confirm("Kết thúc lượt chưa có phiếu sửa chữa?")) {
       try {
         await Garage.request("/service/visits/" + v.id + "/cancel", {
           method: "POST",

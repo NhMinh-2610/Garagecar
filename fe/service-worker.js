@@ -1,8 +1,21 @@
 /* Update by changing the cache version. Never intercept authenticated API requests. */
-const CACHE = "autopro-public-shell-v2";
+const CACHE = "autopro-public-shell-v6";
 const FILES = [
-  "/static/shared/evidence.js", "/static/shared/professional.js", "/static/shared/professional.css",
-  "/static/advisor/index.html", "/static/accountant/index.html", "/static/hr/index.html", "/static/staff/app.js",
+  "/static/shared/workspace.js",
+  "/static/shared/tables.js",
+  "/static/shared/records.css",
+  "/static/demo/maintenance.html",
+  "/static/shared/messaging.js",
+  "/static/shared/messaging.css",
+  "/static/shared/chat.css",
+  "/static/customer/js/chat.js",
+  "/static/shared/evidence.js",
+  "/static/shared/professional.js",
+  "/static/shared/professional.css",
+  "/static/advisor/index.html",
+  "/static/accountant/index.html",
+  "/static/hr/index.html",
+  "/static/staff/app.js",
   "/static/offline.html",
   "/static/shared/ui.css",
   "/static/shared/workspace.css",
@@ -10,6 +23,7 @@ const FILES = [
   "/static/shared/care.css",
   "/static/shared/core.js",
   "/static/shared/portal.js",
+  "/static/shared/session.js",
   "/static/shared/access.js",
   "/static/shared/pwa.js",
   "/static/shared/maintenance.js",
@@ -21,12 +35,8 @@ const FILES = [
   "/static/login/styles.css",
   "/static/login/script.js",
   "/static/customer/index.html",
-  "/static/customer/js/app.js",
-  "/static/customer/js/auth.js",
   "/static/customer/js/workspace.js",
   "/static/mechanic/index.html",
-  "/static/mechanic/js/app.js",
-  "/static/mechanic/js/auth.js",
   "/static/mechanic/js/tasks.js",
   "/static/mechanic/js/inventory.js",
   "/static/shared/booking.js",
@@ -61,14 +71,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(event.request).catch(
         async () =>
-          (await caches.match(url.pathname)) ||
-          (await caches.match("/static/offline.html")),
+          (await caches.match(url.pathname)) || (await caches.match("/static/offline.html")),
       ),
     );
     return;
   }
   if (FILES.includes(url.pathname))
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(url.pathname)),
-    );
+    event.respondWith(fetch(event.request).catch(() => caches.match(url.pathname)));
 });

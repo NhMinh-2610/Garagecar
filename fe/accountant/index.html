@@ -11,6 +11,8 @@
     <script src="../shared/core.js" defer></script>
     <script src="../shared/access.js" defer></script>
     <script src="../shared/portal.js" defer></script>
+    <script src="../shared/workspace.js" defer></script>
+    <script src="../shared/tables.js" defer></script>
     <script src="../staff/app.js" defer></script>
     <script src="../shared/pwa.js" defer></script>
     <link rel="stylesheet" href="../shared/professional.css" />
@@ -20,22 +22,13 @@
   <body data-staff-role="accountant">
     <aside id="sidebar">
       <a class="brand" href="/"
-        ><span class="brand-mark">A</span
-        ><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
+        ><span class="brand-mark">A</span><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
       >
       <p class="nav-caption">KẾ TOÁN</p>
       <nav aria-label="Chức năng Kế toán">
-        <button
-          class="nav-item"
-          data-permission="finance"
-          data-target="finance-section"
-        >
+        <button class="nav-item" data-permission="finance" data-target="finance-section">
           Thu tiền & Phiếu thu</button
-        ><button
-          class="nav-item"
-          data-permission="reports"
-          data-target="staffReport-section"
-        >
+        ><button class="nav-item" data-permission="reports" data-target="staffReport-section">
           Báo cáo doanh thu
         </button>
       </nav>
