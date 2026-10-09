@@ -43,7 +43,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       host = document.createElement("div");
       host.id = key + "Workspace";
       section.append(host);
-      document.querySelector("main").append(section);
+      const main = document.querySelector("main");
+      const contentArea = main.querySelector(".content-body") || main;
+      contentArea.append(section);
       const nav = document.createElement("button");
       nav.className = "nav-item";
       nav.dataset.target = section.id;

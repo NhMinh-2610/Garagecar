@@ -922,6 +922,16 @@ for (const role of ["admin", "customer", "mechanic", "advisor", "accountant", "h
       assert.ok(w.document.querySelector("section.active-section"));
       assert.ok(calls.length > 0);
       assert.equal(w.Garage.base, "http://localhost:8000/api");
+      const contentArea = w.document.querySelector(".content-body");
+      assert.ok(contentArea);
+      for (const button of w.document.querySelectorAll("#sidebar .nav-item[data-target]")) {
+        const section = w.document.getElementById(button.dataset.target);
+        assert.equal(
+          section?.parentElement,
+          contentArea,
+          `${role}/${button.dataset.target} must share the same content margins`,
+        );
+      }
     } finally {
       dom.window.close();
     }
