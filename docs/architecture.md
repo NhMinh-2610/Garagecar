@@ -60,4 +60,18 @@ Các cột/API đang dùng tên camelCase được giữ để tương thích. �
 
 Frontend đồng bộ nghiệp vụ mỗi 20 giây, hộp thư khoảng 5 giây. Các module giữ bộ lọc/lựa chọn, trì hoãn render khi đang nhập liệu và không reload trang. Bản nháp chat giữ trong bộ nhớ của tab, không lưu vĩnh viễn.
 
+## Nguồn dữ liệu hiển thị
+
+| Nội dung                                                                                   | Nguồn thực tế                                                                                                                         |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Xe, lịch hẹn, phiếu sửa, báo giá, kho, phiếu thu/chi, nhân sự, nhắc hạn và tin nhắn garage | API đọc/ghi PostgreSQL; dữ liệu demo cũng là bản ghi trong các bảng nghiệp vụ, có dấu `DEMO`                                          |
+| Số liệu bảng điều hành và báo cáo                                                          | Tổng hợp từ các bản ghi API/PostgreSQL; không có một bản ghi riêng cho từng thẻ số liệu                                               |
+| Thư viện bộ phận và thông tin hãng/dòng xe tham khảo trong bảo dưỡng                       | `be/data/maintenance_catalog.json`, trả qua `/api/maintenance/catalog`; khác với hồ sơ xe và lịch bảo dưỡng được duyệt trong database |
+| Câu trả lời AI                                                                             | Provider theo cấu hình `AI_PROVIDER`; `mock` tạo phản hồi mô phỏng. Hội thoại AI giữ trong tab, không lưu thành tin nhắn garage       |
+| Nhãn menu, hướng dẫn, biểu tượng và nội dung giới thiệu                                    | Mã giao diện và tài nguyên tĩnh                                                                                                       |
+
+Dữ liệu demo lưu thật trong PostgreSQL nhưng mô tả các tình huống giả lập. Bản nháp chưa gửi/lưu và bộ lọc đang chọn chưa phải dữ liệu nghiệp vụ đã lưu. Các portal hiển thị cùng nguồn dữ liệu theo quyền truy cập; dữ liệu chưa lưu không được đồng bộ sang tài khoản khác.
+
+Báo cáo doanh thu tổng hợp các phiếu sửa có trạng thái `paid`, còn sổ thu đọc `payment_receipts`. Với dữ liệu cũ, hai nguồn này có thể lệch nếu phiếu đã được đánh dấu thanh toán nhưng thiếu chứng từ thu. Xem [truy vấn đối chiếu](operations.md#đối-chiếu-phiếu-thanh-toán-và-chứng-từ) trước khi bổ sung chứng từ.
+
 Xem [nghiệp vụ](workflows.md), [AI/chat](ai-and-messaging.md) và [vận hành](operations.md) để biết điều kiện, giới hạn và cách nâng cấp.

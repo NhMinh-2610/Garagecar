@@ -55,4 +55,15 @@ Thao tác xác nhận/thu tiền sẽ thay đổi trạng thái của chính b�
 
 Email có `.demo`, biển số/mã vật tư và ghi chú có dấu `DEMO`. Ảnh [demo_evidence.jpg](../be/data/demo_evidence.jpg) là ảnh minh họa được đánh dấu mô phỏng, không phải bằng chứng sửa xe thật.
 
+Kiểm tra các xe demo bằng Query Tool của pgAdmin, trên đúng database cấu hình trong `be/.env`:
+
+```sql
+SELECT id, "licensePlate", "carBrand", "carModel", status
+FROM vehicles
+WHERE "licensePlate" LIKE 'DEMO%'
+ORDER BY id;
+```
+
+Lệnh chỉ đọc dữ liệu. Bộ demo đầy đủ có 8 xe, gồm VinFast VF 5 và VF 8; xe đã bị xóa hoặc thay biển số sẽ không còn khớp truy vấn này.
+
 Lịch bảo dưỡng demo dùng [trang nguồn giả lập](../fe/demo/maintenance.html), chỉ khớp cấu hình `DEMO`. Không dùng mốc bảo dưỡng, chứng chỉ, mã sản phẩm hoặc ảnh demo cho công việc thực tế. Dữ liệu người dùng đang có và mật khẩu cũ được giữ nguyên.

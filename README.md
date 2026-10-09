@@ -59,6 +59,8 @@ Sau khi chạy `seed.py --demo`, đăng nhập bằng email `{role}.demo@autopro
 
 Dữ liệu demo được đánh dấu và tạo một lần, không ghi đè dữ liệu có sẵn. Xem [danh sách tài khoản và kịch bản demo](docs/demo-data.md). `AI_PROVIDER=mock` là phản hồi mô phỏng, chưa phải LLM thật.
 
+Xe và các hồ sơ nghiệp vụ demo được lưu trong PostgreSQL. Thư viện tham khảo bảo dưỡng đọc từ JSON; số liệu bảng điều hành được tổng hợp từ API. Xem [nguồn dữ liệu hiển thị](docs/architecture.md#nguồn-dữ-liệu-hiển-thị) để phân biệt dữ liệu đã lưu, tài nguyên tham khảo và phản hồi AI.
+
 ## Tài liệu
 
 | Tài liệu                                                     | Dùng khi                                                    |

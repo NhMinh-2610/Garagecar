@@ -46,6 +46,20 @@ Tên đầy đủ và phụ thuộc xem trong [migrations/versions](../be/migrat
 
 Quy trình thêm dữ liệu giả lập được tách tại [demo-data.md](demo-data.md); không seed dữ liệu demo vào môi trường phục vụ khách thật.
 
+## Đối chiếu phiếu thanh toán và chứng từ
+
+Trong Query Tool của pgAdmin, truy vấn chỉ đọc sau liệt kê phiếu ở trạng thái `paid` nhưng chưa có chứng từ trong sổ thu:
+
+```sql
+SELECT r.id, r."vehicleId", r."totalAmount", r."paidAt"
+FROM repair_tickets AS r
+LEFT JOIN payment_receipts AS p ON p."ticketId" = r.id
+WHERE r.status = 'paid' AND p.id IS NULL
+ORDER BY r.id;
+```
+
+Báo cáo doanh thu hiện tổng hợp phiếu đã thanh toán, còn sổ thu liệt kê chứng từ thu. Nếu truy vấn trả kết quả, cần đối chiếu giao dịch gốc, phương thức, mã tham chiếu và người nhận trước khi bổ sung chứng từ. Không đặt lại trạng thái hoặc tạo chứng từ giả chỉ để làm hai bảng khớp nhau.
+
 ## Khôi phục và theo dõi
 
 Giữ bản dump ngoài thư mục làm việc và thử phục hồi vào **database thử riêng** bằng công cụ Restore của pgAdmin/`pg_restore`. Xác minh dữ liệu và cấu hình trước khi quyết định chuyển ứng dụng sang bản phục hồi; không phục hồi đè database đang dùng để thử nghiệm.
