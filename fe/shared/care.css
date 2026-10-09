@@ -12,7 +12,7 @@
 }
 .care-summary strong {
   font-size: 28px;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
 }
 .care-list {
   display: grid;
@@ -56,7 +56,7 @@
 }
 .component-card summary {
   cursor: pointer;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
   font-size: 13px;
 }
 .care-dialog {
@@ -208,13 +208,13 @@ table td small,
 }
 .care-tabs [aria-selected="true"] {
   background: #fff;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
   box-shadow: 0 1px 4px #0f172a12;
 }
 .care-tabs button:focus-visible,
 #serviceWorkspace summary:focus-visible,
 #maintenanceWorkspace summary:focus-visible {
-  outline: 2px solid var(--primary, #4f46e5);
+  outline: 2px solid var(--primary-color);
   outline-offset: 4px;
 }
 .care-toolbar {
@@ -302,7 +302,7 @@ table td small,
 .visit-details > summary {
   padding: 12px 20px;
   border-top: 1px solid #f1f5f9;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
   font-size: 13px;
   font-weight: 600;
 }
@@ -343,7 +343,7 @@ table td small,
 .care-source > summary,
 .care-brand-notes > summary {
   cursor: pointer;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
   font-size: 13px;
   line-height: 1.6;
 }

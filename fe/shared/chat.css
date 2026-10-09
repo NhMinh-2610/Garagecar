@@ -24,7 +24,7 @@
 }
 .chat-provider {
   color: #1e40af;
-  background: #eff6ff;
+  background: var(--color-brand-soft);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 0.85rem;
@@ -58,8 +58,8 @@
   overflow-wrap: anywhere;
 }
 .chat-message.user {
-  background: #eff6ff;
-  color: #1e3a8a;
+  background: var(--color-brand-soft);
+  color: var(--primary-dark);
   align-self: flex-end;
 }
 .chat-message strong {
@@ -82,7 +82,7 @@
   font-size: 0.85rem;
 }
 .chat-sources a {
-  color: #1d4ed8;
+  color: var(--primary-dark);
 }
 .chat-composer {
   padding-top: 14px;

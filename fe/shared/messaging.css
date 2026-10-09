@@ -56,8 +56,8 @@
   color: #334155;
 }
 .support-contact.active {
-  border-color: #4f46e5;
-  background: #eef2ff;
+  border-color: var(--primary-color);
+  background: var(--color-brand-soft);
 }
 .support-contact strong {
   display: flex;
