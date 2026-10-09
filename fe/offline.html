@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>AutoPro · Mất kết nối</title>
     <link rel="stylesheet" href="/static/shared/ui.css" />
+    <link rel="stylesheet" href="/static/shared/workspace.css" />
+    <link rel="stylesheet" href="/static/shared/public.css" />
   </head>
-  <body>
-    <main style="max-width: 520px; margin: 12vh auto; padding: 24px">
-      <h1>Đang mất kết nối</h1>
+  <body class="public-page offline-page">
+    <main class="offline-card">
+      <span class="offline-icon" aria-hidden="true"
+        ><svg class="ui-icon" viewBox="0 0 24 24">
+          <use href="/static/shared/icons.svg#car"></use></svg
+      ></span>
+      <p class="eyebrow">AUTOPRO / KẾT NỐI</p>
+      <h1>Hẹn gặp lại<br />khi có kết nối.</h1>
       <p>
         Kết nối lại để xem tiến độ, duyệt báo giá và lưu công việc. Dữ liệu cá nhân không được lưu
         vào bộ nhớ ngoại tuyến.
       </p>
-      <a href="/login">Thử kết nối lại</a>
+      <a class="btn btn-primary" href="/login">Thử kết nối lại</a>
     </main>
   </body>
 </html>

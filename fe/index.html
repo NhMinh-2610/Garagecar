@@ -18,15 +18,23 @@
     <script src="/static/shared/pwa.js" defer></script>
   </head>
   <body class="public-page">
+    <a class="skip-link" href="#mainContent">Chuyển đến nội dung chính</a>
     <header class="public-header">
-      <a href="/" class="public-brand"><span class="brand-mark">A</span>AutoPro</a>
+      <a href="/" class="public-brand"
+        ><span class="brand-mark"
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#car"></use></svg></span
+        ><span>AutoPro<small>GARAGE & CAR CARE</small></span></a
+      >
       <button
         class="btn-icon public-menu-toggle"
         aria-label="Mở menu"
         aria-controls="publicNav"
         aria-expanded="false"
       >
-        ☰
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <use href="/static/shared/icons.svg#menu"></use>
+        </svg>
       </button>
       <nav id="publicNav" class="public-nav" aria-label="Menu chính">
         <a href="#services">Dịch vụ</a><a href="#pricing">Tiền công</a
@@ -35,10 +43,10 @@
         ><a id="registerLink" class="btn btn-primary" href="/login?mode=register">Tạo tài khoản</a>
       </nav>
     </header>
-    <main class="public-main">
+    <main id="mainContent" class="public-main" tabindex="-1">
       <section id="home" class="hero">
         <div>
-          <p class="eyebrow">AUTOPRO · CHĂM SÓC & SỬA CHỮA Ô TÔ</p>
+          <p class="hero-label">Chăm sóc xe có kế hoạch</p>
           <h1>Chăm sóc xe.<br /><span>An tâm mỗi ngày.</span></h1>
           <p class="hero-description">
             Từ lúc tiếp nhận đến khi nhận lại xe, theo dõi từng hạng mục sửa chữa và nắm rõ chi phí
@@ -48,14 +56,19 @@
             <a href="#contact" class="btn btn-primary">Đặt lịch dịch vụ ↗</a
             ><a id="workspaceLink" href="/login" class="btn btn-secondary">Theo dõi xe của tôi</a>
           </div>
-          <p class="hero-note">Gửi yêu cầu trực tuyến · Garage liên hệ xác nhận lịch</p>
+          <p class="hero-note">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <use href="/static/shared/icons.svg#clock"></use>
+            </svg>
+            Gửi yêu cầu trực tuyến · Garage liên hệ xác nhận lịch
+          </p>
         </div>
         <div class="hero-visual">
           <div class="visual-heading">
-            <span class="eyebrow">CHĂM SÓC CÓ KẾ HOẠCH</span
-            ><span class="visual-tag">AUTOPRO / GARAGE</span>
+            <span class="eyebrow">ĐỒNG HÀNH CÙNG CHIẾC XE</span
+            ><span class="visual-tag">AUTOPRO CAR CARE</span>
           </div>
-          <h2>Chiếc xe của bạn.<br />Một hành trình rõ ràng.</h2>
+          <h2>Hiểu chiếc xe.<br />Chủ động chăm sóc.</h2>
           <img
             class="garage-art"
             src="/static/shared/garage-illustration.svg"
@@ -70,6 +83,24 @@
           <p class="visual-caption">Theo dõi tiến độ thực tế trong tài khoản của bạn.</p>
         </div>
       </section>
+      <div class="hero-assurances" aria-label="Trải nghiệm dịch vụ">
+        <span
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#clipboard"></use>
+          </svg>
+          Báo giá trước khi sửa</span
+        ><span
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#shield"></use>
+          </svg>
+          Theo dõi từng hạng mục</span
+        ><span
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#message"></use>
+          </svg>
+          Trao đổi trực tiếp với garage</span
+        >
+      </div>
       <section class="access-section" aria-labelledby="accessTitle">
         <div>
           <p class="eyebrow">CÙNG MỘT HỆ THỐNG</p>
@@ -77,21 +108,30 @@
         </div>
         <div class="access-grid">
           <a class="access-card" href="/login?mode=register"
-            ><span class="access-icon" aria-hidden="true">01</span>
+            ><span class="access-icon"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#user"></use></svg
+            ></span>
             <div>
               <h3>Khách hàng</h3>
               <p>Đặt lịch, theo dõi xe và xem chi phí.</p>
               <strong>Tạo tài khoản cá nhân ↗</strong>
             </div></a
           ><a class="access-card" href="/login"
-            ><span class="access-icon" aria-hidden="true">02</span>
+            ><span class="access-icon"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#tool"></use></svg
+            ></span>
             <div>
               <h3>Kỹ thuật viên</h3>
               <p>Nhận phiếu, cập nhật công việc được giao.</p>
               <strong>Đăng nhập tài khoản được cấp ↗</strong>
             </div></a
           ><a class="access-card" href="/login"
-            ><span class="access-icon" aria-hidden="true">03</span>
+            ><span class="access-icon"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#grid"></use></svg
+            ></span>
             <div>
               <h3>Quản trị viên</h3>
               <p>Quản lý garage, nhân sự và tài khoản.</p>
@@ -105,7 +145,11 @@
         <h2>Mỗi chiếc xe, một kế hoạch chăm sóc</h2>
         <div class="service-grid">
           <article class="card">
-            <span class="service-number">01 / BẢO DƯỠNG</span>
+            <span class="service-number"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#shield"></use></svg
+              >BẢO DƯỠNG</span
+            >
             <h3>Chăm sóc định kỳ</h3>
             <p class="section-description">
               Trao đổi về thay dầu, kiểm tra phanh, lốp và các hạng mục theo tình trạng xe.
@@ -115,7 +159,11 @@
             </div>
           </article>
           <article class="card">
-            <span class="service-number">02 / SỬA CHỮA</span>
+            <span class="service-number"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#tool"></use></svg
+              >SỬA CHỮA</span
+            >
             <h3>Kiểm tra dấu hiệu bất thường</h3>
             <p class="section-description">
               Mô tả tiếng kêu, đèn cảnh báo hoặc vấn đề vận hành để garage chuẩn bị tiếp nhận.
@@ -125,7 +173,11 @@
             </div>
           </article>
           <article class="card">
-            <span class="service-number">03 / CHĂM SÓC XE</span>
+            <span class="service-number"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#car"></use></svg
+              >CHĂM SÓC XE</span
+            >
             <h3>Làm mới trải nghiệm lái</h3>
             <p class="section-description">
               Gửi nhu cầu vệ sinh và chăm sóc xe để được tư vấn hạng mục phù hợp.

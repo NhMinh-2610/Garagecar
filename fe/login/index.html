@@ -12,12 +12,17 @@
     <script src="/static/login/script.js" defer></script>
     <script src="/static/shared/pwa.js" defer></script>
   </head>
-  <body class="public-page">
+  <body class="public-page auth-page">
+    <a class="skip-link" href="#mainContent">Chuyển đến nội dung chính</a>
     <header class="public-header">
-      <a class="public-brand" href="/"><span class="brand-mark">A</span>AutoPro</a
+      <a class="public-brand" href="/"
+        ><span class="brand-mark"
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#car"></use></svg></span
+        ><span>AutoPro<small>GARAGE & CAR CARE</small></span></a
       ><a class="btn btn-secondary" href="/">← Về trang chủ</a>
     </header>
-    <main class="auth-layout">
+    <main id="mainContent" class="auth-layout" tabindex="-1">
       <aside class="auth-intro">
         <p class="eyebrow">MỘT KẾT NỐI · MỌI HÀNH TRÌNH</p>
         <h1>Chăm sóc xe,<br />an tâm mỗi ngày.</h1>
@@ -29,6 +34,25 @@
           width="640"
           height="330"
         />
+
+        <div class="auth-benefits">
+          <span
+            ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <use href="/static/shared/icons.svg#clipboard"></use>
+            </svg>
+            Rõ ràng từng hạng mục, chi phí</span
+          ><span
+            ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <use href="/static/shared/icons.svg#clock"></use>
+            </svg>
+            Theo dõi tiến độ và lịch sử xe</span
+          ><span
+            ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <use href="/static/shared/icons.svg#shield"></use>
+            </svg>
+            Chủ động lịch chăm sóc định kỳ</span
+          >
+        </div>
         <small
           >Tài khoản khách hàng tự đăng ký. Tài khoản nhân viên được cấp bởi quản trị viên.</small
         >

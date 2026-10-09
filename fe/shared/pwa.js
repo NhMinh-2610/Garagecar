@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.append(link);
     const meta = document.createElement("meta");
     meta.name = "theme-color";
-    meta.content = "#0f172a";
+    meta.content = "#142f40";
     document.head.append(meta);
   }
   const status = document.createElement("div");
