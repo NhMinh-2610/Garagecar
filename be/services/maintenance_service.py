@@ -3,17 +3,19 @@
 import calendar
 from datetime import date, timedelta
 from hashlib import sha256
+
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from fastapi import HTTPException
+
 from models import (
-    Vehicle,
-    Mechanic,
-    RepairTicket,
-    VehicleCare,
     MaintenanceProfile,
     MaintenanceRecord,
     MaintenanceReminder,
+    Mechanic,
+    RepairTicket,
+    Vehicle,
+    VehicleCare,
 )
 from schemas.garage_care import today
 

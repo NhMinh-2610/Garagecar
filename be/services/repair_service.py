@@ -6,8 +6,8 @@ from decimal import Decimal
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.time import utcnow
 
+from core.time import utcnow
 from models import Inventory, Mechanic, RepairItem, RepairTicket, Vehicle
 from models.inventory_movement import InventoryMovement
 

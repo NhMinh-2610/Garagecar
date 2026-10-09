@@ -1,17 +1,19 @@
 """Maintenance correctness and cross-role workflow in isolated PostgreSQL schemas."""
 
+import asyncio
 from datetime import date
 from types import SimpleNamespace
-import asyncio
+
 import pytest
 from sqlalchemy import select
 from test_workflow import api as api
-from test_workflow import vehicle, repair_body, evidence
+from test_workflow import evidence, repair_body, vehicle
+
+from core.security import create_access_token
 from models import (
     Inventory,
     RepairTicket,
 )
-from core.security import create_access_token
 from services.maintenance_service import add_months, calculate_due, matches
 
 
@@ -409,21 +411,44 @@ async def test_quotation_consent_stock_qc_and_cashier_permissions(api):
     assert (
         await client.put(tpath, headers=s["accountant"], json={"status": "paid"})
     ).status_code == 200
-    billing = (await client.get("/api/service/visits", headers=s["accountant"])).json()["data"]
-    assert billing[0]["qcAt"] and "diagnosis" not in billing[0] and "quotes" not in billing[0]
+    billing = (await client.get("/api/service/visits", headers=s["accountant"])).json()[
+        "data"
+    ]
+    assert (
+        billing[0]["qcAt"]
+        and "diagnosis" not in billing[0]
+        and "quotes" not in billing[0]
+    )
     paid_ticket = (await client.get(tpath, headers=s["accountant"])).json()["data"]
     assert paid_ticket["qcAt"]
     followup_path = f"/api/advisor/visits/{visit_id}/followup"
-    followup_body = {"outcome": "satisfied", "rating": 5, "note": "Customer confirmed good operation"}
-    assert (await client.post(followup_path, headers=s["advisor"], json=followup_body)).status_code == 409
+    followup_body = {
+        "outcome": "satisfied",
+        "rating": 5,
+        "note": "Customer confirmed good operation",
+    }
+    assert (
+        await client.post(followup_path, headers=s["advisor"], json=followup_body)
+    ).status_code == 409
     assert (
         await client.put(
             f"/api/vehicles/{vid}", headers=s["advisor"], json={"status": "delivered"}
         )
     ).status_code == 200
-    assert (await client.post(followup_path, headers=s["hr"], json=followup_body)).status_code == 403
-    assert (await client.post(followup_path, headers=s["advisor"], json=followup_body)).status_code == 201
-    assert len((await client.get("/api/advisor/followups", headers=s["advisor"])).json()["data"]) == 1
+    assert (
+        await client.post(followup_path, headers=s["hr"], json=followup_body)
+    ).status_code == 403
+    assert (
+        await client.post(followup_path, headers=s["advisor"], json=followup_body)
+    ).status_code == 201
+    assert (
+        len(
+            (await client.get("/api/advisor/followups", headers=s["advisor"])).json()[
+                "data"
+            ]
+        )
+        == 1
+    )
     async with factory() as db:
         assert (await db.get(Inventory, ids["inventory_id"])).quantity == 3
 

@@ -17,14 +17,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError, InvalidHashError
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from jose import jwt
 
 from config.settings import settings
 
-# ── Argon2id parameters (OWASP recommended minimums) ─────────────────────────
+# Argon2id parameters (OWASP recommended minimums)
 _ph = PasswordHasher(
-    time_cost=3,        # iterations
+    time_cost=3,  # iterations
     memory_cost=65536,  # 64 MB — makes GPU/ASIC brute-force very expensive
     parallelism=4,
     hash_len=32,
@@ -49,6 +49,7 @@ def verify_password(plain: str, hashed: str) -> bool:
         # Legacy bcrypt path — kept for backward compatibility
         try:
             from passlib.context import CryptContext
+
             _bcrypt_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
             return _bcrypt_ctx.verify(plain, hashed)
         except Exception:
@@ -74,9 +75,10 @@ def needs_rehash(hashed: str) -> bool:
         return False
 
 
-# ── JWT helpers ───────────────────────────────────────────────────────────────
-
-def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+# JWT helpers
+def create_access_token(
+    data: dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     """
     Create a signed JWT access token.
     Default expiry: JWT_EXPIRE_HOURS from settings (typically 24h).

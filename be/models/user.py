@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, text, JSON
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, text
 from sqlalchemy.sql import func
 
 from database.engine import Base
@@ -18,9 +18,15 @@ class User(Base):
     password = Column(String, nullable=False)
     fullName = Column("fullName", String, nullable=False)
     role = Column(String, nullable=False, default="customer")
-    isActive = Column(Boolean, nullable=False, default=True, server_default=text("true"))
+    isActive = Column(
+        Boolean, nullable=False, default=True, server_default=text("true")
+    )
     sessionVersion = Column(Integer, nullable=False, default=0, server_default="0")
-    disabledPermissions = Column(JSON, nullable=False, default=list, server_default=text("'[]'"))
+    disabledPermissions = Column(
+        JSON, nullable=False, default=list, server_default=text("'[]'")
+    )
     lastLoginAt = Column(DateTime, nullable=True)
     createdAt = Column("createdAt", DateTime, server_default=func.now())
-    updatedAt = Column("updatedAt", DateTime, server_default=func.now(), onupdate=func.now())
+    updatedAt = Column(
+        "updatedAt", DateTime, server_default=func.now(), onupdate=func.now()
+    )

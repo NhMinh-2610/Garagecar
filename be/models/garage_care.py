@@ -1,18 +1,19 @@
 """Auditable maintenance, intake/quotation and staff records."""
 
 from sqlalchemy import (
+    JSON,
+    CheckConstraint,
     Column,
-    Integer,
-    String,
     Date,
     DateTime,
     ForeignKey,
-    JSON,
+    Integer,
     Numeric,
+    String,
     UniqueConstraint,
-    CheckConstraint,
 )
 from sqlalchemy.sql import func
+
 from database.engine import Base
 
 

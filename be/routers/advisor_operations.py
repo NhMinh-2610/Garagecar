@@ -3,10 +3,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.response import success_response
 from database.session import get_db
 from middleware.auth import require_permission
-from models import ServiceVisit, ServiceFollowup, Vehicle, RepairTicket
+from models import RepairTicket, ServiceFollowup, ServiceVisit, Vehicle
 from schemas.professional import FollowupInput
 from services.maintenance_service import row_dict
 

@@ -1,20 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 
+from core.constants import Role
+from core.response import error_response, success_response
 from database.session import get_db
+from middleware.auth import require_role
 from models.inventory import Inventory
-from schemas.inventory import (
-    InventoryCreate,
-    InventoryUpdate,
-    InventoryResponse,
-    StockReceipt,
-)
 from models.inventory_movement import InventoryMovement
 from models.repair_item import RepairItem
-from core.constants import Role
-from core.response import success_response, error_response
-from middleware.auth import require_role
+from schemas.inventory import (
+    InventoryCreate,
+    InventoryResponse,
+    InventoryUpdate,
+    StockReceipt,
+)
 
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 

@@ -1,28 +1,30 @@
 """Intake → preliminary consent → diagnosis → final approval → workshop → QC."""
 
 from decimal import Decimal
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.session import get_db
-from middleware.auth import get_current_user, require_permission
+
 from core.response import success_response
 from core.time import utcnow
+from database.session import get_db
+from middleware.auth import get_current_user, require_permission
 from models import (
-    Vehicle,
-    Mechanic,
     Inventory,
+    Mechanic,
     RepairTicket,
-    ServiceVisit,
     ServiceQuote,
+    ServiceVisit,
+    Vehicle,
 )
 from schemas.garage_care import (
-    VisitInput,
-    DiagnosisInput,
-    QuoteInput,
-    QuoteDecision,
     ConvertInput,
+    DiagnosisInput,
     QCInput,
+    QuoteDecision,
+    QuoteInput,
+    VisitInput,
 )
 from schemas.repair import RepairItemCreate
 from services.maintenance_service import row_dict

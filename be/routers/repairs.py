@@ -1,13 +1,13 @@
-from core.time import utcnow
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.constants import Role
 from core.response import success_response
+from core.time import utcnow
 from database.session import get_db
 from middleware.auth import require_role
-from models import Mechanic, RepairTicket, Vehicle, ServiceVisit
+from models import Mechanic, RepairTicket, ServiceVisit, Vehicle
 from schemas.repair import (
     RepairItemToggle,
     RepairTicketCreate,
@@ -267,11 +267,11 @@ async def toggle_item(
     if not item:
         raise HTTPException(404, "Không tìm thấy hạng mục")
     if body.isCompleted:
-        from services.evidence_service import (
-            require_item_evidence,
-            check_ev_certificate,
-        )
         from models import Inventory
+        from services.evidence_service import (
+            check_ev_certificate,
+            require_item_evidence,
+        )
 
         await check_ev_certificate(
             db,

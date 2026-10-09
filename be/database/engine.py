@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from config.settings import settings
@@ -10,11 +10,12 @@ engine: AsyncEngine = create_async_engine(
     echo=False,
     pool_size=10,
     max_overflow=20,
-    pool_pre_ping=True,   # reconnect automatically if connection drops
+    pool_pre_ping=True,  # reconnect automatically if connection drops
     connect_args={"server_settings": {"timezone": "UTC"}},
 )
 
 
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy ORM models."""
+
     pass
