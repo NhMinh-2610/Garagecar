@@ -101,6 +101,39 @@
     if (text !== undefined) node.textContent = text;
     return node;
   };
+  const symbol = (name, className = "") => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", `ui-icon ${className}`.trim());
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    use.setAttribute("href", `/static/shared/icons.svg#${name}`);
+    svg.append(use);
+    return svg;
+  };
+  const groupIcons = {
+    workshop: "tool",
+    care: "shield",
+    finance: "wallet",
+    people: "users",
+    personal: "calendar",
+    vehicles: "car",
+    support: "message",
+  };
+  const targetIcon = (target) => {
+    if (target === "dashboard-section") return "grid";
+    if (/message/.test(target)) return "message";
+    if (/chat/.test(target)) return "spark";
+    if (/inventory/.test(target)) return "box";
+    if (/maintenance/.test(target)) return "shield";
+    if (/booking|myWork|hrOps/.test(target)) return "calendar";
+    if (/finance/.test(target)) return "wallet";
+    if (/Report|report/.test(target)) return "chart";
+    if (/HR|hr/.test(target)) return "users";
+    if (/reception|Reception|vehicles/.test(target)) return "car";
+    if (/service/.test(target)) return "clipboard";
+    return "tool";
+  };
   Garage.initWorkspace = (role) => {
     if (Garage.workspace?.active) return;
     const sidebar = document.getElementById("sidebar"),
@@ -109,6 +142,47 @@
       topbar = document.querySelector(".topbar");
     if (!sidebar || !nav || !main || !topbar) return;
     document.body.classList.add("workspace-shell");
+    document.body.dataset.workspaceRole = role;
+    const contentArea = main.querySelector(".content-body") || main;
+    contentArea.id ||= "mainContent";
+    contentArea.tabIndex = -1;
+    const skipLink = element("a", "skip-link", "Chuyển đến nội dung chính");
+    skipLink.href = `#${contentArea.id}`;
+    document.body.prepend(skipLink);
+    const mark = sidebar.querySelector(".brand-mark");
+    mark?.replaceChildren(symbol("car"));
+    const menuToggle = document.querySelector(".toggle-sidebar");
+    menuToggle?.replaceChildren(symbol("menu"));
+    const logout = document.getElementById("logoutBtn");
+    if (logout) {
+      logout.replaceChildren(symbol("logout"));
+      logout.setAttribute("aria-label", "Đăng xuất");
+      logout.title = "Đăng xuất";
+    }
+    const pageTitle = document.getElementById("pageTitle");
+    if (pageTitle) {
+      const titleStack = element("div", "workspace-title-stack");
+      titleStack.append(element("span", "workspace-role-label", names[role] || "AutoPro"));
+      pageTitle.before(titleStack);
+      titleStack.append(pageTitle);
+    }
+    const account = document.getElementById("myAccountButton");
+    if (account) {
+      account.replaceChildren(symbol("user"), element("span", "", "Tài khoản"));
+      account.setAttribute("aria-label", "Tài khoản của tôi");
+      account.title = "Tài khoản của tôi";
+    }
+    for (const id of ["staffRefresh", "refreshData", "refreshTasks"]) {
+      const button = document.getElementById(id);
+      if (!button) continue;
+      button.replaceChildren(symbol("clock"), element("span", "", "Làm mới"));
+      button.classList.add("workspace-topbar-action");
+      button.setAttribute("aria-label", "Làm mới dữ liệu");
+      button.title = "Làm mới dữ liệu";
+    }
+    const avatar = element("span", "workspace-avatar", (names[role] || "A").slice(0, 1));
+    avatar.setAttribute("aria-hidden", "true");
+    sidebar.querySelector(".sidebar-footer")?.prepend(avatar);
     Garage.workspace = { active: true, role };
     const key = `garage:${role}:section`,
       containers = new Map();
@@ -148,6 +222,35 @@
     if (role === "mechanic") {
       labels["service-section"] = "Kiểm tra kỹ";
       labels["inventory-section"] = "Tra cứu vật tư";
+    }
+    const welcome = dashboard.querySelector(".section-heading");
+    if (welcome) {
+      // Nut dat lich duoc gom vao hang thao tac chung ben duoi phan chao don.
+      if (role === "customer") welcome.querySelector('[data-go="booking-section"]')?.remove();
+      welcome.classList.add("workspace-welcome");
+      const copy = welcome.querySelector(":scope > div") || welcome;
+      const eyebrow = copy.querySelector(".eyebrow");
+      if (eyebrow) eyebrow.textContent = "AUTOPRO / " + (names[role] || "Không gian làm việc");
+      const heading = copy.querySelector("h1");
+      if (heading) heading.textContent = "Một ngày làm việc hiệu quả.";
+      if (role === "customer" && heading) heading.textContent = "An tâm trên mọi hành trình.";
+      const visual = element("div", "workspace-welcome-aside");
+      const date = element("span", "workspace-date");
+      date.append(
+        symbol("calendar"),
+        element(
+          "span",
+          "",
+          new Intl.DateTimeFormat("vi-VN", {
+            weekday: "long",
+            day: "2-digit",
+            month: "2-digit",
+            timeZone: "Asia/Ho_Chi_Minh",
+          }).format(new Date()),
+        ),
+      );
+      visual.append(date, symbol(role === "customer" ? "car" : "tool", "workspace-welcome-icon"));
+      welcome.append(visual);
     }
     const secondary = element("div", "workspace-subnav");
     secondary.setAttribute("role", "navigation");
@@ -214,7 +317,7 @@
       const heading = element("button", "workspace-group-button");
       heading.type = "button";
       heading.append(
-        element("span", "workspace-group-mark", groups[key]?.mark || "•"),
+        symbol(groupIcons[key] || "grid", "workspace-group-mark"),
         element("span", "", groupName(key)),
         element("span", "workspace-group-chevron", "›"),
       );
@@ -321,10 +424,9 @@
         button.dataset.title = labels[target] || button.dataset.title || button.textContent.trim();
         let text = button.querySelector(":scope > .workspace-nav-label");
         if (!text) {
-          const icons = [...button.querySelectorAll(":scope > i")];
           const badges = [...button.querySelectorAll(".support-badge")];
           text = element("span", "workspace-nav-label", button.dataset.title);
-          button.replaceChildren(...icons, text, ...badges);
+          button.replaceChildren(symbol(targetIcon(target)), text, ...badges);
         } else if (text.textContent !== button.dataset.title) {
           text.textContent = button.dataset.title;
         }
@@ -431,6 +533,9 @@
     const actions = element("div", "workspace-actions");
     actions.setAttribute("aria-label", "Thao tác thường dùng");
     overview.append(actions);
+    const summary = element("div", "workspace-stats");
+    summary.setAttribute("aria-label", "Tổng quan công việc");
+    if (role !== "customer") overview.prepend(summary);
     let priority, status, shortcutContainer;
     if (role !== "customer") {
       const columns = element("div", "workspace-dashboard-grid");
@@ -509,6 +614,7 @@
         const related = available.filter((node) => grouping(node.dataset.target, role) === group);
         if (!related.length) return;
         const article = element("article", "workspace-shortcut");
+        article.prepend(symbol(groupIcons[group] || "grid", "workspace-shortcut-icon"));
         article.append(
           element("strong", "", groupName(group)),
           element("p", "muted", groups[group].text),
@@ -527,6 +633,21 @@
     syncNavigation();
     Promise.resolve(Garage.permissionsReady)
       .then((me) => {
+        if (me?.role === role) {
+          const fullName = me.fullName || "";
+          if (fullName) {
+            avatar.textContent = fullName
+              .trim()
+              .split(/\s+/)
+              .slice(-2)
+              .map((word) => word[0])
+              .join("")
+              .toUpperCase();
+            const heading = welcome?.querySelector("h1");
+            if (heading)
+              heading.textContent = "Xin chào, " + fullName.trim().split(/\s+/).at(-1) + ".";
+          }
+        }
         if (!me?.role || me.role !== role || role === "customer") return;
         const permissions = new Set(me.permissions || []),
           can = (permission) => permissions.has(permission);
@@ -673,6 +794,20 @@
           item.hidden = index >= 5;
           const count = element("strong", "", "—");
           row.counter = count;
+          if (index < 4) {
+            const tile = element("button", "workspace-stat");
+            tile.type = "button";
+            tile.dataset.workspaceGo = row.target;
+            const value = element("strong", "workspace-stat-value", "—");
+            row.summaryCounter = value;
+            tile.append(
+              symbol(targetIcon(row.target), "workspace-stat-icon"),
+              element("span", "workspace-stat-title", row.title),
+              value,
+              element("span", "workspace-stat-link", "Xem chi tiết →"),
+            );
+            summary.append(tile);
+          }
           item.append(
             element("span", "", row.title),
             count,
@@ -738,6 +873,7 @@
                 failed = true;
                 row.counter.textContent = "—";
               }
+              if (row.summaryCounter) row.summaryCounter.textContent = row.counter.textContent;
             });
             status.textContent = failed
               ? "Một số số liệu chưa tải được. Dữ liệu sẽ cập nhật khi kết nối ổn định."

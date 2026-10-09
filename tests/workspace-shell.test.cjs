@@ -37,6 +37,7 @@ async function shell(role = "admin", options = {}) {
     permissionsReady: Promise.resolve({
       id: 7,
       role,
+      fullName: options.fullName,
       permissions: options.permissions || [],
     }),
     request: async (path) => {
@@ -201,13 +202,39 @@ test("dashboard summaries fetch only enabled capabilities and leave unloaded cou
     assert.equal(counts[0], "1");
     assert.ok(counts[1].includes("1.200.000"));
     assert.equal(counts[2], "—");
+    const summary = [...w.document.querySelectorAll(".workspace-stat-value")].map(
+      (node) => node.textContent,
+    );
+    assert.deepEqual(summary, counts);
     assert.ok(
       w.document.querySelector(".workspace-update-status").textContent.includes("chưa tải được"),
     );
     const input = w.document.querySelector("#finance-section input");
     input.value = "Draft";
+    w.document.querySelector(".workspace-stat").click();
+    assert.equal(w.document.getElementById("finance-section").hidden, false);
     await listeners[0]({ background: true });
     assert.equal(input.value, "Draft");
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("the welcome treats account names as text and keeps quick actions within the available menu", async () => {
+  const name = 'Người dùng <img src=x onerror="alert(1)">';
+  const { dom, w, errors } = await shell("customer", {
+    fullName: name,
+    targets: ["dashboard-section", "vehicles-section", "booking-section"],
+  });
+  try {
+    const welcome = w.document.querySelector(".workspace-welcome");
+    assert.equal(welcome.querySelector("img"), null);
+    assert.ok(welcome.querySelector("h1").textContent.includes("alert(1)"));
+    const quick = w.document.querySelectorAll(".workspace-actions [data-workspace-go]");
+    assert.equal(quick.length, 1);
+    quick[0].click();
+    assert.equal(w.document.getElementById("booking-section").hidden, false);
+    assert.deepEqual(errors, []);
   } finally {
     dom.window.close();
   }

@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           totals
             .map(
               (r) =>
-                `<div><div class="summary-row"><span>Tháng ${r.month}</span><strong>${money(r.total)}</strong></div><div style="height:12px;background:#eef2ff;border-radius:6px"><div style="height:12px;width:${(r.total / max) * 100}%;background:#4f46e5;border-radius:6px"></div></div></div>`,
+                `<div><div class="summary-row"><span>Tháng ${r.month}</span><strong>${money(r.total)}</strong></div><div style="height:12px;background:#eaf5f2;border-radius:6px"><div style="height:12px;width:${(r.total / max) * 100}%;background:var(--primary-color);border-radius:6px"></div></div></div>`,
             )
             .join("") +
           "</div><p><strong>Tổng: " +

@@ -59,7 +59,7 @@
             datasets: [
               {
                 data: rows.map((r) => r.revenue),
-                backgroundColor: "#7771df",
+                backgroundColor: "#0e746e",
                 borderRadius: 6,
                 maxBarThickness: 56,
               },
