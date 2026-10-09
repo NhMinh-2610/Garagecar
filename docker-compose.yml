@@ -1,5 +1,5 @@
 services:
-  # ── PostgreSQL Database ──────────────────────────────────────────────────────
+  # PostgreSQL cho moi truong local/demo.
   db:
     image: postgres:16-alpine
     container_name: garagecar_db
@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── FastAPI Backend ──────────────────────────────────────────────────────────
+  # Migration duoc chay truoc khi khoi dong API.
   backend:
     build:
       context: ./be
@@ -29,7 +29,7 @@ services:
       - ./be/.env
     environment:
       DATABASE_URL: postgresql+asyncpg://garagecar:garagecar@db:5432/garagecar
-    command: sh -c "python -m alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: sh -c "python -m alembic upgrade head && python -m uvicorn main:app --host 0.0.0.0 --port 8000"
     volumes:
       - ./fe:/fe:ro
     ports:
@@ -38,7 +38,7 @@ services:
       db:
         condition: service_healthy
 
-  # ── Nginx Frontend ───────────────────────────────────────────────────────────
+  # Frontend va API duoc phuc vu cung origin.
   frontend:
     image: nginx:alpine
     container_name: garagecar_frontend
