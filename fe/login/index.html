@@ -1,37 +1,164 @@
-<!DOCTYPE html>
-<html lang="vi"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AutoPro · Đăng nhập</title>
-<link rel="stylesheet" href="/static/shared/ui.css"><link rel="stylesheet" href="/static/shared/workspace.css"><link rel="stylesheet" href="/static/shared/public.css"><link rel="stylesheet" href="/static/login/styles.css">
-<script src="/static/shared/core.js" defer></script><script src="/static/login/script.js" defer></script>
-<script src="/static/shared/pwa.js" defer></script></head><body class="public-page">
-<header class="public-header"><a class="public-brand" href="/"><span class="brand-mark">A</span>AutoPro</a><a class="btn btn-secondary" href="/">← Về trang chủ</a></header>
-<main class="auth-layout">
-<aside class="auth-intro">
-<p class="eyebrow">MỘT KẾT NỐI · MỌI HÀNH TRÌNH</p>
-<h1>Chăm sóc xe,<br>an tâm mỗi ngày.</h1>
-<p>Xe, lịch sử sửa chữa và tiến độ công việc — tất cả trong cùng một không gian AutoPro.</p>
-<img class="auth-art" src="/static/shared/garage-illustration.svg" alt="" width="640" height="330">
-<small>Tài khoản khách hàng tự đăng ký. Tài khoản nhân viên được cấp bởi quản trị viên.</small>
-</aside>
-<div class="auth-panel">
-<div class="auth-switch" aria-label="Chọn đăng nhập hoặc đăng ký"><button type="button" data-auth-mode="login" aria-pressed="true">Đăng nhập</button><button type="button" data-auth-mode="register" aria-pressed="false">Đăng ký khách hàng</button></div>
-<div id="messageBox" class="message-box" role="status" aria-live="polite"></div>
-<form id="loginForm" class="auth-form active">
-<p class="eyebrow">CHÀO MỪNG TRỞ LẠI</p><h2>Đăng nhập AutoPro</h2><p class="auth-description">Tiếp tục công việc và theo dõi chiếc xe của bạn.</p>
-<div class="form-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" autocomplete="username" placeholder="ban@example.com" required></div>
-<div class="form-group"><label for="loginPassword">Mật khẩu</label><div class="password-field"><input type="password" id="loginPassword" autocomplete="current-password" required><button type="button" class="password-toggle" data-password="loginPassword" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button></div></div>
-<button type="submit" class="btn btn-primary full-width">Đăng nhập</button>
-<p class="switch-text">Chưa có tài khoản? <a href="?mode=register" id="showRegister">Đăng ký khách hàng</a></p>
-<p class="panel-note">Nếu quên mật khẩu, hãy liên hệ bộ phận quản lý garage để được hỗ trợ.</p>
-</form>
-<form id="registerForm" class="auth-form">
-<p class="eyebrow">BẮT ĐẦU CÙNG AUTOPRO</p><h2>Tạo tài khoản khách hàng</h2><p class="auth-description">Lưu lịch sử chăm sóc xe và gửi yêu cầu đặt lịch.</p>
-<div class="form-grid"><div class="form-group"><label for="registerFullName">Họ và tên</label><input id="registerFullName" autocomplete="name" maxlength="255" required></div><div class="form-group"><label for="registerUsername">Tên đăng nhập</label><input id="registerUsername" autocomplete="username" maxlength="255" required></div></div>
-<div class="form-group"><label for="registerEmail">Email</label><input type="email" id="registerEmail" autocomplete="email" placeholder="ban@example.com" required></div>
-<div class="form-group"><label for="registerPassword">Mật khẩu</label><div class="password-field"><input type="password" id="registerPassword" autocomplete="new-password" aria-describedby="passwordHelp" minlength="6" maxlength="72" required><button type="button" class="password-toggle" data-password="registerPassword" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button></div><p id="passwordHelp" class="field-help">Ít nhất 6 ký tự. Nên dùng mật khẩu dài, khó đoán.</p></div>
-<div class="form-group"><label for="registerPasswordConfirm">Nhập lại mật khẩu</label><div class="password-field"><input type="password" id="registerPasswordConfirm" autocomplete="new-password" minlength="6" maxlength="72" required><button type="button" class="password-toggle" data-password="registerPasswordConfirm" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button></div></div>
-<button type="submit" class="btn btn-primary full-width">Tạo tài khoản</button><p class="switch-text">Đã có tài khoản? <a href="?mode=login" id="showLogin">Đăng nhập</a></p>
-</form>
-</div></main>
-<footer class="public-footer">AutoPro · Không gian chăm sóc xe và quản lý garage</footer>
-</body></html>
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AutoPro · Đăng nhập</title>
+    <link rel="stylesheet" href="/static/shared/ui.css" />
+    <link rel="stylesheet" href="/static/shared/workspace.css" />
+    <link rel="stylesheet" href="/static/shared/public.css" />
+    <link rel="stylesheet" href="/static/login/styles.css" />
+    <script src="/static/shared/core.js" defer></script>
+    <script src="/static/login/script.js" defer></script>
+    <script src="/static/shared/pwa.js" defer></script>
+  </head>
+  <body class="public-page">
+    <header class="public-header">
+      <a class="public-brand" href="/"><span class="brand-mark">A</span>AutoPro</a
+      ><a class="btn btn-secondary" href="/">← Về trang chủ</a>
+    </header>
+    <main class="auth-layout">
+      <aside class="auth-intro">
+        <p class="eyebrow">MỘT KẾT NỐI · MỌI HÀNH TRÌNH</p>
+        <h1>Chăm sóc xe,<br />an tâm mỗi ngày.</h1>
+        <p>Xe, lịch sử sửa chữa và tiến độ công việc — tất cả trong cùng một không gian AutoPro.</p>
+        <img
+          class="auth-art"
+          src="/static/shared/garage-illustration.svg"
+          alt=""
+          width="640"
+          height="330"
+        />
+        <small
+          >Tài khoản khách hàng tự đăng ký. Tài khoản nhân viên được cấp bởi quản trị viên.</small
+        >
+      </aside>
+      <div class="auth-panel">
+        <div class="auth-switch" aria-label="Chọn đăng nhập hoặc đăng ký">
+          <button type="button" data-auth-mode="login" aria-pressed="true">Đăng nhập</button
+          ><button type="button" data-auth-mode="register" aria-pressed="false">
+            Đăng ký khách hàng
+          </button>
+        </div>
+        <div id="messageBox" class="message-box" role="status" aria-live="polite"></div>
+        <form id="loginForm" class="auth-form active">
+          <p class="eyebrow">CHÀO MỪNG TRỞ LẠI</p>
+          <h2>Đăng nhập AutoPro</h2>
+          <p class="auth-description">Tiếp tục công việc và theo dõi chiếc xe của bạn.</p>
+          <div class="form-group">
+            <label for="loginEmail">Email</label
+            ><input
+              type="email"
+              id="loginEmail"
+              autocomplete="username"
+              placeholder="ban@example.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Mật khẩu</label>
+            <div class="password-field">
+              <input
+                type="password"
+                id="loginPassword"
+                autocomplete="current-password"
+                required
+              /><button
+                type="button"
+                class="password-toggle"
+                data-password="loginPassword"
+                aria-label="Hiện mật khẩu"
+                aria-pressed="false"
+              >
+                Hiện
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Đăng nhập</button>
+          <p class="switch-text">
+            Chưa có tài khoản? <a href="?mode=register" id="showRegister">Đăng ký khách hàng</a>
+          </p>
+          <p class="panel-note">
+            Nếu quên mật khẩu, hãy liên hệ bộ phận quản lý garage để được hỗ trợ.
+          </p>
+        </form>
+        <form id="registerForm" class="auth-form">
+          <p class="eyebrow">BẮT ĐẦU CÙNG AUTOPRO</p>
+          <h2>Tạo tài khoản khách hàng</h2>
+          <p class="auth-description">Lưu lịch sử chăm sóc xe và gửi yêu cầu đặt lịch.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="registerFullName">Họ và tên</label
+              ><input id="registerFullName" autocomplete="name" maxlength="255" required />
+            </div>
+            <div class="form-group">
+              <label for="registerUsername">Tên đăng nhập</label
+              ><input id="registerUsername" autocomplete="username" maxlength="255" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="registerEmail">Email</label
+            ><input
+              type="email"
+              id="registerEmail"
+              autocomplete="email"
+              placeholder="ban@example.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Mật khẩu</label>
+            <div class="password-field">
+              <input
+                type="password"
+                id="registerPassword"
+                autocomplete="new-password"
+                aria-describedby="passwordHelp"
+                minlength="6"
+                maxlength="72"
+                required
+              /><button
+                type="button"
+                class="password-toggle"
+                data-password="registerPassword"
+                aria-label="Hiện mật khẩu"
+                aria-pressed="false"
+              >
+                Hiện
+              </button>
+            </div>
+            <p id="passwordHelp" class="field-help">
+              Ít nhất 6 ký tự. Nên dùng mật khẩu dài, khó đoán.
+            </p>
+          </div>
+          <div class="form-group">
+            <label for="registerPasswordConfirm">Nhập lại mật khẩu</label>
+            <div class="password-field">
+              <input
+                type="password"
+                id="registerPasswordConfirm"
+                autocomplete="new-password"
+                minlength="6"
+                maxlength="72"
+                required
+              /><button
+                type="button"
+                class="password-toggle"
+                data-password="registerPasswordConfirm"
+                aria-label="Hiện mật khẩu"
+                aria-pressed="false"
+              >
+                Hiện
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Tạo tài khoản</button>
+          <p class="switch-text">
+            Đã có tài khoản? <a href="?mode=login" id="showLogin">Đăng nhập</a>
+          </p>
+        </form>
+      </div>
+    </main>
+    <footer class="public-footer">AutoPro · Không gian chăm sóc xe và quản lý garage</footer>
+  </body>
+</html>
