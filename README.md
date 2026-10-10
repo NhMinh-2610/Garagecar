@@ -17,6 +17,8 @@ Khách hàng và kỹ thuật viên có thể cài PWA từ trình duyệt đi�
 
 Giao diện dùng chung bố cục, điều hướng theo nhóm công việc, bảng phân trang và biểu mẫu. Đồng bộ dữ liệu không tải lại trang và trì hoãn cập nhật khi người dùng đang nhập liệu.
 
+**Tạo phiếu:** chọn **Mở hồ sơ dịch vụ** trên xe hoặc **Tạo phiếu sửa** trong Xưởng. Giao diện hướng dẫn bước tiếp theo, điền tiền công từ bảng giá và cho dùng lại hạng mục báo giá; xem [hướng dẫn thao tác](docs/workflows.md#thao-tác-tạo-phiếu-trên-giao-diện).
+
 ## Công nghệ
 
 | Thành phần | Giải pháp trong code                                              |

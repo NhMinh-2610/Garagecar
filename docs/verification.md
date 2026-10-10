@@ -6,8 +6,8 @@ Phạm vi: kiểm thử nghiệp vụ với PostgreSQL, tương tác frontend b�
 
 | Kiểm tra              | Kết quả                                                                                                 |
 | --------------------- | ------------------------------------------------------------------------------------------------------- |
-| Backend/PostgreSQL    | **46/46 đạt**, gồm luồng nghiệp vụ và quyền truy cập                                                    |
-| Frontend/jsdom        | **56/56 đạt**, tải HTML/script của sáu portal và thao tác giao diện                                     |
+| Backend/PostgreSQL    | **47/47 đạt**, gồm luồng nghiệp vụ, tài nguyên tiếp nhận và quyền truy cập                              |
+| Frontend/jsdom        | **61/61 đạt**, tải HTML/script của sáu portal và thao tác giao diện                                     |
 | HTTP qua Nginx Docker | **70/70 đạt**, đăng nhập, API theo vai trò và từ chối truy cập sai quyền                                |
 | Chất lượng code       | Ruff lint/format đạt; Prettier và kiểm tra file/liên kết đạt                                            |
 | Docker thực tế        | Build thành công; PostgreSQL, backend và Nginx đều healthy                                              |
@@ -47,6 +47,9 @@ Test nằm trong [backend](../be/tests) và [frontend](../tests). Script [smoke-
 - Yêu cầu thiếu token trả nhầm 403, header xác thực bị bỏ: trả 401 kèm `WWW-Authenticate: Bearer`; tài khoản đã đăng nhập thiếu quyền vẫn nhận 403.
 - Docker dễ trùng PostgreSQL local, frontend lên trước API, thiếu nén và xử lý proxy: tách cổng, chờ readiness, nén phản hồi, giữ HTTPS khi chuyển hướng và giới hạn log.
 - Thêm script khởi động demo, kiểm tra toàn bộ và kiểm tra HTTP thực; image backend có sẵn frontend và không chứa `.env`.
+- Tạo phiếu dùng chung điểm vào theo xe: tìm hồ sơ đang mở, tiếp nhận xe mới, mở báo giá đã duyệt hoặc chuyển đến đúng tab phiếu đang sửa.
+- Trình soạn báo giá điền tiền công từ danh mục, tìm vật tư theo tên/SKU, dùng lại hạng mục với giá kho hiện tại và chỉnh số lượng/tiền công mà không mất focus.
+- Kiểm thử chuỗi thao tác tiếp nhận → sơ bộ → khách đồng ý → kiểm tra kỹ → chính thức → khách đồng ý → tạo phiếu. Kiểm tra thêm bản nháp khi lỗi/đồng bộ, thiếu tồn, mã không khớp xe, hạng mục chưa thêm và chống nhập trùng khi dùng lại.
 
 ## Chạy lại
 

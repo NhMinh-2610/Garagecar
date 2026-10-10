@@ -28,11 +28,18 @@ Quản trị có thể khóa bớt nhóm chức năng của từng tài khoản.
 
 Trạng thái phiếu sửa: `draft` → `working` → `completed` → `paid`. Phiếu thuộc lượt dịch vụ phải qua nghiệm thu trước khi thu; phiếu lịch sử không liên kết lượt dịch vụ giữ khả năng xử lý tương thích. Không dùng nút hoàn thành để ghi nhận tiền đã thu.
 
-### Khi nút tạo phiếu yêu cầu chuyển báo giá
+### Thao tác tạo phiếu trên giao diện
 
-Xe đang có lượt dịch vụ chưa kết thúc phải tạo phiếu từ báo giá của lượt đó. Trong **Cố vấn & Báo giá**, hoàn tất kiểm tra kỹ → lập **báo giá chính thức** → ghi nhận khách duyệt → chọn **Chuyển vào xưởng** và phân công thợ có tài khoản. Duyệt báo giá sơ bộ chỉ mở bước kiểm tra kỹ.
+1. Tại **Tiếp nhận & Lịch hẹn**, chọn **Mở hồ sơ dịch vụ** trên xe; hoặc bấm **Tạo phiếu sửa** tại Xưởng rồi tìm biển số. Xe có hồ sơ tiếp tục đúng bước đang chờ, xe mới mở tiếp nhận với biển số điền sẵn.
+2. Ghi nhu cầu/tình trạng xe, chọn **Lưu & Lập báo giá sơ bộ**. Hệ thống mở ngay trình soạn báo giá: chọn công việc trong bảng giá để điền tiền công, tìm vật tư theo tên/SKU, thêm hạng mục và kiểm tra tổng tiền.
+3. Ghi nhận khách đồng ý sơ bộ, thực hiện kiểm tra kỹ. Khi lập báo giá chính thức, chọn **Dùng lại hạng mục** rồi chỉnh số lượng/tiền công ngay trên danh sách; giá vật tư lấy lại từ kho hiện tại. Khách xác nhận riêng báo giá chính thức.
+4. Chọn **Tạo phiếu & Giao thợ**, xem lại hạng mục/tổng tiền và chọn kỹ thuật viên. Thợ đã kiểm tra được giữ sẵn nếu còn đủ điều kiện. Phiếu tạo thành công có nút mở đúng xe và đúng tab trong Xưởng.
 
-Nút tạo phiếu từ xe sẽ mở đúng lượt dịch vụ nếu đã có; hộp tạo phiếu chung hiển thị hướng dẫn khi chọn xe theo báo giá. Xe chưa có lượt dịch vụ vẫn có thể tạo phiếu trực tiếp. Nếu có người tạo lượt trong lúc bạn đang nhập, hệ thống kiểm tra lại khi lưu và giữ các hạng mục để bạn xử lý tiếp.
+Mỗi hồ sơ có thanh tiến trình, hướng dẫn bước tiếp theo và một thao tác chính. Bộ lọc **Cần xử lý / Đang thực hiện / Đã kết thúc** hỗ trợ tìm việc; sau khi lưu, giao diện giữ đúng hồ sơ vừa thao tác. **Xem tất cả lượt** trở lại danh sách chung. Các biểu mẫu đang mở giữ nội dung khi đồng bộ hoặc khi API báo lỗi.
+
+Vật tư liên quan được ưu tiên theo tên công việc, không tự động chọn hoặc xác nhận tương thích VIN. Mã không khớp cấu hình hồ sơ bị vô hiệu hóa trong danh sách; thiếu tồn có lời nhắc trước khi tạo phiếu. Khi tạo phiếu, server vẫn kiểm tra lại giá, tồn, tương thích và tài khoản thợ trong giao dịch.
+
+Xe có lượt dịch vụ chưa kết thúc phải tạo phiếu từ báo giá chính thức đã duyệt. Với công việc đã thống nhất trực tiếp và xe chưa có lượt đang mở, mục **Lập phiếu riêng** ở cuối Xưởng giữ khả năng tạo phiếu trực tiếp. Nếu có người tạo lượt trong lúc đang nhập phiếu riêng, hệ thống kiểm tra lại khi lưu và giữ hạng mục để xử lý tiếp.
 
 ## Ảnh và xác nhận vật tư
 
