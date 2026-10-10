@@ -1,13 +1,20 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.sql import func
+
 from database.engine import Base
 
 
 class InventoryMovement(Base):
     """Append-only stock ledger; repair reference is retained even after draft deletion."""
+
     __tablename__ = "inventory_movements"
     id = Column(Integer, primary_key=True)
-    inventoryId = Column(Integer, ForeignKey("inventories.id", ondelete="RESTRICT"), nullable=False, index=True)
+    inventoryId = Column(
+        Integer,
+        ForeignKey("inventories.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     quantityChange = Column(Integer, nullable=False)
     balanceAfter = Column(Integer, nullable=False)
     reason = Column(String, nullable=False)

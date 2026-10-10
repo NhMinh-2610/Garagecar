@@ -1,9 +1,9 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-# ── Request schemas ────────────────────────────────────────────────────────────
-
+# Request schemas
 class DiagnoseRequest(BaseModel):
     symptoms: str
     carBrand: Optional[str] = None
@@ -34,20 +34,41 @@ class MaintenanceAdviceRequest(BaseModel):
 
 
 class ChatMessage(BaseModel):
-    role: str   # "user" | "assistant"
-    content: str
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4000)
+
+    @field_validator("content")
+    @classmethod
+    def nonempty_content(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError("Nội dung không được để trống")
+        return value
 
 
 class ChatRequest(BaseModel):
-    messages: List[ChatMessage]
+    messages: List[ChatMessage] = Field(min_length=1, max_length=21)
+    vehicleId: Optional[int] = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def conversation_limits(self):
+        if sum(len(message.content) for message in self.messages) > 16000:
+            raise ValueError("Cuộc trò chuyện quá dài; hãy bắt đầu cuộc trò chuyện mới")
+        if self.messages[-1].role != "user":
+            raise ValueError("Tin nhắn cuối phải là câu hỏi của người dùng")
+        for index, message in enumerate(self.messages):
+            if message.role != ("user" if index % 2 == 0 else "assistant"):
+                raise ValueError(
+                    "Lịch sử hội thoại phải luân phiên người dùng và trợ lý"
+                )
+        return self
 
 
-# ── Response schemas ───────────────────────────────────────────────────────────
-
+# Response schemas
 class DiagnoseResponse(BaseModel):
     possibleCauses: List[str]
     recommendedActions: List[str]
-    urgencyLevel: str   # low | medium | high | critical
+    urgencyLevel: str  # low | medium | high | critical
     estimatedCost: Optional[str] = None
     disclaimer: str
 
@@ -70,3 +91,7 @@ class MaintenanceAdviceResponse(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    provider: str = "mock"
+    model: Optional[str] = None
+    isDemo: bool = True
+    sources: List[dict] = Field(default_factory=list)

@@ -1,20 +1,21 @@
-from fastapi import Depends, HTTPException, status, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError
 from typing import Callable
+
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.constants import Role
+from core.permissions import permissions
+from core.security import decode_token
 from database.session import get_db
 from models.user import User
 
-from core.security import decode_token
-from core.constants import Role
-from core.permissions import permissions
-
-_bearer = HTTPBearer()
+_bearer = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
@@ -22,6 +23,8 @@ async def get_current_user(
     Attaches the decoded payload (id, email, role, fullName) to the request.
     """
     try:
+        if credentials is None:
+            raise JWTError("Missing bearer token")
         payload = decode_token(credentials.credentials)
         user = await db.get(User, payload.get("id"))
         if (

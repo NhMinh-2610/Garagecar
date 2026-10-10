@@ -2,29 +2,31 @@
 
 import json
 from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.response import success_response
+from core.time import utcnow
 from database.session import get_db
 from middleware.auth import get_current_user, require_permission
 from models import (
-    Vehicle,
-    VehicleCare,
     MaintenanceProfile,
     MaintenanceRecord,
     MaintenanceReminder,
     RepairTicket,
+    Vehicle,
+    VehicleCare,
 )
-from schemas.garage_care import ProfileInput, CareInput, RecordInput
+from schemas.garage_care import CareInput, ProfileInput, RecordInput
 from services.maintenance_service import (
-    vehicle_access,
-    schedule,
-    row_dict,
     matches,
+    row_dict,
     scan_reminders,
+    schedule,
+    vehicle_access,
 )
-from core.response import success_response
-from core.time import utcnow
 
 router = APIRouter(prefix="/api/maintenance", tags=["Maintenance"])
 CATALOG = Path(__file__).resolve().parents[1] / "data" / "maintenance_catalog.json"

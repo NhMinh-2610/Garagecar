@@ -1,6 +1,8 @@
-﻿from datetime import datetime
+from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from core.constants import VehicleStatus
 from schemas.common import Name, PositiveId
 from schemas.repair import RepairTicketResponse
@@ -54,4 +56,3 @@ class VehicleResponse(BaseModel):
     receivedDate: Optional[datetime]
     createdAt: Optional[datetime]
     repairTickets: list[RepairTicketResponse] = Field(default_factory=list)
-

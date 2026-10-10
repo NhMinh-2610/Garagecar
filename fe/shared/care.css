@@ -12,7 +12,7 @@
 }
 .care-summary strong {
   font-size: 28px;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
 }
 .care-list {
   display: grid;
@@ -56,7 +56,7 @@
 }
 .component-card summary {
   cursor: pointer;
-  color: var(--primary, #4f46e5);
+  color: var(--primary-color);
   font-size: 13px;
 }
 .care-dialog {
@@ -172,5 +172,640 @@ table td small,
   .card-heading {
     flex-wrap: wrap;
     gap: 12px;
+  }
+}
+#serviceWorkspace,
+#maintenanceWorkspace,
+.visit-row,
+.care-toolbar > *,
+[data-care-panel] {
+  min-width: 0;
+}
+#serviceWorkspace [hidden],
+#maintenanceWorkspace [hidden] {
+  display: none !important;
+}
+.care-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  margin: 0 0 18px;
+  background: var(--bg, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.care-tabs [role="tab"] {
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #475569;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.care-tabs [aria-selected="true"] {
+  background: #fff;
+  color: var(--primary-color);
+  box-shadow: 0 1px 4px #0f172a12;
+}
+.care-tabs button:focus-visible,
+#serviceWorkspace summary:focus-visible,
+#maintenanceWorkspace summary:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 4px;
+}
+.care-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: end;
+  margin: 0 0 18px;
+}
+.care-toolbar label {
+  display: grid;
+  flex: 1 1 210px;
+  max-width: 420px;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+}
+.care-toolbar input,
+.care-toolbar select,
+#careVehicle,
+#careSearch,
+#careBrand,
+#careModel {
+  max-width: 100%;
+  min-height: 42px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+}
+.care-toolbar .panel-note {
+  margin: 0 0 10px;
+}
+.visit-grid.visit-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.visit-row {
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
+}
+.visit-row-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px 14px;
+}
+.visit-identity {
+  min-width: 0;
+  flex: 1;
+}
+.visit-identity h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.visit-concern {
+  margin: 0 0 10px;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.visit-meta,
+.visit-next-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.visit-meta {
+  font-size: 13px;
+  color: #64748b;
+}
+.visit-next-action {
+  justify-content: flex-end;
+  max-width: 360px;
+}
+.workflow-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.workflow-overview button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-align: left;
+}
+.workflow-overview button:hover,
+.workflow-overview button[aria-pressed="true"] {
+  border-color: var(--color-brand);
+  background: var(--color-brand-soft);
+}
+.workflow-overview strong {
+  grid-row: span 2;
+  align-self: center;
+  font-size: 26px;
+  color: var(--color-brand);
+}
+.workflow-overview span {
+  font-weight: 600;
+  font-size: 14px;
+}
+.workflow-overview small {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.workflow-steps {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 20px 18px;
+  list-style: none;
+  overflow-x: auto;
+}
+.workflow-steps li {
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--color-muted);
+  background: #f5f7f9;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.workflow-steps li > span,
+.workflow-number {
+  display: inline-grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: white;
+  font-weight: 700;
+}
+.workflow-steps .is-current {
+  background: var(--color-brand-soft);
+  color: #085e58;
+  font-weight: 700;
+}
+.workflow-steps .is-current > span {
+  border-color: var(--color-brand);
+  color: white;
+  background: var(--color-brand);
+}
+.workflow-steps .is-done > span {
+  border-color: #b7dbd0;
+  background: #eaf5f2;
+  color: #0b625f;
+}
+.workflow-next {
+  padding: 14px 20px;
+  border-top: 1px solid var(--color-border);
+  background: #f8fafb;
+}
+.workflow-kicker {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--color-brand-hover);
+  font-weight: 700;
+}
+.workflow-next p {
+  margin: 6px 0 0;
+  color: var(--color-ink);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.workflow-next .btn {
+  margin-top: 10px;
+}
+.workflow-feedback,
+.workflow-context,
+.workflow-reuse {
+  padding: 14px 16px;
+  border: 1px solid #cce3db;
+  border-radius: 10px;
+  background: var(--color-brand-soft);
+  color: #164e43;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0 0 18px;
+  overflow-wrap: anywhere;
+}
+.workflow-context p {
+  margin: 6px 0 0;
+  white-space: pre-line;
+}
+.workflow-reuse {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.workflow-dialog {
+  width: min(1080px, calc(100vw - 32px));
+  padding: 24px 28px 0;
+  color: var(--color-ink);
+}
+.workflow-dialog .card-heading {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.workflow-dialog h3 {
+  font-size: 20px;
+  line-height: 1.5;
+  margin: 0;
+}
+.workflow-intro {
+  margin: 0 0 20px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.workflow-dialog .form-group {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.workflow-dialog input,
+.workflow-dialog select,
+.workflow-dialog textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #cbd6dd;
+  border-radius: 8px;
+  background: white;
+  color: var(--color-ink);
+  font-weight: 400;
+}
+.workflow-dialog input[type="checkbox"] {
+  width: auto;
+  min-height: auto;
+}
+.workflow-dialog textarea {
+  resize: vertical;
+}
+.workflow-dialog .field-help {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.workflow-optional {
+  margin: 18px 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+.workflow-optional summary {
+  color: var(--color-brand-hover);
+  font-size: 13px;
+  font-weight: 600;
+}
+.workflow-optional[open] summary {
+  margin-bottom: 14px;
+}
+.quote-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+}
+.quote-composer h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  font-size: 14px;
+}
+.workflow-number {
+  color: var(--color-brand-hover);
+  border-color: #bad8cf;
+  background: var(--color-brand-soft);
+}
+.quote-review {
+  min-width: 0;
+  padding: 20px;
+  background: #f5f8fa;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.quote-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  border: 1px dashed #c4d1d9;
+  border-radius: 8px;
+}
+.quote-line-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.quote-line-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.quote-line-list li:first-child {
+  padding-top: 0;
+}
+.quote-line-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.quote-line-heading strong,
+.quote-line-list small {
+  overflow-wrap: anywhere;
+}
+.quote-line-list small {
+  display: block;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.quote-line-fields {
+  display: grid;
+  grid-template-columns: 65px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 12px;
+}
+.quote-line-fields label {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+.quote-line-fields input {
+  padding: 8px;
+  font-size: 12px;
+}
+.quote-line-fields > strong {
+  font-size: 13px;
+  padding-bottom: 12px;
+  white-space: nowrap;
+}
+.workflow-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0;
+  font-size: 13px;
+  color: var(--color-ink);
+}
+.workflow-total strong {
+  font-size: 22px;
+  color: var(--color-brand-hover);
+  text-align: right;
+}
+.workflow-dialog-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+  background: white;
+}
+.workflow-picker {
+  width: min(820px, calc(100vw - 32px));
+  padding-bottom: 24px;
+}
+.workflow-picker-list {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.workflow-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px;
+}
+.workflow-picker-row + .workflow-picker-row {
+  border-top: 1px solid var(--color-border);
+}
+.workflow-picker-row > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.workflow-picker-row strong {
+  font-size: 15px;
+}
+.workflow-picker-row span,
+.workflow-picker-row small {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.workflow-picker-row .btn {
+  flex-shrink: 0;
+  max-width: 210px;
+  white-space: normal;
+}
+[data-ticket-row]:focus {
+  outline: 2px solid var(--color-brand);
+  outline-offset: -2px;
+  background: var(--color-brand-soft);
+}
+.visit-details > summary {
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+  color: var(--primary-color);
+  font-size: 13px;
+  font-weight: 600;
+}
+.visit-details[open] > summary {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+.visit-details-body {
+  display: grid;
+  gap: 18px;
+  padding: 18px 20px;
+}
+.visit-details-body p,
+.care-reminder,
+.component-card {
+  overflow-wrap: anywhere;
+}
+.visit-details-body h4 {
+  margin: 0 0 8px;
+}
+.visit-details-body .form-actions {
+  margin: 0;
+}
+.care-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.care-history {
+  margin-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+.care-history > summary,
+.care-source > summary,
+.care-brand-notes > summary {
+  cursor: pointer;
+  color: var(--primary-color);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.care-history > summary {
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.care-source {
+  margin-top: 8px;
+}
+[data-care-panel="library"] > label {
+  display: inline-grid;
+  width: min(100%, 290px);
+  gap: 7px;
+  margin: 10px 12px 14px 0;
+  font-size: 13px;
+}
+@media (max-width: 700px) {
+  .workflow-overview {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .workflow-overview button {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 12px;
+  }
+  .workflow-overview strong {
+    grid-row: auto;
+    font-size: 24px;
+  }
+  .workflow-overview span {
+    font-size: 11px;
+  }
+  .workflow-overview small {
+    display: none;
+  }
+  .workflow-dialog {
+    padding: 20px 16px 0;
+  }
+  .workflow-picker {
+    padding-bottom: 20px;
+  }
+  .workflow-picker-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .workflow-picker-row .btn {
+    max-width: none;
+    min-height: 44px;
+  }
+  .workflow-dialog h3 {
+    font-size: 17px;
+  }
+  .quote-composer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .quote-review {
+    padding: 16px;
+  }
+  .quote-line-fields {
+    grid-template-columns: 65px minmax(0, 1fr);
+  }
+  .quote-line-fields > strong {
+    grid-column: 1 / -1;
+    text-align: right;
+    padding: 0;
+  }
+  .workflow-dialog-footer {
+    gap: 8px;
+  }
+  .workflow-dialog-footer .btn {
+    min-height: 44px;
+    white-space: normal;
+  }
+  .workflow-steps {
+    padding: 0 16px 16px;
+  }
+  .workflow-next {
+    padding: 12px 16px;
+  }
+  .care-tabs [role="tab"] {
+    flex: 1 1 130px;
+    min-height: 44px;
+    padding: 10px;
+  }
+  .visit-row-summary {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+  }
+  .visit-next-action {
+    justify-content: flex-start;
+    max-width: none;
+  }
+  .visit-next-action .btn {
+    flex: 1 1 180px;
+    min-height: 44px;
+  }
+  .visit-details > summary,
+  .visit-details-body {
+    padding: 14px 16px;
+  }
+  .care-pagination {
+    justify-content: space-between;
+  }
+  .care-toolbar label {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  #careVehicle {
+    width: 100%;
   }
 }

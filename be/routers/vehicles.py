@@ -1,18 +1,19 @@
-from core.time import utcnow
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, exc as sa_exc
-
-from database.session import get_db
-from models.vehicle import Vehicle
-from models.user import User
-from models.settings import SystemParameter
 from datetime import timedelta
-from sqlalchemy import func
-from schemas.vehicle import VehicleCreate, VehicleUpdate, VehicleResponse
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import exc as sa_exc
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.constants import Role
-from core.response import success_response, error_response
+from core.response import error_response, success_response
+from core.time import utcnow
+from database.session import get_db
 from middleware.auth import get_current_user, require_role
+from models.settings import SystemParameter
+from models.user import User
+from models.vehicle import Vehicle
+from schemas.vehicle import VehicleCreate, VehicleResponse, VehicleUpdate
 
 router = APIRouter(prefix="/api/vehicles", tags=["Vehicles"])
 

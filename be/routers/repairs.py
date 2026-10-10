@@ -1,13 +1,13 @@
-from core.time import utcnow
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.constants import Role
 from core.response import success_response
+from core.time import utcnow
 from database.session import get_db
 from middleware.auth import require_role
-from models import Mechanic, RepairTicket, Vehicle, ServiceVisit
+from models import Mechanic, RepairTicket, ServiceVisit, Vehicle
 from schemas.repair import (
     RepairItemToggle,
     RepairTicketCreate,
@@ -203,8 +203,13 @@ async def update_repair(
             if ticket.status == "working" and body.mechanicId is None:
                 raise HTTPException(400, "Phiếu đang sửa cần có thợ phụ trách")
             mechanic = await assigned_mechanic(db, body.mechanicId)
+            if ticket.serviceVisitId and (not mechanic or not mechanic.userId):
+                raise HTTPException(409, "Phiếu theo báo giá cần thợ có tài khoản")
             ticket.mechanicId = body.mechanicId
             ticket.mechanicName = mechanic.fullName if mechanic else "Chưa phân công"
+            if ticket.serviceVisitId:
+                visit = await db.get(ServiceVisit, ticket.serviceVisitId)
+                visit.mechanicId = body.mechanicId
         if "items" in fields:
             if ticket.status != "draft" or body.items is None:
                 raise HTTPException(409, "Chỉ thay đổi hạng mục khi phiếu đang chờ sửa")
@@ -267,11 +272,11 @@ async def toggle_item(
     if not item:
         raise HTTPException(404, "Không tìm thấy hạng mục")
     if body.isCompleted:
-        from services.evidence_service import (
-            require_item_evidence,
-            check_ev_certificate,
-        )
         from models import Inventory
+        from services.evidence_service import (
+            check_ev_certificate,
+            require_item_evidence,
+        )
 
         await check_ev_certificate(
             db,

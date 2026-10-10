@@ -11,6 +11,8 @@
     <script src="../shared/core.js" defer></script>
     <script src="../shared/access.js" defer></script>
     <script src="../shared/portal.js" defer></script>
+    <script src="../shared/workspace.js" defer></script>
+    <script src="../shared/tables.js" defer></script>
     <script src="../staff/app.js" defer></script>
     <script src="../shared/maintenance.js" defer></script>
     <script src="../shared/service.js" defer></script>
@@ -18,33 +20,32 @@
     <link rel="stylesheet" href="../shared/professional.css" />
     <script src="../shared/evidence.js" defer></script>
     <script src="../shared/professional.js" defer></script>
+    <link rel="stylesheet" href="../shared/chat.css" />
+    <link rel="stylesheet" href="../shared/messaging.css" />
+    <script src="../shared/messaging.js" defer></script>
   </head>
   <body data-staff-role="advisor">
     <aside id="sidebar">
       <a class="brand" href="/"
-        ><span class="brand-mark">A</span
-        ><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
+        ><span class="brand-mark">A</span><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
       >
       <p class="nav-caption">CỐ VẤN DỊCH VỤ</p>
       <nav aria-label="Chức năng Cố vấn dịch vụ">
+        <button class="nav-item" data-permission="reception" data-target="staffReception-section">
+          Tiếp nhận & Lịch hẹn</button
+        ><button class="nav-item" data-permission="workshop" data-target="service-section">
+          Kiểm tra & Báo giá</button
+        ><button class="nav-item" data-permission="maintenance" data-target="maintenance-section">
+          Bảo dưỡng & Nhắc hạn
+        </button>
         <button
           class="nav-item"
-          data-permission="reception"
-          data-target="staffReception-section"
+          data-title="Hộp thư khách hàng"
+          data-permission="messages"
+          data-target="messages-section"
         >
-          Tiếp nhận & Lịch hẹn</button
-        ><button
-          class="nav-item"
-          data-permission="workshop"
-          data-target="service-section"
-        >
-          Kiểm tra & Báo giá</button
-        ><button
-          class="nav-item"
-          data-permission="maintenance"
-          data-target="maintenance-section"
-        >
-          Bảo dưỡng & Nhắc hạn
+          Hộp thư khách hàng
+          <span id="supportUnread" class="support-badge" hidden>0</span>
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -72,9 +73,7 @@
         <p id="staffError" class="inline-message error" role="alert" hidden></p>
         <div class="role-intro">
           <strong>Cố vấn dịch vụ</strong>
-          <p>
-            Tiếp nhận, báo giá, điều phối kiểm tra và theo dõi khách sau sửa.
-          </p>
+          <p>Tiếp nhận, báo giá, điều phối kiểm tra và theo dõi khách sau sửa.</p>
         </div>
         <section id="staffReception-section">
           <div id="staffReception"></div>
@@ -84,6 +83,9 @@
         </section>
         <section id="maintenance-section">
           <div id="maintenanceWorkspace"></div>
+        </section>
+        <section id="messages-section" aria-labelledby="supportTitle">
+          <div id="supportWorkspace"></div>
         </section>
       </main>
     </div>

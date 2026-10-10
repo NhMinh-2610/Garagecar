@@ -43,7 +43,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       host = document.createElement("div");
       host.id = key + "Workspace";
       section.append(host);
-      document.querySelector("main").append(section);
+      const main = document.querySelector("main");
+      const contentArea = main.querySelector(".content-body") || main;
+      contentArea.append(section);
       const nav = document.createElement("button");
       nav.className = "nav-item";
       nav.dataset.target = section.id;
@@ -51,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (permission) nav.dataset.permission = permission;
       document.querySelector("nav").append(nav);
       nav.onclick = () => {
+        if (Garage.navigate) return Garage.navigate(section.id);
         document
           .querySelectorAll(".nav-item")
           .forEach((n) => n.classList.toggle("active", n === nav));
@@ -104,6 +107,131 @@ document.addEventListener("DOMContentLoaded", async () => {
     `<div class="table-responsive"><table><thead><tr>${heads.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("") || `<tr><td colspan="${heads.length}">Chưa có dữ liệu.</td></tr>`}</tbody></table></div>`;
   const heading = (title, text) =>
     `<div class="section-heading"><div><p class="eyebrow">${e(names[user.role])} · CÔNG VIỆC</p><h1>${title}</h1><p class="section-description">${text}</p></div></div>`;
+  const viewState = new Map();
+  function compactWorkspace(key, definitions) {
+    const host = hosts[key];
+    if (!host) return;
+    const state = viewState.get(key) || {
+      active: definitions[0].key,
+      filters: {},
+    };
+    viewState.set(key, state);
+    const cards = [...host.children].filter((node) => node.classList.contains("card"));
+    const actions = host.querySelector(".operations-actions");
+    const tablist = document.createElement("div");
+    tablist.className = "operations-tabs";
+    tablist.setAttribute("role", "tablist");
+    tablist.setAttribute("aria-label", "Nhóm công việc");
+    tablist.hidden = definitions.length < 2;
+    host.querySelector(".section-heading").after(tablist);
+    const activate = (tabKey, focus = false) => {
+      state.active = tabKey;
+      tablist.querySelectorAll("[role=tab]").forEach((tab) => {
+        const selected = tab.dataset.opsTab === tabKey;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        if (selected && focus) tab.focus();
+      });
+      host.querySelectorAll("[data-ops-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.opsPanel !== tabKey;
+      });
+    };
+    definitions.forEach((definition, index) => {
+      const card = cards[index];
+      if (!card) return;
+      const panel = document.createElement("div");
+      panel.className = "operations-panel";
+      panel.id = `${key}-${definition.key}-panel`;
+      panel.dataset.opsPanel = definition.key;
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", `${key}-${definition.key}-tab`);
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.id = `${key}-${definition.key}-tab`;
+      tab.dataset.opsTab = definition.key;
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-controls", panel.id);
+      tab.textContent = definition.title;
+      tab.onclick = () => activate(definition.key);
+      tablist.append(tab);
+      card.before(panel);
+      panel.append(card);
+      const panelActions = document.createElement("div");
+      panelActions.className = "operations-actions";
+      (definition.actions || []).forEach((action) => {
+        const button = actions?.querySelector(`[data-ops="${action}"]`);
+        if (button) {
+          button.classList.add("btn-primary");
+          panelActions.append(button);
+        }
+      });
+      if (panelActions.children.length) panel.prepend(panelActions);
+      const filters = (state.filters[definition.key] ||= {
+        query: "",
+        page: 0,
+      });
+      const rows = [...card.querySelectorAll("tbody tr")].filter(
+        (row) => !row.querySelector("td[colspan]"),
+      );
+      const tools = document.createElement("div");
+      tools.className = "operations-list-tools";
+      tools.innerHTML = `<label class="operations-search"><span>Tìm trong ${e(definition.title.toLowerCase())}</span><input type="search" value="${e(filters.query)}" placeholder="Nhập tên, mã hoặc nội dung…"></label><p class="panel-note" aria-live="polite"></p>`;
+      card.querySelector(".table-responsive")?.before(tools);
+      const pager = document.createElement("div");
+      pager.className = "operations-pagination";
+      pager.innerHTML =
+        '<button type="button" class="btn btn-sm" data-page="previous">Trước</button><span aria-live="polite"></span><button type="button" class="btn btn-sm" data-page="next">Sau</button>';
+      card.append(pager);
+      const apply = () => {
+        const query = filters.query.trim().toLocaleLowerCase("vi-VN");
+        const matching = rows.filter((row) =>
+          row.textContent.toLocaleLowerCase("vi-VN").includes(query),
+        );
+        const pageCount = Math.max(1, Math.ceil(matching.length / 10));
+        filters.page = Math.min(filters.page, pageCount - 1);
+        rows.forEach((row) => {
+          row.hidden = true;
+        });
+        matching.slice(filters.page * 10, (filters.page + 1) * 10).forEach((row) => {
+          row.hidden = false;
+        });
+        tools.querySelector("p").textContent = matching.length
+          ? `${matching.length} kết quả`
+          : "Không có kết quả phù hợp.";
+        pager.hidden = matching.length <= 10;
+        pager.querySelector("span").textContent = `Trang ${filters.page + 1} / ${pageCount}`;
+        pager.querySelector('[data-page="previous"]').disabled = filters.page === 0;
+        pager.querySelector('[data-page="next"]').disabled = filters.page >= pageCount - 1;
+      };
+      tools.querySelector("input").oninput = (event) => {
+        filters.query = event.target.value;
+        filters.page = 0;
+        apply();
+      };
+      pager.onclick = (event) => {
+        const button = event.target.closest("[data-page]");
+        if (!button || button.disabled) return;
+        filters.page += button.dataset.page === "next" ? 1 : -1;
+        apply();
+      };
+      apply();
+    });
+    actions?.remove();
+    tablist.onkeydown = (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const tabs = [...tablist.querySelectorAll("[role=tab]")];
+      const index = tabs.findIndex((tab) => tab.dataset.opsTab === state.active);
+      const next =
+        event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? tabs.length - 1
+            : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+      activate(tabs[next].dataset.opsTab, true);
+    };
+    activate(state.active);
+  }
   function render() {
     if (hosts.financeOps)
       hosts.financeOps.innerHTML =
@@ -118,12 +246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               `<tr><td>${e(x.documentNumber)}<small>${e(x.payee)} · ${e(x.note)}</small></td><td>${money(x.amount)}</td><td>${e(labels[x.status])}<small>Người lập #${x.createdBy}${x.approvedBy ? " · Duyệt #" + x.approvedBy : ""}</small></td><td>${x.status === "submitted" ? (user.role === "admin" && x.createdBy !== user.id ? button("approveExpense", "Duyệt chi", x.id) : "") + (x.createdBy === user.id || user.role === "admin" ? button("cancelExpense", "Hủy đề nghị", x.id) : "") : x.status === "approved" ? button("payExpense", "Ghi chi tiền", x.id) : ""}</td></tr>`,
           ),
         )}</div><div class="card"><h3>Sổ phiếu thu có người nhận</h3><p class="panel-note">Thu đủ tiền tại mục Thu tiền. Phiếu đã thu trước nâng cấp giữ lịch sử cũ, không tự tạo thông tin người nhận hay phương thức. Danh sách tối đa 1.000 bản ghi gần nhất.</p>${table(
-          [
-            "Phiếu thu / Phiếu sửa",
-            "Số tiền",
-            "Phương thức / Giao dịch",
-            "Người thu / Thời điểm",
-          ],
+          ["Phiếu thu / Phiếu sửa", "Số tiền", "Phương thức / Giao dịch", "Người thu / Thời điểm"],
           receipts.map(
             (x) =>
               `<tr><td>PT-${x.id} / #${x.ticketId}</td><td>${money(x.amount)}</td><td>${e(labels[x.method])}<small>${e(x.reference || "—")}</small></td><td>#${x.receivedBy}<small>${e(formatDate(x.createdAt))}</small></td></tr>`,
@@ -164,15 +287,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         `<div class="card"><h3>Xe đã bàn giao qua lượt dịch vụ</h3>${table(
           ["Lượt / Biển số", "Nghiệm thu", "Phản hồi gần nhất", "Thao tác"],
           visits
-            .filter(
-              (v) =>
-                v.vehicleStatus === "delivered" && v.ticketStatus === "paid",
-            )
+            .filter((v) => v.vehicleStatus === "delivered" && v.ticketStatus === "paid")
             .map((v) => {
               const last = followups.find((x) => x.visitId === v.id);
               return `<tr><td>#${v.id} · ${e(v.licensePlate)}</td><td>${e(formatDate(v.qcAt))}</td><td>${last ? e(labels[last.outcome]) + "<small>" + e(last.note) + (last.nextContactOn ? " · Gọi lại " + e(last.nextContactOn) : "") + "</small>" : "Chưa ghi nhận"}</td><td>${button("followup", "Ghi phản hồi", v.id)}${v.ticketId ? button("gallery", "Xem bằng chứng", v.ticketId) : ""}</td></tr>`;
             }),
         )}</div>`;
+    compactWorkspace("financeOps", [
+      { key: "expenses", title: "Đề nghị chi", actions: ["expense"] },
+      { key: "receipts", title: "Sổ phiếu thu" },
+    ]);
+    compactWorkspace("hrOps", [
+      { key: "shifts", title: "Phân ca", actions: ["shift"] },
+      { key: "certificates", title: "Chứng chỉ", actions: ["certificate"] },
+      { key: "leave", title: "Duyệt nghỉ phép" },
+    ]);
+    compactWorkspace("myWork", [
+      { key: "shifts", title: "Lịch của tôi" },
+      { key: "leave", title: "Nghỉ phép", actions: ["leave"] },
+    ]);
+    compactWorkspace("advisorOps", [{ key: "followups", title: "Theo dõi sau sửa" }]);
   }
   function shiftTable(rows, manage = true) {
     return table(
@@ -185,12 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   function leaveTable(rows, manage = true) {
     return table(
-      [
-        "Nhân viên",
-        "Khoảng nghỉ",
-        "Lý do / Quyết định",
-        "Trạng thái / Thao tác",
-      ],
+      ["Nhân viên", "Khoảng nghỉ", "Lý do / Quyết định", "Trạng thái / Thao tác"],
       rows.map(
         (x) =>
           `<tr><td>${e(employeeName(x.userId))}</td><td>${e(x.fromDate)} → ${e(x.toDate)}</td><td>${e(x.reason)}<small>${e(x.decisionNote || "")}</small></td><td>${e(labels[x.status])}${manage && allowed("hr") && x.userId !== user.id && x.status === "pending" ? button("approveLeave", "Duyệt", x.id) + button("rejectLeave", "Từ chối", x.id) : ""}</td></tr>`,
@@ -204,24 +333,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const requests = [Garage.request("/hr/operations")];
       if (hosts.financeOps)
-        requests.push(
-          Garage.request("/finance/expenses"),
-          Garage.request("/finance/receipts"),
-        );
+        requests.push(Garage.request("/finance/expenses"), Garage.request("/finance/receipts"));
       if (hosts.hrOps) requests.push(Garage.request("/service/employees"));
       if (hosts.advisorOps)
-        requests.push(
-          Garage.request("/service/visits"),
-          Garage.request("/advisor/followups"),
-        );
+        requests.push(Garage.request("/service/visits"), Garage.request("/advisor/followups"));
       const values = await Promise.all(requests);
       if (!guard()) return;
       operations = values.shift();
-      if (hosts.financeOps)
-        [expenses, receipts] = [values.shift(), values.shift()];
+      if (hosts.financeOps) [expenses, receipts] = [values.shift(), values.shift()];
       if (hosts.hrOps) employees = values.shift();
-      if (hosts.advisorOps)
-        [visits, followups] = [values.shift(), values.shift()];
+      if (hosts.advisorOps) [visits, followups] = [values.shift(), values.shift()];
       render();
     } catch (err) {
       if (!context.background)
@@ -275,12 +396,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ]) +
           field("Người nhận / Nhà cung cấp", "payee") +
           field("Số chứng từ / hóa đơn", "documentNumber") +
-          field(
-            "Số tiền (đ)",
-            "amount",
-            "number",
-            'required min="1" step="0.01"',
-          ) +
+          field("Số tiền (đ)", "amount", "number", 'required min="1" step="0.01"') +
           note(),
         (f) => post("/finance/expenses", { ...f, amount: Number(f.amount) }),
       );
@@ -329,13 +445,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             "kind",
             Object.keys(labels)
               .filter((k) =>
-                [
-                  "ev_safety",
-                  "diagnostics",
-                  "air_conditioning",
-                  "bodywork",
-                  "other",
-                ].includes(k),
+                ["ev_safety", "diagnostics", "air_conditioning", "bodywork", "other"].includes(k),
               )
               .map((k) => [k, labels[k]]),
           ) +
@@ -372,12 +482,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           ["no_answer", "Chưa liên hệ được"],
           ["needs_rework", "Cần kiểm tra lại"],
         ]) +
-          field(
-            "Đánh giá 1–5 (nếu có)",
-            "rating",
-            "number",
-            'min="1" max="5"',
-          ) +
+          field("Đánh giá 1–5 (nếu có)", "rating", "number", 'min="1" max="5"') +
           field("Ngày liên hệ tiếp theo", "nextContactOn", "date", "") +
           note(),
         (f) =>

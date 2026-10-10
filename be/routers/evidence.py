@@ -1,23 +1,25 @@
 """Private photos: no static URL, client filename or token in URL."""
 
+import hashlib
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-from starlette.concurrency import run_in_threadpool
 from sqlalchemy import select
-from sqlalchemy.orm import defer
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defer
+from starlette.concurrency import run_in_threadpool
+
 from core.response import success_response
 from database.session import get_db
 from middleware.auth import get_current_user
-from models import RepairEvidence, RepairTicket, Inventory
+from models import Inventory, RepairEvidence, RepairTicket
 from schemas.professional import EvidenceInput
-from services.repair_service import authorize_ticket, lock_ticket
 from services.evidence_service import (
-    sanitize_image,
-    evidence_metadata,
     check_ev_certificate,
+    evidence_metadata,
+    sanitize_image,
 )
-import hashlib
+from services.repair_service import authorize_ticket, lock_ticket
 
 router = APIRouter(prefix="/api/workshop", tags=["Workshop evidence"])
 

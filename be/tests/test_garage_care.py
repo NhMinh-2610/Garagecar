@@ -1,17 +1,22 @@
 """Maintenance correctness and cross-role workflow in isolated PostgreSQL schemas."""
 
+import asyncio
 from datetime import date
 from types import SimpleNamespace
-import asyncio
+
 import pytest
 from sqlalchemy import select
 from test_workflow import api as api
-from test_workflow import vehicle, repair_body, evidence
+from test_workflow import evidence, repair_body, vehicle
+
+from core.security import create_access_token
 from models import (
     Inventory,
+    Mechanic,
     RepairTicket,
+    User,
+    Wage,
 )
-from core.security import create_access_token
 from services.maintenance_service import add_months, calculate_due, matches
 
 
@@ -265,6 +270,75 @@ async def test_maintenance_review_ownership_and_dedup(api):
 
 
 @pytest.mark.asyncio
+async def test_service_resources_offer_eligible_cars_accounts_and_current_prices(api):
+    client, auth, ids, factory, _ = api
+    open_car = await vehicle(client, auth, ids)
+    ticket_car = await vehicle(client, auth, ids, "30A-22222")
+    free_car = await vehicle(client, auth, ids, "30A-33333")
+    visit = await client.post(
+        "/api/service/visits",
+        headers=auth("admin"),
+        json={
+            "vehicleId": open_car,
+            "concern": "Oil service",
+            "initialInspection": "No warning lights",
+        },
+    )
+    assert visit.status_code == 201, visit.text
+    ticket = await client.post(
+        "/api/repairs", headers=auth("admin"), json=repair_body(ticket_car, ids)
+    )
+    assert ticket.status_code == 201, ticket.text
+    async with factory() as db:
+        locked = User(
+            username="lockedtech",
+            email="locked@example.com",
+            fullName="Locked",
+            role="mechanic",
+            password="unused",
+            isActive=False,
+        )
+        restricted = User(
+            username="restrictedtech",
+            email="restricted@example.com",
+            fullName="Restricted",
+            role="mechanic",
+            password="unused",
+            disabledPermissions=["workshop"],
+        )
+        db.add_all([locked, restricted])
+        await db.flush()
+        db.add_all(
+            [
+                Mechanic(fullName="No account"),
+                Mechanic(fullName="Locked account", userId=locked.id),
+                Mechanic(fullName="Restricted account", userId=restricted.id),
+                Wage(name="Change oil", price=75),
+            ]
+        )
+        await db.commit()
+    result = await client.get("/api/service/resources", headers=auth("admin"))
+    assert result.status_code == 200, result.text
+    data = result.json()["data"]
+    cars = {v["id"]: v for v in data["vehicles"]}
+    assert cars[open_car]["activeVisitId"] == visit.json()["data"]["id"]
+    assert cars[open_car]["availableForIntake"] is False
+    assert cars[ticket_car]["ticketId"] == ticket.json()["data"]["id"]
+    assert cars[ticket_car]["availableForIntake"] is False
+    assert cars[free_car]["availableForIntake"] is True
+    assert cars[free_car]["carModel"] == "Vios"
+    assert data["mechanics"] == [
+        {"id": ids["mechanic_id"], "fullName": "Same Name", "openTickets": 1}
+    ]
+    assert next(w for w in data["wages"] if w["name"] == "Change oil")["price"] == 75
+    assert data["inventory"][0]["quantity"] == 3
+    for role in ("customer", "mechanic"):
+        assert (
+            await client.get("/api/service/resources", headers=auth(role))
+        ).status_code == 403
+
+
+@pytest.mark.asyncio
 async def test_quotation_consent_stock_qc_and_cashier_permissions(api):
     client, auth, ids, factory, _ = api
     s = await staff_accounts(client, auth)
@@ -409,21 +483,44 @@ async def test_quotation_consent_stock_qc_and_cashier_permissions(api):
     assert (
         await client.put(tpath, headers=s["accountant"], json={"status": "paid"})
     ).status_code == 200
-    billing = (await client.get("/api/service/visits", headers=s["accountant"])).json()["data"]
-    assert billing[0]["qcAt"] and "diagnosis" not in billing[0] and "quotes" not in billing[0]
+    billing = (await client.get("/api/service/visits", headers=s["accountant"])).json()[
+        "data"
+    ]
+    assert (
+        billing[0]["qcAt"]
+        and "diagnosis" not in billing[0]
+        and "quotes" not in billing[0]
+    )
     paid_ticket = (await client.get(tpath, headers=s["accountant"])).json()["data"]
     assert paid_ticket["qcAt"]
     followup_path = f"/api/advisor/visits/{visit_id}/followup"
-    followup_body = {"outcome": "satisfied", "rating": 5, "note": "Customer confirmed good operation"}
-    assert (await client.post(followup_path, headers=s["advisor"], json=followup_body)).status_code == 409
+    followup_body = {
+        "outcome": "satisfied",
+        "rating": 5,
+        "note": "Customer confirmed good operation",
+    }
+    assert (
+        await client.post(followup_path, headers=s["advisor"], json=followup_body)
+    ).status_code == 409
     assert (
         await client.put(
             f"/api/vehicles/{vid}", headers=s["advisor"], json={"status": "delivered"}
         )
     ).status_code == 200
-    assert (await client.post(followup_path, headers=s["hr"], json=followup_body)).status_code == 403
-    assert (await client.post(followup_path, headers=s["advisor"], json=followup_body)).status_code == 201
-    assert len((await client.get("/api/advisor/followups", headers=s["advisor"])).json()["data"]) == 1
+    assert (
+        await client.post(followup_path, headers=s["hr"], json=followup_body)
+    ).status_code == 403
+    assert (
+        await client.post(followup_path, headers=s["advisor"], json=followup_body)
+    ).status_code == 201
+    assert (
+        len(
+            (await client.get("/api/advisor/followups", headers=s["advisor"])).json()[
+                "data"
+            ]
+        )
+        == 1
+    )
     async with factory() as db:
         assert (await db.get(Inventory, ids["inventory_id"])).quantity == 3
 

@@ -1,9 +1,11 @@
 from datetime import date, timedelta
 from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.constants import Role
 from core.response import success_response
 from core.time import utcnow
@@ -39,18 +41,37 @@ async def create_booking(body: BookingCreate, db: AsyncSession = Depends(get_db)
     booking = Booking(**body.model_dump())
     db.add(booking)
     await db.commit()
-    return success_response({"id": booking.id}, "Đã nhận yêu cầu. Garage sẽ liên hệ xác nhận lịch hẹn.", 201)
+    return success_response(
+        {"id": booking.id}, "Đã nhận yêu cầu. Garage sẽ liên hệ xác nhận lịch hẹn.", 201
+    )
 
 
 @router.get("")
-async def list_bookings(db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR))):
-    rows = await db.scalars(select(Booking).order_by(Booking.createdAt.desc()).limit(500))
-    return success_response([{column.name: getattr(row, column.name) for column in Booking.__table__.columns} for row in rows])
+async def list_bookings(
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR)),
+):
+    rows = await db.scalars(
+        select(Booking).order_by(Booking.createdAt.desc()).limit(500)
+    )
+    return success_response(
+        [
+            {
+                column.name: getattr(row, column.name)
+                for column in Booking.__table__.columns
+            }
+            for row in rows
+        ]
+    )
 
 
 @router.put("/{booking_id}")
-async def update_booking(booking_id: int, body: BookingUpdate, db: AsyncSession = Depends(get_db),
-                         _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR))):
+async def update_booking(
+    booking_id: int,
+    body: BookingUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR)),
+):
     booking = await db.get(Booking, booking_id)
     if not booking:
         raise HTTPException(404, "Không tìm thấy lịch hẹn")

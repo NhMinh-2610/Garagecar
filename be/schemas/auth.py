@@ -1,13 +1,12 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional
 from datetime import datetime
-from pydantic import Field, field_validator
+from typing import Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
 from schemas.common import Name, PositiveId
-from typing import Literal
 
 
-# ── Request schemas ────────────────────────────────────────────────────────────
-
+# Request schemas
 class RegisterRequest(BaseModel):
     username: Name
     email: EmailStr
@@ -29,6 +28,7 @@ class RegisterRequest(BaseModel):
 
 class StaffRegisterRequest(RegisterRequest):
     """Used by admin to create mechanic / admin accounts."""
+
     role: str  # validated against STAFF_ROLES in the router
     mechanicId: Optional[PositiveId] = None
 
@@ -38,8 +38,7 @@ class LoginRequest(BaseModel):
     password: str
 
 
-# ── Response schemas ───────────────────────────────────────────────────────────
-
+# Response schemas
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

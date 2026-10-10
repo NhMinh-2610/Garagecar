@@ -1,1016 +1,1173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AutoPro · Quản trị garage</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="../shared/ui.css">
-<link rel="stylesheet" href="../shared/workspace.css">
-<script src="../shared/core.js">
-</script>
-<script src="../shared/access.js"></script>
-<script src="../shared/portal.js">
-</script>
-<link rel="stylesheet" href="../shared/care.css"><script src="../shared/maintenance.js" defer></script><script src="../shared/service.js" defer></script><script src="../shared/pwa.js" defer></script><script src="../shared/employees.js" defer></script><link rel="stylesheet" href="../shared/professional.css"><script src="../shared/evidence.js" defer></script><script src="../shared/professional.js" defer></script><script src="../shared/part-fitments.js" defer></script></head>
-<body>
-<div class="app-container">
-<aside id="sidebar">
-<a class="brand" href="../index.html">
-<span class="brand-mark">A</span>
-<span>AutoPro<small>GARAGE WORKSPACE</small>
-</span>
-</a>
-<p class="nav-caption">ĐIỀU HÀNH</p>
-<nav>
-<button class="nav-item" data-target="dashboard-section">
-<i class="fa-solid fa-chart-pie">
-</i>
-<span>Tổng quan</span>
-</button>
-<button class="nav-item" data-target="reception-section">
-<i class="fa-solid fa-car">
-</i>
-<span>Tiếp nhận & Lịch hẹn</span>
-</button>
-<button class="nav-item" data-target="repair-section">
-<i class="fa-solid fa-screwdriver-wrench">
-</i>
-<span>Sửa chữa & Dịch vụ</span>
-</button>
-<button class="nav-item" data-target="inventory-section">
-<i class="fa-solid fa-boxes-stacked">
-</i>
-<span>Kho & Dữ liệu</span>
-</button>
-<button class="nav-item" data-target="finance-section">
-<i class="fa-solid fa-wallet">
-</i>
-<span>Tài chính · Thu tiền</span>
-</button>
-<button class="nav-item" data-target="report-section">
-<i class="fa-solid fa-chart-column">
-</i>
-<span>Báo cáo & Thống kê</span>
-</button>
-<button class="nav-item" data-target="hr-section">
-<i class="fa-solid fa-users">
-</i>
-<span>Quản trị Nhân sự</span>
-</button>
-<button class="nav-item" data-target="service-section">Cố vấn & Báo giá</button><button class="nav-item" data-target="maintenance-section">Bảo dưỡng & Nhắc hạn</button></nav>
-<div class="sidebar-footer">
-<div class="user-info">
-<h4>Quản trị viên</h4>
-<small>Đang kết nối tài khoản</small>
-</div>
-<button class="btn-icon" id="logoutBtn" title="Đăng xuất">
-<i class="fa-solid fa-right-from-bracket">
-</i>
-</button>
-</div>
-</aside>
-<main id="content">
-<header class="topbar">
-<button class="btn-icon toggle-sidebar" aria-label="Mở menu">
-<i class="fa-solid fa-bars">
-</i>
-</button>
-<span id="pageTitle">Tổng quan</span>
-<span class="sync-label">
-<span>
-</span>Đồng bộ mỗi 20 giây</span>
-</header>
-<div class="content-body">
-<section id="service-section"><div id="serviceWorkspace"></div></section><section id="maintenance-section"><div id="maintenanceWorkspace"></div></section><section id="dashboard-section" class="active-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Tổng quan vận hành</h1>
-<p class="section-description">Theo dõi lượng xe, tiến độ sửa chữa và dòng tiền của garage.</p>
-</div>
-</div>
-<div class="metrics dashboard-cards">
-<div class="metric stat-card">
-<div class="stat-info">
-<h3>—</h3>
-<p>Xe tiếp nhận hôm nay</p>
-</div>
-</div>
-<div class="metric stat-card">
-<div class="stat-info">
-<h3>—</h3>
-<p>Đang sửa chữa</p>
-</div>
-</div>
-<div class="metric stat-card">
-<div class="stat-info">
-<h3>—</h3>
-<p>Xe đang chờ giao</p>
-</div>
-</div>
-<div class="metric stat-card">
-<div class="stat-info">
-<h3>—</h3>
-<p>Tổng tiền đã thu</p>
-</div>
-</div>
-</div>
-<div class="split-layout">
-<div class="card">
-<h3>Hoạt động gần đây</h3>
-<div id="recentActivities">
-</div>
-</div>
-<div class="stack">
-<div class="card">
-<h3>7 ngày gần nhất</h3>
-<div class="summary-row">Xe tiếp nhận<strong id="weeklyVehicles">—</strong>
-</div>
-<div class="summary-row">Phiếu sửa<strong id="weeklyRepairs">—</strong>
-</div>
-<div class="summary-row">Đã thu<strong id="weeklyRevenue">—</strong>
-</div>
-</div>
-<div class="card">
-<h3>Cần lưu ý</h3>
-<div id="alerts">
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="reception-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Tiếp nhận & Lịch hẹn</h1>
-<p class="section-description">Quản lý xe, xác nhận lịch hẹn và liên kết tài khoản khách hàng.</p>
-</div>
-<button class="btn btn-primary" id="btnNewReception">+ Tiếp nhận xe</button>
-</div>
-<div class="card">
-<div class="card-heading">
-<h3>Danh sách xe</h3>
-<input id="vehicleSearch" type="search" placeholder="Tìm biển số, khách hàng, số điện thoại…" aria-label="Tìm xe">
-</div>
-<div class="table-responsive">
-<table class="data-table" id="receptionTable">
-<thead>
-<tr>
-<th>Biển số</th>
-<th>Khách hàng</th>
-<th>Xe</th>
-<th>Tiếp nhận</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-<th>Lịch sử</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="7" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="card">
-<div class="card-heading">
-<div>
-<h3>Yêu cầu đặt lịch</h3>
-<p class="muted">Liên hệ khách trước khi xác nhận ngày hẹn.</p>
-</div>
-</div>
-<div class="table-responsive">
-<table class="data-table" id="bookingsTable">
-<thead>
-<tr>
-<th>Mã</th>
-<th>Khách hàng</th>
-<th>Ngày mong muốn</th>
-<th>Dịch vụ / Ghi chú</th>
-<th>Trạng thái</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="modal" id="receptionModal" role="dialog" aria-modal="true" aria-label="Tiếp nhận xe" style="display:none">
-<div class="modal-content ">
-<div class="modal-header">
-<h2>Tiếp nhận xe</h2>
-<button class="btn-icon close-btn" id="closeReceptionModal" aria-label="Đóng">×</button>
-</div>
-<form id="receptionForm">
-<div class="form-group">
-<label>Tài khoản khách hàng<select id="customerSelect" >
-</select>
-</label>
-</div>
-<p class="field-help">Chọn đúng email để khách theo dõi tiến độ. Có thể để trống với khách vãng lai.</p>
-<div class="form-grid">
-<div class="form-group">
-<label>Họ tên khách hàng<input id="customerName" type="text" name="customerName" required>
-</label>
-</div>
-<div class="form-group">
-<label>Số điện thoại<input id="phone" type="tel" name="phone" required>
-</label>
-</div>
-<div class="form-group">
-<label>Biển số xe<input id="licensePlate" type="text" name="licensePlate" required>
-</label>
-</div>
-<div class="form-group">
-<label>Hiệu xe<select id="brandSelect" name="carBrand" required>
-</select>
-</label>
-</div>
-<div class="form-group">
-<label>Dòng xe<input id="modelSelect" type="text" >
-</label>
-</div>
-<div class="form-group">
-<label>Địa chỉ<input id="address" type="text" name="address">
-</label>
-</div>
-</div>
-<div class="form-actions">
-<button class="btn btn-primary" >Tiếp nhận xe</button>
-</div>
-</form>
-</div>
-</div>
-<div class="modal" id="editVehicleModal" role="dialog" aria-modal="true" aria-label="Thông tin xe" style="display:none">
-<div class="modal-content ">
-<div class="modal-header">
-<h2>Thông tin xe</h2>
-<button class="btn-icon close-btn" id="closeEditModal" aria-label="Đóng">×</button>
-</div>
-<form id="editVehicleForm">
-<input id="editVehicleId" type="hidden" >
-<div class="form-group">
-<label>Tài khoản khách hàng<select id="editCustomerSelect" >
-</select>
-</label>
-</div>
-<p class="field-help">Chọn đúng email để khách theo dõi tiến độ. Có thể để trống với khách vãng lai.</p>
-<div class="form-grid">
-<div class="form-group">
-<label>Họ tên khách hàng<input id="editCustomerName" type="text"  required>
-</label>
-</div>
-<div class="form-group">
-<label>Số điện thoại<input id="editPhone" type="tel"  required>
-</label>
-</div>
-<div class="form-group">
-<label>Biển số xe<input id="editLicensePlate" type="text"  required>
-</label>
-</div>
-<div class="form-group">
-<label>Hiệu xe<select id="editBrandSelect"  required>
-</select>
-</label>
-</div>
-<div class="form-group">
-<label>Dòng xe<input id="editModelSelect" type="text" >
-</label>
-</div>
-<div class="form-group">
-<label>Địa chỉ<input id="editAddress" type="text" >
-</label>
-</div>
-</div>
-<div class="form-actions">
-<button class="btn btn-primary" >Lưu thay đổi</button>
-</div>
-</form>
-</div>
-</div>
-</section>
-<section id="repair-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Sửa chữa & Dịch vụ</h1>
-<p class="section-description">Phân công đúng người, theo dõi từng hạng mục và kiểm soát tiến độ.</p>
-</div>
-<button class="btn btn-primary" id="btnNewRepair">+ Tạo phiếu sửa</button>
-</div>
-<div class="metrics">
-<div class="metric">
-<span>Chờ bắt đầu</span>
-<strong id="repairWaiting">—</strong>
-<small>Phiếu đang chờ phân công / sửa</small>
-</div>
-<div class="metric">
-<span>Đang thực hiện</span>
-<strong id="repairWorking">—</strong>
-<small>Theo dõi hạng mục đã hoàn tất</small>
-</div>
-<div class="metric">
-<span>Chờ thanh toán</span>
-<strong id="repairCompleted">—</strong>
-<small>Đã hoàn thành sửa chữa</small>
-</div>
-<div class="metric">
-<span>Đã thanh toán</span>
-<strong id="repairPaid">—</strong>
-<small>Phiếu đã thu đủ tiền</small>
-</div>
-</div>
-<div class="card">
-<div class="card-heading">
-<div class="repair-tabs">
-<button class="repair-tab active" onclick="switchRepairTab('waiting')">Chờ sửa</button>
-<button class="repair-tab" onclick="switchRepairTab('working')">Đang sửa</button>
-<button class="repair-tab" onclick="switchRepairTab('completed')">Hoàn thành & Đã thu</button>
-</div>
-</div>
-<div class="toolbar">
-<input type="search" id="globalRepairSearch" placeholder="Tìm biển số, khách hàng hoặc thợ…" aria-label="Tìm phiếu sửa">
-<select id="filterMechanic" aria-label="Lọc theo thợ">
-<option value="">Tất cả thợ</option>
-</select>
-</div>
-<div class="repair-tab-content active" id="tabWaiting">
-<div class="table-responsive">
-<table class="data-table" id="waitingTable">
-<thead>
-<tr>
-<th>Biển số</th>
-<th>Hiệu xe</th>
-<th>Hạng mục</th>
-<th>Phụ trách</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="repair-tab-content" id="tabWorking" style="display:none">
-<div class="table-responsive">
-<table class="data-table" id="workingTable">
-<thead>
-<tr>
-<th>Chi tiết</th>
-<th>Biển số</th>
-<th>Hiệu xe</th>
-<th>Phụ trách</th>
-<th>Tiến độ</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="repair-tab-content" id="tabCompleted" style="display:none">
-<div class="table-responsive">
-<table class="data-table" id="completedTable">
-<thead>
-<tr>
-<th>Biển số</th>
-<th>Hiệu xe</th>
-<th>Hạng mục</th>
-<th>Phụ trách</th>
-<th>Tổng tiền</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="7" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p class="panel-note">Chờ sửa → Đang sửa → Hoàn thành → Thanh toán. Hoàn tất từng hạng mục trước khi đóng phiếu.</p>
-</div>
-<div class="modal" id="repairModal" role="dialog" aria-modal="true" aria-label="Phiếu sửa chữa" style="display:none">
-<div class="modal-content modal-wide">
-<div class="modal-header">
-<h2>Phiếu sửa chữa</h2>
-<button class="btn-icon close-btn" id="closeRepairModal" aria-label="Đóng">×</button>
-</div>
-<div class="form-grid">
-<div class="form-group">
-<label>Xe tiếp nhận<select id="repairVehicleSelect" >
-</select>
-</label>
-</div>
-<div class="form-group">
-<label>Thợ phụ trách<select id="mechanicSelect" >
-</select>
-</label>
-</div>
-</div>
-<div class="editor-panel">
-<h3>Thêm hạng mục</h3>
-<div class="form-grid">
-<div class="form-group">
-<label>Công việc<select id="taskSelect" >
-</select>
-</label>
-</div>
-<div class="form-group">
-<label>Vật tư<select id="partSelect" >
-</select>
-</label>
-</div>
-</div>
-<input id="customTask" placeholder="Tên công việc khác" style="display:none">
-<div class="form-grid three">
-<div class="form-group">
-<label>Số lượng vật tư<input id="partQuantity" type="number" min="1" step="1" value="1">
-</label>
-</div>
-<div class="form-group">
-<label>Đơn giá vật tư (đ)<input id="partPrice" type="number" readonly value="0">
-</label>
-</div>
-<div class="form-group">
-<label>Tiền công / hạng mục (đ)<input id="laborPrice" type="number" min="0" value="0">
-</label>
-</div>
-</div>
-<button class="btn btn-secondary" id="btnAddItem">+ Thêm hạng mục</button>
-</div>
-<div class="table-responsive">
-<table class="data-table" id="repairItemsTable">
-<thead>
-<tr>
-<th>Công việc</th>
-<th>Vật tư / Số lượng</th>
-<th>Thành tiền</th>
-<th>
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="4" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="editor-footer">
-<div>
-<small>TỔNG DỰ KIẾN</small>
-<strong id="totalAmount">0 ₫</strong>
-<p class="field-help">Giá và tồn kho được kiểm tra khi lưu.</p>
-</div>
-<button class="btn btn-primary" id="btnSaveTicket">Lưu phiếu sửa</button>
-</div>
-</div>
-</div>
-</section>
-<section id="inventory-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Kho & Dữ liệu</h1>
-<p class="section-description">Theo dõi tồn kho, nhập vật tư và quản lý danh mục dùng chung.</p>
-</div>
-</div>
-<div class="metrics">
-<div class="metric">
-<span>Mã vật tư</span>
-<strong id="inventorySku">—</strong>
-<small>Danh mục trong kho</small>
-</div>
-<div class="metric">
-<span>Tổng số lượng</span>
-<strong id="inventoryUnits">—</strong>
-<small>Số lượng sẵn sàng sử dụng</small>
-</div>
-<div class="metric">
-<span>Giá trị theo đơn giá</span>
-<strong id="inventoryValue">—</strong>
-<small>Tồn kho × đơn giá hiện tại</small>
-</div>
-<div class="metric">
-<span>Sắp hết / Hết hàng</span>
-<strong id="inventoryLow">—</strong>
-<small>Vật tư có tồn kho ≤ 5</small>
-</div>
-</div>
-<div class="tabs">
-<button class="tab-btn active" data-tab="inv-import">Vật tư & Nhập kho</button>
-<button class="tab-btn" data-tab="inv-settings">Danh mục & Quy định</button>
-</div>
-<div class="tab-content active" id="inv-import">
-<div class="inventory-layout">
-<div class="card">
-<div class="card-heading">
-<h3>Danh sách vật tư</h3>
-</div>
-<div class="toolbar">
-<input id="inventorySearch" type="search" placeholder="Tìm mã hoặc tên vật tư…" aria-label="Tìm vật tư">
-<select id="inventoryFilter" aria-label="Lọc tồn kho">
-<option value="">Tất cả tồn kho</option>
-<option value="low">Sắp hết (1–5)</option>
-<option value="empty">Hết hàng</option>
-</select>
-</div>
-<div class="table-responsive">
-<table class="data-table" id="inventoryTable">
-<thead>
-<tr>
-<th>Mã</th>
-<th>Vật tư</th>
-<th>Tồn kho</th>
-<th>Đơn giá</th>
-<th>Cập nhật</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p class="panel-note">Xem lịch sử để đối chiếu nhập, xuất và hoàn kho. Đơn giá hiện tại không thay đổi phiếu đã lập.</p>
-</div>
-<aside class="card intake-panel">
-<h3>Nhập vật tư</h3>
-<p class="muted">Chọn mã có sẵn khi nhập bổ sung.</p>
-<form id="importForm">
-<div class="form-group">
-<label>Vật tư<select id="existingInventory" >
-<option value="">Tạo vật tư mới</option>
-</select>
-</label>
-</div>
-<div class="form-group">
-<label>Tên vật tư<input id="invName" type="text" name="name" required>
-</label>
-</div>
-<div class="form-group">
-<label>Số lượng nhập<input id="invQuantity" type="number" name="quantity" min="1" step="1" required>
-</label>
-</div>
-<div class="form-group">
-<label>Đơn giá (đ)<input id="invPrice" type="number" name="unitPrice" min="0" required>
-</label>
-</div>
-<button type="submit" class="btn btn-primary full-width">Xác nhận nhập kho</button>
-</form>
-</aside>
-</div>
-</div>
-<div class="tab-content" id="inv-settings">
-<div class="settings-grid">
-<div class="card">
-<h3>Hiệu xe</h3>
-<p class="muted">Dùng khi tiếp nhận và lập báo cáo.</p>
-<ul class="list-group">
-</ul>
-<div class="add-row">
-<input placeholder="Tên hiệu xe" aria-label="Tên hiệu xe">
-<button class="btn btn-primary">Thêm</button>
-</div>
-</div>
-<div class="card">
-<h3>Danh mục tiền công</h3>
-<p class="muted">Giá gợi ý cho từng hạng mục sửa chữa.</p>
-<ul class="list-group">
-</ul>
-<div class="add-row">
-<input placeholder="Tên công việc" aria-label="Tên công việc">
-<input type="number" min="0" placeholder="Giá (đ)" aria-label="Giá tiền công">
-<button class="btn btn-primary">Thêm</button>
-</div>
-</div>
-<div class="card full-width">
-<h3>Giới hạn tiếp nhận</h3>
-<p class="muted">Giới hạn xe tiếp nhận trong ngày để phù hợp năng lực phục vụ.</p>
-<div class="parameter-row">
-<div class="form-group">
-<label>Số xe tối đa / ngày<input type="number" min="1" max="10000" value="30">
-</label>
-</div>
-<button class="btn btn-primary">Lưu quy định</button>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="finance-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Tài chính · Thu tiền</h1>
-<p class="section-description">Đối chiếu phiếu, ghi nhận tiền đã nhận và tra cứu lịch sử thu.</p>
-</div>
-</div>
-<div class="metrics">
-<div class="metric">
-<span>Phiếu chờ thu</span>
-<strong id="financePending">—</strong>
-<small>Chỉ gồm phiếu đã sửa xong</small>
-</div>
-<div class="metric">
-<span>Tổng chờ thu</span>
-<strong id="financeOutstanding">—</strong>
-<small>Chưa ghi nhận vào doanh thu</small>
-</div>
-<div class="metric">
-<span>Đã thu trong tháng</span>
-<strong id="financeMonth">—</strong>
-<small>Theo ngày thanh toán</small>
-</div>
-<div class="metric">
-<span>Phiếu đã thu</span>
-<strong id="financePaidCount">—</strong>
-<small>Tổng phiếu đã thanh toán</small>
-</div>
-</div>
-<div class="finance-layout">
-<div class="card">
-<h3>Lập phiếu thu</h3>
-<p class="muted">Kiểm tra khách hàng và số tiền trước khi xác nhận.</p>
-<div class="form-group">
-<label>Chọn phiếu đã hoàn thành<select id="paymentSelect" >
-<option value="">Chọn phiếu sửa</option>
-</select>
-</label>
-</div>
-<div class="notice">
-<i class="fa-solid fa-circle-info">
-</i> Chỉ xác nhận sau khi garage đã nhận đủ tiền. Phiếu đã thu được khóa chỉnh sửa.</div>
-</div>
-<div class="card invoice-box">
-<div class="invoice-header">
-<span class="eyebrow">AUTOPRO / PHIẾU THU</span>
-<h3>Chi tiết thanh toán</h3>
-<p>
-</p>
-</div>
-<div class="invoice-details">
-<p class="empty-state">Chọn phiếu để xem chi tiết.</p>
-</div>
-<div class="invoice-actions">
-<button class="btn btn-success" id="confirmPayment">Xác nhận thu tiền</button>
-</div>
-</div>
-</div>
-<div class="card">
-<div class="card-heading">
-<div>
-<h3>Lịch sử thu tiền</h3>
-<p class="muted">Có thể xem và in lại phiếu đã thu.</p>
-</div>
-<input id="paymentSearch" type="search" placeholder="Tìm mã phiếu, biển số, khách hàng…" aria-label="Tìm phiếu thu">
-</div>
-<div class="table-responsive">
-<table class="data-table" id="paymentHistory">
-<thead>
-<tr>
-<th>Phiếu</th>
-<th>Khách hàng / Xe</th>
-<th>Ngày thu</th>
-<th>Số tiền</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="report-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Báo cáo & Thống kê</h1>
-<p class="section-description">Theo dõi doanh thu thực thu và cơ cấu sửa chữa theo kỳ.</p>
-</div>
-<button class="btn btn-secondary" id="exportReport">Xuất CSV</button>
-</div>
-<div class="card report-filters">
-<div>
-<div class="form-group">
-<label>Tháng báo cáo<input id="reportMonth" type="month" >
-</label>
-</div>
-</div>
-<button class="btn btn-primary" id="btnViewReport">Xem báo cáo</button>
-<p class="muted">Tính theo ngày thu tiền · Múi giờ Việt Nam</p>
-</div>
-<div class="metrics">
-<div class="metric">
-<span>Doanh thu thực thu</span>
-<strong id="reportRevenue">—</strong>
-<small>Phiếu đã thanh toán trong tháng</small>
-</div>
-<div class="metric">
-<span>Phiếu đã thu</span>
-<strong id="reportCount">—</strong>
-<small>Số lượt thanh toán</small>
-</div>
-<div class="metric">
-<span>Bình quân / Phiếu</span>
-<strong id="reportAverage">—</strong>
-<small>Doanh thu chia số phiếu</small>
-</div>
-<div class="metric">
-<span>Hiệu xe phục vụ</span>
-<strong id="reportBrands">—</strong>
-<small>Hiệu xe phát sinh doanh thu</small>
-</div>
-</div>
-<div class="report-layout">
-<div class="card">
-<div class="card-heading">
-<h3>Doanh thu theo hiệu xe</h3>
-</div>
-<div class="chart-container">
-<canvas id="revenueChart">
-</canvas>
-<p id="chartEmpty" class="empty-state" hidden>Chưa có doanh thu trong kỳ này.</p>
-</div>
-</div>
-<div class="card">
-<h3>Cơ cấu doanh thu</h3>
-<div id="revenueBreakdown">
-</div>
-<p class="panel-note">Phiếu chưa thu tiền không được tính vào báo cáo này.</p>
-</div>
-</div>
-<div class="card">
-<div class="card-heading">
-<h3>Chi tiết kỳ báo cáo</h3>
-<span class="muted" id="reportPeriod">
-</span>
-</div>
-<div class="table-responsive">
-<table class="data-table" id="reportTable">
-<thead>
-<tr>
-<th>Hiệu xe</th>
-<th>Số phiếu đã thu</th>
-<th>Doanh thu (đ)</th>
-<th>Tỷ trọng</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="4" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="table-footer" id="reportTotal">
-</div>
-</div>
-</section>
-<section id="hr-section">
-<div class="section-heading">
-<div>
-<p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
-<h1>Quản trị Nhân sự</h1>
-<p class="section-description">Quản lý đội ngũ kỹ thuật, tài khoản và quyền truy cập.</p>
-</div>
-</div>
-<div class="metrics">
-<div class="metric">
-<span>Thợ đang hoạt động</span>
-<strong id="hrActive">—</strong>
-<small>Sẵn sàng nhận phân công</small>
-</div>
-<div class="metric">
-<span>Chưa có tài khoản</span>
-<strong id="hrUnlinked">—</strong>
-<small>Cần liên kết để đăng nhập</small>
-</div>
-<div class="metric">
-<span>Tổng tài khoản</span>
-<strong id="hrAccounts">—</strong>
-<small>Khách hàng và nhân viên</small>
-</div>
-<div class="metric">
-<span>Quản trị viên</span>
-<strong id="hrAdmins">—</strong>
-<small>Có quyền quản lý garage</small>
-</div>
-</div>
-<div class="tabs">
-<button class="tab-btn active" data-tab="hr-mechanics">Đội ngũ kỹ thuật</button>
-<button class="tab-btn" data-tab="hr-users">Tài khoản & Quyền</button>
-</div>
-<div class="tab-content active" id="hr-mechanics">
-<div class="card">
-<div class="card-heading">
-<div>
-<h3>Hồ sơ kỹ thuật viên</h3>
-<p class="muted">Ngừng hoạt động vẫn giữ nguyên lịch sử phân công.</p>
-</div>
-<button class="btn btn-primary" id="btnAddMechanic">+ Thêm thợ</button>
-</div>
-<div class="toolbar">
-<input id="staffSearch" type="search" placeholder="Tìm tên, điện thoại, chuyên môn…" aria-label="Tìm thợ">
-<select id="staffFilter" aria-label="Trạng thái thợ">
-<option value="">Tất cả trạng thái</option>
-<option value="active">Đang hoạt động</option>
-<option value="inactive">Ngừng hoạt động</option>
-<option value="unlinked">Chưa có tài khoản</option>
-</select>
-</div>
-<div class="table-responsive">
-<table class="data-table" id="mechanicsTable">
-<thead>
-<tr>
-<th>Kỹ thuật viên</th>
-<th>Điện thoại</th>
-<th>Chuyên môn</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div class="tab-content" id="hr-users">
-<div class="card">
-<div class="card-heading">
-<h3>Tài khoản hệ thống</h3>
-<button class="btn btn-primary" id="btnCreateUser">+ Tạo tài khoản</button>
-</div>
-<div class="toolbar">
-<input id="userSearch" type="search" placeholder="Tìm họ tên, email, tên đăng nhập…" aria-label="Tìm tài khoản">
-<select id="userRoleFilter" aria-label="Lọc vai trò">
-<option value="">Tất cả vai trò</option>
-<option value="admin">Quản trị viên</option><option value="advisor">Cố vấn dịch vụ</option><option value="accountant">Kế toán</option><option value="hr">Nhân sự</option>
-<option value="mechanic">Kỹ thuật viên</option>
-<option value="customer">Khách hàng</option>
-</select>
-<select id="userStatusFilter" aria-label="Lọc trạng thái tài khoản"><option value="">Tất cả trạng thái</option><option value="active">Đang hoạt động</option><option value="locked">Đã khóa</option></select>
-</div>
-<p id="accountSummary" class="muted" aria-live="polite"></p>
-<div class="table-responsive">
-<table class="data-table" id="usersTable">
-<thead>
-<tr>
-<th>Tên đăng nhập</th>
-<th>Họ tên</th>
-<th>Email</th>
-<th>Vai trò</th>
-<th>Trạng thái / Đăng nhập gần nhất</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p class="panel-note">Khóa tài khoản để ngừng quyền truy cập mà vẫn giữ lịch sử. Vai trò được chọn khi tạo tài khoản. Không thể tự khóa tài khoản đang sử dụng.</p>
-<div class="notice" id="accountCoverage"></div>
-</div>
-</div>
-<div class="modal" id="hrModal" role="dialog" aria-modal="true" aria-label="Hồ sơ kỹ thuật viên" style="display:none">
-<div class="modal-content ">
-<div class="modal-header">
-<h2>Hồ sơ kỹ thuật viên</h2>
-<button class="btn-icon close-btn" id="closeHrModal" aria-label="Đóng">×</button>
-</div>
-<form id="hrForm">
-<input id="mechId" type="hidden" >
-<div class="form-grid">
-<div class="form-group">
-<label>Họ tên<input id="mechName" type="text" required>
-</label>
-</div>
-<div class="form-group">
-<label>Điện thoại<input id="mechPhone" type="tel" >
-</label>
-</div>
-<div class="form-group">
-<label>Chuyên môn<input id="mechSpecialty" type="text" value="Chung" required>
-</label>
-</div>
-<div class="form-group">
-<label>Trạng thái<select id="mechStatus" >
-<option value="active">Đang hoạt động</option>
-<option value="inactive">Ngừng hoạt động</option>
-</select>
-</label>
-</div>
-</div>
-<div class="form-actions">
-<button type="submit" class="btn btn-primary">Lưu hồ sơ</button>
-</div>
-</form>
-</div>
-</div>
-<div class="modal" id="userModal" role="dialog" aria-modal="true" aria-label="Tạo tài khoản" style="display:none">
-<div class="modal-content ">
-<div class="modal-header">
-<h2>Tạo tài khoản</h2>
-<button class="btn-icon close-btn" id="closeUserModal" aria-label="Đóng">×</button>
-</div>
-<form id="createUserForm">
-<div class="form-grid">
-<div class="form-group">
-<label>Họ tên<input id="newFullName" type="text" required>
-</label>
-</div>
-<div class="form-group">
-<label>Tên đăng nhập<input id="newUsername" type="text" required>
-</label>
-</div>
-<div class="form-group">
-<label>Email<input id="newEmail" type="email" required>
-</label>
-</div>
-<div class="form-group">
-<label>Mật khẩu<input id="newPassword" type="password" minlength="6" required>
-</label>
-</div>
-<div class="form-group">
-<label>Vai trò<select id="newRole" required>
-<option value="customer">Khách hàng</option>
-<option value="mechanic">Kỹ thuật viên</option>
-<option value="admin">Quản trị viên</option><option value="advisor">Cố vấn dịch vụ</option><option value="accountant">Kế toán</option><option value="hr">Nhân sự</option>
-</select>
-</label>
-</div>
-<div class="form-group">
-<label>Hồ sơ thợ có sẵn<select id="staffMechanicId" >
-<option value="">Tạo hồ sơ mới</option>
-</select>
-</label>
-</div>
-<div class="form-group full-width" id="customerVehicleField"><label>Xe của khách chưa có tài khoản<select id="accountVehicleIds" multiple size="4" aria-describedby="vehicleLinkHelp"></select></label><p id="vehicleLinkHelp" class="field-help">Có thể chọn nhiều xe bằng Ctrl/Cmd. Chỉ liên kết sau khi xác nhận đúng chủ xe; cũng có thể bổ sung tại mục Tiếp nhận.</p></div>
-</div>
-<p class="field-help">Dùng email thật của người sử dụng. Khách có thể tự đăng ký; tài khoản nhân viên do quản trị viên cấp. Gửi thông tin đăng nhập cho đúng người nhận sau khi tạo.</p>
-<div class="form-actions">
-<button type="submit" class="btn btn-primary">Tạo tài khoản</button>
-</div>
-</form>
-</div>
-</div>
-<div id="employeeWorkspace"></div></section>
-</div>
-</main>
-</div>
-<div id="toast-container">
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js">
-</script>
-<script src="js/app.js">
-</script>
-<script src="js/dashboard.js">
-</script>
-<script src="js/reception.js">
-</script>
-<script src="js/bookings.js">
-</script>
-<script src="js/repair.js">
-</script>
-<script src="js/inventory.js">
-</script>
-<script src="js/finance.js">
-</script>
-<script src="js/report.js">
-</script>
-<script src="js/hr.js">
-</script>
-<script src="js/auth.js">
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AutoPro · Quản trị garage</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../shared/ui.css" />
+    <link rel="stylesheet" href="../shared/workspace.css" />
+    <link rel="stylesheet" href="../shared/records.css" />
+    <link rel="stylesheet" href="../shared/chat.css" />
+    <link rel="stylesheet" href="../shared/messaging.css" />
+    <script src="../shared/messaging.js" defer></script>
+    <script src="../shared/core.js"></script>
+    <script src="../shared/access.js"></script>
+    <script src="../shared/portal.js"></script>
+    <script src="../shared/workspace.js"></script>
+    <script src="../shared/tables.js" defer></script>
+    <link rel="stylesheet" href="../shared/care.css" />
+    <script src="../shared/maintenance.js" defer></script>
+    <script src="../shared/service.js" defer></script>
+    <script src="../shared/pwa.js" defer></script>
+    <script src="../shared/employees.js" defer></script>
+    <link rel="stylesheet" href="../shared/professional.css" />
+    <script src="../shared/evidence.js" defer></script>
+    <script src="../shared/professional.js" defer></script>
+    <script src="../shared/part-fitments.js" defer></script>
+  </head>
+  <body data-role="admin">
+    <div class="app-container">
+      <aside id="sidebar">
+        <a class="brand" href="../index.html">
+          <span class="brand-mark">A</span>
+          <span>AutoPro<small>GARAGE WORKSPACE</small> </span>
+        </a>
+        <p class="nav-caption">ĐIỀU HÀNH</p>
+        <nav>
+          <button class="nav-item" data-target="dashboard-section">
+            <i class="fa-solid fa-chart-pie"> </i>
+            <span>Tổng quan</span>
+          </button>
+          <button class="nav-item" data-target="reception-section">
+            <i class="fa-solid fa-car"> </i>
+            <span>Tiếp nhận & Lịch hẹn</span>
+          </button>
+          <button class="nav-item" data-target="repair-section">
+            <i class="fa-solid fa-screwdriver-wrench"> </i>
+            <span>Sửa chữa & Dịch vụ</span>
+          </button>
+          <button class="nav-item" data-target="inventory-section">
+            <i class="fa-solid fa-boxes-stacked"> </i>
+            <span>Kho & Dữ liệu</span>
+          </button>
+          <button class="nav-item" data-target="finance-section">
+            <i class="fa-solid fa-wallet"> </i>
+            <span>Tài chính · Thu tiền</span>
+          </button>
+          <button class="nav-item" data-target="report-section">
+            <i class="fa-solid fa-chart-column"> </i>
+            <span>Báo cáo & Thống kê</span>
+          </button>
+          <button class="nav-item" data-target="hr-section">
+            <i class="fa-solid fa-users"> </i>
+            <span>Quản trị Nhân sự</span>
+          </button>
+          <button class="nav-item" data-target="service-section">Cố vấn & Báo giá</button
+          ><button class="nav-item" data-target="maintenance-section">Bảo dưỡng & Nhắc hạn</button
+          ><button class="nav-item" data-title="Hộp thư khách hàng" data-target="messages-section">
+            Hộp thư khách hàng <span id="supportUnread" class="support-badge" hidden>0</span>
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <h4>Quản trị viên</h4>
+            <small>Đang kết nối tài khoản</small>
+          </div>
+          <button class="btn-icon" id="logoutBtn" title="Đăng xuất">
+            <i class="fa-solid fa-right-from-bracket"> </i>
+          </button>
+        </div>
+      </aside>
+      <main id="content">
+        <header class="topbar">
+          <button class="btn-icon toggle-sidebar" aria-label="Mở menu">
+            <i class="fa-solid fa-bars"> </i>
+          </button>
+          <span id="pageTitle">Tổng quan</span>
+          <span class="sync-label"> <span> </span>Đồng bộ mỗi 20 giây</span>
+        </header>
+        <div class="content-body">
+          <section id="service-section"><div id="serviceWorkspace"></div></section>
+          <section id="maintenance-section"><div id="maintenanceWorkspace"></div></section>
+          <section id="dashboard-section" class="active-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Tổng quan vận hành</h1>
+                <p class="section-description">
+                  Theo dõi lượng xe, tiến độ sửa chữa và dòng tiền của garage.
+                </p>
+              </div>
+            </div>
+          </section>
+          <section id="reception-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Tiếp nhận & Lịch hẹn</h1>
+                <p class="section-description">
+                  Quản lý xe, xác nhận lịch hẹn và liên kết tài khoản khách hàng.
+                </p>
+              </div>
+              <button class="btn btn-primary" id="btnNewReception">+ Tiếp nhận xe</button>
+            </div>
+            <div class="tabs" aria-label="Tiếp nhận và lịch hẹn">
+              <button class="tab-btn active" data-tab="reception-vehicles">Xe tại garage</button>
+              <button class="tab-btn" data-tab="reception-bookings">Lịch hẹn</button>
+            </div>
+            <div class="tab-content active" id="reception-vehicles">
+              <div class="card">
+                <div class="card-heading">
+                  <h3>Danh sách xe</h3>
+                  <input
+                    id="vehicleSearch"
+                    type="search"
+                    placeholder="Tìm biển số, khách hàng, số điện thoại…"
+                    aria-label="Tìm xe"
+                  />
+                </div>
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="receptionTable">
+                    <thead>
+                      <tr>
+                        <th>Biển số</th>
+                        <th>Khách hàng</th>
+                        <th>Xe</th>
+                        <th>Tiếp nhận</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                        <th>Lịch sử</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="7" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" id="reception-bookings">
+              <div class="card">
+                <div class="card-heading">
+                  <div>
+                    <h3>Yêu cầu đặt lịch</h3>
+                    <p class="muted">Liên hệ khách trước khi xác nhận ngày hẹn.</p>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="bookingsTable">
+                    <thead>
+                      <tr>
+                        <th>Mã</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày mong muốn</th>
+                        <th>Dịch vụ / Ghi chú</th>
+                        <th>Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div
+              class="modal"
+              id="receptionModal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Tiếp nhận xe"
+              style="display: none"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h2>Tiếp nhận xe</h2>
+                  <button class="btn-icon close-btn" id="closeReceptionModal" aria-label="Đóng">
+                    ×
+                  </button>
+                </div>
+                <form id="receptionForm">
+                  <div class="form-group">
+                    <label>Tài khoản khách hàng<select id="customerSelect"></select> </label>
+                  </div>
+                  <p class="field-help">
+                    Chọn đúng email để khách theo dõi tiến độ. Có thể để trống với khách vãng lai.
+                  </p>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label
+                        >Họ tên khách hàng<input
+                          id="customerName"
+                          type="text"
+                          name="customerName"
+                          required
+                        />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Số điện thoại<input id="phone" type="tel" name="phone" required />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Biển số xe<input
+                          id="licensePlate"
+                          type="text"
+                          name="licensePlate"
+                          required
+                        />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Hiệu xe<select id="brandSelect" name="carBrand" required></select>
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Dòng xe<input id="modelSelect" type="text" /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Địa chỉ<input id="address" type="text" name="address" /> </label>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-primary">Tiếp nhận xe</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div
+              class="modal"
+              id="editVehicleModal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Thông tin xe"
+              style="display: none"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h2>Thông tin xe</h2>
+                  <button class="btn-icon close-btn" id="closeEditModal" aria-label="Đóng">
+                    ×
+                  </button>
+                </div>
+                <form id="editVehicleForm">
+                  <input id="editVehicleId" type="hidden" />
+                  <div class="form-group">
+                    <label>Tài khoản khách hàng<select id="editCustomerSelect"></select> </label>
+                  </div>
+                  <p class="field-help">
+                    Chọn đúng email để khách theo dõi tiến độ. Có thể để trống với khách vãng lai.
+                  </p>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label
+                        >Họ tên khách hàng<input id="editCustomerName" type="text" required />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Số điện thoại<input id="editPhone" type="tel" required /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Biển số xe<input id="editLicensePlate" type="text" required /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Hiệu xe<select id="editBrandSelect" required></select> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Dòng xe<input id="editModelSelect" type="text" /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Địa chỉ<input id="editAddress" type="text" /> </label>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-primary">Lưu thay đổi</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+          <section id="repair-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Sửa chữa & Dịch vụ</h1>
+                <p class="section-description">
+                  Tạo phiếu từ báo giá đã duyệt, giao thợ và theo dõi tiến độ tại một nơi.
+                </p>
+              </div>
+              <button class="btn btn-primary" id="btnNewRepair">+ Tạo phiếu sửa</button>
+            </div>
+            <div class="workflow-reuse">
+              <div>
+                <strong>Tiếp tục đúng hồ sơ, không nhập lại công việc</strong><br />
+                <span>Tiếp nhận → Báo giá → Khách xác nhận → Tạo phiếu &amp; Giao thợ.</span>
+              </div>
+              <button type="button" class="btn btn-secondary" id="btnContinueService">
+                Mở hồ sơ dịch vụ
+              </button>
+            </div>
+            <div class="metrics">
+              <div class="metric">
+                <span>Chờ bắt đầu</span>
+                <strong id="repairWaiting">—</strong>
+                <small>Phiếu đang chờ phân công / sửa</small>
+              </div>
+              <div class="metric">
+                <span>Đang thực hiện</span>
+                <strong id="repairWorking">—</strong>
+                <small>Theo dõi hạng mục đã hoàn tất</small>
+              </div>
+              <div class="metric">
+                <span>Chờ thanh toán</span>
+                <strong id="repairCompleted">—</strong>
+                <small>Đã hoàn thành sửa chữa</small>
+              </div>
+              <div class="metric">
+                <span>Đã thanh toán</span>
+                <strong id="repairPaid">—</strong>
+                <small>Phiếu đã thu đủ tiền</small>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-heading">
+                <div class="repair-tabs">
+                  <button class="repair-tab active" onclick="switchRepairTab('waiting')">
+                    Chờ sửa
+                  </button>
+                  <button class="repair-tab" onclick="switchRepairTab('working')">Đang sửa</button>
+                  <button class="repair-tab" onclick="switchRepairTab('completed')">
+                    Hoàn thành & Đã thu
+                  </button>
+                </div>
+              </div>
+              <div class="toolbar">
+                <input
+                  type="search"
+                  id="globalRepairSearch"
+                  placeholder="Tìm biển số, khách hàng hoặc thợ…"
+                  aria-label="Tìm phiếu sửa"
+                />
+                <select id="filterMechanic" aria-label="Lọc theo thợ">
+                  <option value="">Tất cả thợ</option>
+                </select>
+              </div>
+              <div class="workflow-reuse" id="repairFocusNotice" hidden>
+                <strong id="repairFocusLabel" role="status"></strong>
+                <button type="button" class="btn btn-sm" id="btnShowAllRepairs">
+                  Xem tất cả phiếu
+                </button>
+              </div>
+              <div class="repair-tab-content active" id="tabWaiting">
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="waitingTable">
+                    <thead>
+                      <tr>
+                        <th>Biển số</th>
+                        <th>Hiệu xe</th>
+                        <th>Hạng mục</th>
+                        <th>Phụ trách</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="repair-tab-content" id="tabWorking" style="display: none">
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="workingTable">
+                    <thead>
+                      <tr>
+                        <th>Chi tiết</th>
+                        <th>Biển số</th>
+                        <th>Hiệu xe</th>
+                        <th>Phụ trách</th>
+                        <th>Tiến độ</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="repair-tab-content" id="tabCompleted" style="display: none">
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="completedTable">
+                    <thead>
+                      <tr>
+                        <th>Biển số</th>
+                        <th>Hiệu xe</th>
+                        <th>Hạng mục</th>
+                        <th>Phụ trách</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="7" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <p class="panel-note">
+                Chờ sửa → Đang sửa → Hoàn thành → Thanh toán. Hoàn tất từng hạng mục trước khi đóng
+                phiếu.
+              </p>
+              <details class="workflow-optional">
+                <summary>Lập phiếu riêng cho xe chưa có hồ sơ dịch vụ</summary>
+                <p class="field-help">
+                  Dành cho công việc đã thống nhất trực tiếp. Xe có lượt kiểm tra / báo giá đang mở
+                  phải tiếp tục hồ sơ đó.
+                </p>
+                <button type="button" class="btn btn-secondary" id="btnDirectRepair">
+                  Lập phiếu riêng
+                </button>
+              </details>
+            </div>
+            <div
+              class="modal"
+              id="repairModal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Phiếu sửa chữa"
+              style="display: none"
+            >
+              <div class="modal-content modal-wide">
+                <div class="modal-header">
+                  <h2>Phiếu sửa chữa</h2>
+                  <button class="btn-icon close-btn" id="closeRepairModal" aria-label="Đóng">
+                    ×
+                  </button>
+                </div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Xe tiếp nhận<select id="repairVehicleSelect"></select> </label>
+                  </div>
+                  <div class="form-group">
+                    <label>Thợ phụ trách<select id="mechanicSelect"></select> </label>
+                  </div>
+                </div>
+                <div id="repairWorkflowNotice" class="notice" hidden>
+                  <p id="repairWorkflowMessage" role="status"></p>
+                  <button type="button" class="btn btn-secondary" id="btnOpenServiceVisit">
+                    Mở lượt kiểm tra &amp; báo giá
+                  </button>
+                </div>
+                <div class="editor-panel">
+                  <h3>Thêm hạng mục</h3>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label>Công việc<select id="taskSelect"></select> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Vật tư<select id="partSelect"></select> </label>
+                    </div>
+                  </div>
+                  <input id="customTask" placeholder="Tên công việc khác" style="display: none" />
+                  <div class="form-grid three">
+                    <div class="form-group">
+                      <label
+                        >Số lượng vật tư<input
+                          id="partQuantity"
+                          type="number"
+                          min="1"
+                          step="1"
+                          value="1"
+                        />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Đơn giá vật tư (đ)<input id="partPrice" type="number" readonly value="0" />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Tiền công / hạng mục (đ)<input
+                          id="laborPrice"
+                          type="number"
+                          min="0"
+                          value="0"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <button class="btn btn-secondary" id="btnAddItem">+ Thêm hạng mục</button>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table" id="repairItemsTable">
+                    <thead>
+                      <tr>
+                        <th>Công việc</th>
+                        <th>Vật tư / Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="4" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="editor-footer">
+                  <div>
+                    <small>TỔNG DỰ KIẾN</small>
+                    <strong id="totalAmount">0 ₫</strong>
+                    <p class="field-help">Giá và tồn kho được kiểm tra khi lưu.</p>
+                  </div>
+                  <button class="btn btn-primary" id="btnSaveTicket">Lưu phiếu sửa</button>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="inventory-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Kho & Dữ liệu</h1>
+                <p class="section-description">
+                  Theo dõi tồn kho, nhập vật tư và quản lý danh mục dùng chung.
+                </p>
+              </div>
+              <button class="btn btn-primary" id="btnNewStockImport" type="button">
+                ＋ Nhập vật tư
+              </button>
+            </div>
+            <div class="metrics">
+              <div class="metric">
+                <span>Mã vật tư</span>
+                <strong id="inventorySku">—</strong>
+                <small>Danh mục trong kho</small>
+              </div>
+              <div class="metric">
+                <span>Tổng số lượng</span>
+                <strong id="inventoryUnits">—</strong>
+                <small>Số lượng sẵn sàng sử dụng</small>
+              </div>
+              <div class="metric">
+                <span>Giá trị theo đơn giá</span>
+                <strong id="inventoryValue">—</strong>
+                <small>Tồn kho × đơn giá hiện tại</small>
+              </div>
+              <div class="metric">
+                <span>Sắp hết / Hết hàng</span>
+                <strong id="inventoryLow">—</strong>
+                <small>Vật tư có tồn kho ≤ 5</small>
+              </div>
+            </div>
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="inv-import">Vật tư & Nhập kho</button>
+              <button class="tab-btn" data-tab="inv-settings">Danh mục & Quy định</button>
+            </div>
+            <div class="tab-content active" id="inv-import">
+              <div class="inventory-layout inventory-list-layout">
+                <div class="card">
+                  <div class="card-heading">
+                    <h3>Danh sách vật tư</h3>
+                  </div>
+                  <div class="toolbar">
+                    <input
+                      id="inventorySearch"
+                      type="search"
+                      placeholder="Tìm mã hoặc tên vật tư…"
+                      aria-label="Tìm vật tư"
+                    />
+                    <select id="inventoryFilter" aria-label="Lọc tồn kho">
+                      <option value="">Tất cả tồn kho</option>
+                      <option value="low">Sắp hết (1–5)</option>
+                      <option value="empty">Hết hàng</option>
+                    </select>
+                  </div>
+                  <div class="table-responsive">
+                    <table data-page-size="8" class="data-table" id="inventoryTable">
+                      <thead>
+                        <tr>
+                          <th>Mã</th>
+                          <th>Vật tư</th>
+                          <th>Tồn kho</th>
+                          <th>Đơn giá</th>
+                          <th>Cập nhật</th>
+                          <th>Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="panel-note">
+                    Xem lịch sử để đối chiếu nhập, xuất và hoàn kho. Đơn giá hiện tại không thay đổi
+                    phiếu đã lập.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" id="inv-settings">
+              <div class="settings-grid">
+                <div class="card">
+                  <h3>Hiệu xe</h3>
+                  <p class="muted">Dùng khi tiếp nhận và lập báo cáo.</p>
+                  <ul class="list-group"></ul>
+                  <div class="add-row">
+                    <input placeholder="Tên hiệu xe" aria-label="Tên hiệu xe" />
+                    <button class="btn btn-primary">Thêm</button>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3>Danh mục tiền công</h3>
+                  <p class="muted">Giá gợi ý cho từng hạng mục sửa chữa.</p>
+                  <ul class="list-group"></ul>
+                  <div class="add-row">
+                    <input placeholder="Tên công việc" aria-label="Tên công việc" />
+                    <input type="number" min="0" placeholder="Giá (đ)" aria-label="Giá tiền công" />
+                    <button class="btn btn-primary">Thêm</button>
+                  </div>
+                </div>
+                <div class="card full-width">
+                  <h3>Giới hạn tiếp nhận</h3>
+                  <p class="muted">Giới hạn xe tiếp nhận trong ngày để phù hợp năng lực phục vụ.</p>
+                  <div class="parameter-row">
+                    <div class="form-group">
+                      <label
+                        >Số xe tối đa / ngày<input type="number" min="1" max="10000" value="30" />
+                      </label>
+                    </div>
+                    <button class="btn btn-primary">Lưu quy định</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <dialog
+              id="stockImportDialog"
+              class="account-dialog"
+              aria-labelledby="stockImportTitle"
+            >
+              <div class="card-heading">
+                <h3 id="stockImportTitle">Nhập vật tư</h3>
+                <button
+                  id="closeStockImport"
+                  type="button"
+                  class="btn-icon"
+                  aria-label="Đóng nhập vật tư"
+                >
+                  ×
+                </button>
+              </div>
+              <p class="muted">Chọn mã có sẵn khi nhập bổ sung.</p>
+              <form id="importForm">
+                <div class="form-group">
+                  <label
+                    >Vật tư<select id="existingInventory">
+                      <option value="">Tạo vật tư mới</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>Tên vật tư<input id="invName" type="text" name="name" required /> </label>
+                </div>
+                <div class="form-group">
+                  <label
+                    >Số lượng nhập<input
+                      id="invQuantity"
+                      type="number"
+                      name="quantity"
+                      min="1"
+                      step="1"
+                      required
+                    />
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label
+                    >Đơn giá (đ)<input
+                      id="invPrice"
+                      type="number"
+                      name="unitPrice"
+                      min="0"
+                      required
+                    />
+                  </label>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Xác nhận nhập kho</button>
+              </form>
+            </dialog>
+          </section>
+          <section id="finance-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Tài chính · Thu tiền</h1>
+                <p class="section-description">
+                  Đối chiếu phiếu, ghi nhận tiền đã nhận và tra cứu lịch sử thu.
+                </p>
+              </div>
+            </div>
+            <div class="metrics">
+              <div class="metric">
+                <span>Phiếu chờ thu</span>
+                <strong id="financePending">—</strong>
+                <small>Chỉ gồm phiếu đã sửa xong</small>
+              </div>
+              <div class="metric">
+                <span>Tổng chờ thu</span>
+                <strong id="financeOutstanding">—</strong>
+                <small>Chưa ghi nhận vào doanh thu</small>
+              </div>
+              <div class="metric">
+                <span>Đã thu trong tháng</span>
+                <strong id="financeMonth">—</strong>
+                <small>Theo ngày thanh toán</small>
+              </div>
+              <div class="metric">
+                <span>Phiếu đã thu</span>
+                <strong id="financePaidCount">—</strong>
+                <small>Tổng phiếu đã thanh toán</small>
+              </div>
+            </div>
+            <div class="finance-layout">
+              <div class="card">
+                <h3>Lập phiếu thu</h3>
+                <p class="muted">Kiểm tra khách hàng và số tiền trước khi xác nhận.</p>
+                <div class="form-group">
+                  <label
+                    >Chọn phiếu đã hoàn thành<select id="paymentSelect">
+                      <option value="">Chọn phiếu sửa</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="notice">
+                  <i class="fa-solid fa-circle-info"> </i> Chỉ xác nhận sau khi garage đã nhận đủ
+                  tiền. Phiếu đã thu được khóa chỉnh sửa.
+                </div>
+              </div>
+              <div class="card invoice-box">
+                <div class="invoice-header">
+                  <span class="eyebrow">AUTOPRO / PHIẾU THU</span>
+                  <h3>Chi tiết thanh toán</h3>
+                  <p></p>
+                </div>
+                <div class="invoice-details">
+                  <p class="empty-state">Chọn phiếu để xem chi tiết.</p>
+                </div>
+                <div class="invoice-actions">
+                  <button class="btn btn-success" id="confirmPayment">Xác nhận thu tiền</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-heading">
+                <div>
+                  <h3>Lịch sử thu tiền</h3>
+                  <p class="muted">Có thể xem và in lại phiếu đã thu.</p>
+                </div>
+                <input
+                  id="paymentSearch"
+                  type="search"
+                  placeholder="Tìm mã phiếu, biển số, khách hàng…"
+                  aria-label="Tìm phiếu thu"
+                />
+              </div>
+              <div class="table-responsive">
+                <table data-page-size="8" class="data-table" id="paymentHistory">
+                  <thead>
+                    <tr>
+                      <th>Phiếu</th>
+                      <th>Khách hàng / Xe</th>
+                      <th>Ngày thu</th>
+                      <th>Số tiền</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+          <section id="report-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Báo cáo & Thống kê</h1>
+                <p class="section-description">
+                  Theo dõi doanh thu thực thu và cơ cấu sửa chữa theo kỳ.
+                </p>
+              </div>
+              <button class="btn btn-secondary" id="exportReport">Xuất CSV</button>
+            </div>
+            <div class="card report-filters">
+              <div>
+                <div class="form-group">
+                  <label>Tháng báo cáo<input id="reportMonth" type="month" /> </label>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btnViewReport">Xem báo cáo</button>
+              <p class="muted">Tính theo ngày thu tiền · Múi giờ Việt Nam</p>
+            </div>
+            <div class="metrics">
+              <div class="metric">
+                <span>Doanh thu thực thu</span>
+                <strong id="reportRevenue">—</strong>
+                <small>Phiếu đã thanh toán trong tháng</small>
+              </div>
+              <div class="metric">
+                <span>Phiếu đã thu</span>
+                <strong id="reportCount">—</strong>
+                <small>Số lượt thanh toán</small>
+              </div>
+              <div class="metric">
+                <span>Bình quân / Phiếu</span>
+                <strong id="reportAverage">—</strong>
+                <small>Doanh thu chia số phiếu</small>
+              </div>
+              <div class="metric">
+                <span>Hiệu xe phục vụ</span>
+                <strong id="reportBrands">—</strong>
+                <small>Hiệu xe phát sinh doanh thu</small>
+              </div>
+            </div>
+            <div class="report-layout">
+              <div class="card">
+                <div class="card-heading">
+                  <h3>Doanh thu theo hiệu xe</h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="revenueChart"> </canvas>
+                  <p id="chartEmpty" class="empty-state" hidden>Chưa có doanh thu trong kỳ này.</p>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Cơ cấu doanh thu</h3>
+                <div id="revenueBreakdown"></div>
+                <p class="panel-note">Phiếu chưa thu tiền không được tính vào báo cáo này.</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-heading">
+                <h3>Chi tiết kỳ báo cáo</h3>
+                <span class="muted" id="reportPeriod"> </span>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table" id="reportTable">
+                  <thead>
+                    <tr>
+                      <th>Hiệu xe</th>
+                      <th>Số phiếu đã thu</th>
+                      <th>Doanh thu (đ)</th>
+                      <th>Tỷ trọng</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="4" class="empty-state">Đang tải dữ liệu…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-footer" id="reportTotal"></div>
+            </div>
+          </section>
+          <section id="hr-section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
+                <h1>Quản trị Nhân sự</h1>
+                <p class="section-description">
+                  Quản lý đội ngũ kỹ thuật, tài khoản và quyền truy cập.
+                </p>
+              </div>
+            </div>
+            <div class="metrics">
+              <div class="metric">
+                <span>Thợ đang hoạt động</span>
+                <strong id="hrActive">—</strong>
+                <small>Sẵn sàng nhận phân công</small>
+              </div>
+              <div class="metric">
+                <span>Chưa có tài khoản</span>
+                <strong id="hrUnlinked">—</strong>
+                <small>Cần liên kết để đăng nhập</small>
+              </div>
+              <div class="metric">
+                <span>Tổng tài khoản</span>
+                <strong id="hrAccounts">—</strong>
+                <small>Khách hàng và nhân viên</small>
+              </div>
+              <div class="metric">
+                <span>Quản trị viên</span>
+                <strong id="hrAdmins">—</strong>
+                <small>Có quyền quản lý garage</small>
+              </div>
+            </div>
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="hr-mechanics">Đội ngũ kỹ thuật</button>
+              <button class="tab-btn" data-tab="hr-users">Tài khoản & Quyền</button>
+              <button class="tab-btn" data-tab="hr-profiles">Hồ sơ nhân viên</button>
+            </div>
+            <div class="tab-content active" id="hr-mechanics">
+              <div class="card">
+                <div class="card-heading">
+                  <div>
+                    <h3>Hồ sơ kỹ thuật viên</h3>
+                    <p class="muted">Ngừng hoạt động vẫn giữ nguyên lịch sử phân công.</p>
+                  </div>
+                  <button class="btn btn-primary" id="btnAddMechanic">+ Thêm thợ</button>
+                </div>
+                <div class="toolbar">
+                  <input
+                    id="staffSearch"
+                    type="search"
+                    placeholder="Tìm tên, điện thoại, chuyên môn…"
+                    aria-label="Tìm thợ"
+                  />
+                  <select id="staffFilter" aria-label="Trạng thái thợ">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Ngừng hoạt động</option>
+                    <option value="unlinked">Chưa có tài khoản</option>
+                  </select>
+                </div>
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="mechanicsTable">
+                    <thead>
+                      <tr>
+                        <th>Kỹ thuật viên</th>
+                        <th>Điện thoại</th>
+                        <th>Chuyên môn</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="5" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" id="hr-users">
+              <div class="card">
+                <div class="card-heading">
+                  <h3>Tài khoản hệ thống</h3>
+                  <button class="btn btn-primary" id="btnCreateUser">+ Tạo tài khoản</button>
+                </div>
+                <div class="toolbar">
+                  <input
+                    id="userSearch"
+                    type="search"
+                    placeholder="Tìm họ tên, email, tên đăng nhập…"
+                    aria-label="Tìm tài khoản"
+                  />
+                  <select id="userRoleFilter" aria-label="Lọc vai trò">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="admin">Quản trị viên</option>
+                    <option value="advisor">Cố vấn dịch vụ</option>
+                    <option value="accountant">Kế toán</option>
+                    <option value="hr">Nhân sự</option>
+                    <option value="mechanic">Kỹ thuật viên</option>
+                    <option value="customer">Khách hàng</option>
+                  </select>
+                  <select id="userStatusFilter" aria-label="Lọc trạng thái tài khoản">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="locked">Đã khóa</option>
+                  </select>
+                </div>
+                <p id="accountSummary" class="muted" aria-live="polite"></p>
+                <div class="table-responsive">
+                  <table data-page-size="8" class="data-table" id="usersTable">
+                    <thead>
+                      <tr>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái / Đăng nhập gần nhất</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="6" class="empty-state">Đang tải dữ liệu…</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="panel-note">
+                  Khóa tài khoản để ngừng quyền truy cập mà vẫn giữ lịch sử. Vai trò được chọn khi
+                  tạo tài khoản. Không thể tự khóa tài khoản đang sử dụng.
+                </p>
+                <div class="notice" id="accountCoverage"></div>
+              </div>
+            </div>
+            <div
+              class="modal"
+              id="hrModal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Hồ sơ kỹ thuật viên"
+              style="display: none"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h2>Hồ sơ kỹ thuật viên</h2>
+                  <button class="btn-icon close-btn" id="closeHrModal" aria-label="Đóng">×</button>
+                </div>
+                <form id="hrForm">
+                  <input id="mechId" type="hidden" />
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label>Họ tên<input id="mechName" type="text" required /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Điện thoại<input id="mechPhone" type="tel" /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Chuyên môn<input id="mechSpecialty" type="text" value="Chung" required />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Trạng thái<select id="mechStatus">
+                          <option value="active">Đang hoạt động</option>
+                          <option value="inactive">Ngừng hoạt động</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Lưu hồ sơ</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div
+              class="modal"
+              id="userModal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Tạo tài khoản"
+              style="display: none"
+            >
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h2>Tạo tài khoản</h2>
+                  <button class="btn-icon close-btn" id="closeUserModal" aria-label="Đóng">
+                    ×
+                  </button>
+                </div>
+                <form id="createUserForm">
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label>Họ tên<input id="newFullName" type="text" required /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Tên đăng nhập<input id="newUsername" type="text" required /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Email<input id="newEmail" type="email" required /> </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Mật khẩu<input id="newPassword" type="password" minlength="6" required />
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Vai trò<select id="newRole" required>
+                          <option value="customer">Khách hàng</option>
+                          <option value="mechanic">Kỹ thuật viên</option>
+                          <option value="admin">Quản trị viên</option>
+                          <option value="advisor">Cố vấn dịch vụ</option>
+                          <option value="accountant">Kế toán</option>
+                          <option value="hr">Nhân sự</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label
+                        >Hồ sơ thợ có sẵn<select id="staffMechanicId">
+                          <option value="">Tạo hồ sơ mới</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="form-group full-width" id="customerVehicleField">
+                      <label
+                        >Xe của khách chưa có tài khoản<select
+                          id="accountVehicleIds"
+                          multiple
+                          size="4"
+                          aria-describedby="vehicleLinkHelp"
+                        ></select
+                      ></label>
+                      <p id="vehicleLinkHelp" class="field-help">
+                        Có thể chọn nhiều xe bằng Ctrl/Cmd. Chỉ liên kết sau khi xác nhận đúng chủ
+                        xe; cũng có thể bổ sung tại mục Tiếp nhận.
+                      </p>
+                    </div>
+                  </div>
+                  <p class="field-help">
+                    Dùng email thật của người sử dụng. Khách có thể tự đăng ký; tài khoản nhân viên
+                    do quản trị viên cấp. Gửi thông tin đăng nhập cho đúng người nhận sau khi tạo.
+                  </p>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="tab-content" id="hr-profiles"><div id="employeeWorkspace"></div></div>
+          </section>
+          <section id="messages-section" aria-labelledby="supportTitle">
+            <div id="supportWorkspace"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+    <div id="toast-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../shared/session.js" defer></script>
+
+    <script src="js/reception.js"></script>
+    <script src="js/bookings.js"></script>
+    <script src="js/repair.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/finance.js"></script>
+    <script src="js/report.js"></script>
+    <script src="js/hr.js"></script>
+  </body>
 </html>

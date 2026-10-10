@@ -1,15 +1,17 @@
 """HR scheduling, verified qualifications and leave decisions."""
 
 from datetime import datetime, time, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.response import success_response
 from core.time import utcnow
 from database.session import get_db
 from middleware.auth import get_current_user, require_permission
-from models import User, StaffShift, StaffCertificate, LeaveRequest
-from schemas.professional import ShiftInput, CertificateInput, LeaveInput, DecisionInput
+from models import LeaveRequest, StaffCertificate, StaffShift, User
+from schemas.professional import CertificateInput, DecisionInput, LeaveInput, ShiftInput
 from services.maintenance_service import row_dict
 
 router = APIRouter(prefix="/api/hr", tags=["HR operations"])

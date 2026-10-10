@@ -39,8 +39,8 @@
 }
 .role-intro {
   padding: 18px 20px;
-  border-left: 4px solid var(--primary, #4f46e5);
-  background: #eef2ff;
+  border-left: 4px solid var(--primary-color);
+  background: var(--color-brand-soft);
   border-radius: 12px;
   margin-bottom: 20px;
 }
@@ -63,5 +63,97 @@
 @media print {
   .payment-controls {
     display: none !important;
+  }
+}
+.professional-workspace,
+.operations-panel,
+.professional-workspace .card {
+  min-width: 0;
+}
+.professional-workspace [hidden] {
+  display: none !important;
+}
+.operations-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  margin: 0 0 18px;
+  background: var(--bg, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.operations-tabs [role="tab"] {
+  min-height: 42px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #475569;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.operations-tabs [aria-selected="true"] {
+  color: var(--primary-color);
+  background: #fff;
+  box-shadow: 0 1px 4px #0f172a12;
+}
+.operations-tabs button:focus-visible,
+.operations-list-tools input:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 3px;
+}
+.operations-list-tools,
+.operations-pagination {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+.operations-list-tools .panel-note {
+  margin: 0 0 10px;
+}
+.operations-search {
+  display: grid;
+  gap: 7px;
+  flex: 1 1 240px;
+  max-width: 420px;
+  color: #475569;
+  font-size: 13px;
+}
+.operations-search input {
+  min-height: 42px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  font: inherit;
+}
+.operations-pagination {
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 0;
+}
+.professional-workspace .care-summary {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+.professional-workspace td {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .operations-tabs [role="tab"] {
+    flex: 1 1 120px;
+    min-height: 44px;
+    padding: 10px;
+  }
+  .operations-pagination {
+    justify-content: space-between;
+  }
+  .professional-workspace table {
+    min-width: 580px;
   }
 }

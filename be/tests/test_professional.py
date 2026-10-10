@@ -3,11 +3,14 @@
 import base64
 import io
 from datetime import timedelta
+
 import pytest
 from PIL import Image
 from sqlalchemy import select
-from test_workflow import api as api, vehicle, repair_body, evidence
 from test_garage_care import staff_accounts
+from test_workflow import api as api
+from test_workflow import evidence, repair_body, vehicle
+
 from models import Inventory, RepairTicket
 from schemas.garage_care import today
 
@@ -72,7 +75,7 @@ async def test_evidence_identity_privacy_and_rework_round(api):
     assert len(rows) == 2 and all("image" not in r for r in rows)
     image_url = f"/api/workshop/evidence/{rows[0]['id']}/image"
     assert (await client.get(image_url, headers=auth("other"))).status_code == 403
-    assert (await client.get(image_url)).status_code == 403
+    assert (await client.get(image_url)).status_code == 401
     image = await client.get(image_url, headers=auth("customer"))
     assert (
         image.status_code == 200

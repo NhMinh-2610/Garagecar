@@ -1,6 +1,8 @@
 from datetime import datetime
-from typing import Optional, Literal
+from typing import Literal, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
+
 from core.constants import RepairStatus
 from schemas.common import Money, Name, PositiveId
 

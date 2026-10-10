@@ -1,18 +1,19 @@
 """Separate job records and immutable workshop evidence."""
 
 from sqlalchemy import (
+    CheckConstraint,
     Column,
-    Integer,
-    String,
     Date,
     DateTime,
-    Numeric,
-    LargeBinary,
     ForeignKey,
+    Integer,
+    LargeBinary,
+    Numeric,
+    String,
     UniqueConstraint,
-    CheckConstraint,
 )
 from sqlalchemy.sql import func
+
 from database.engine import Base
 
 

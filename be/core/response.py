@@ -1,7 +1,8 @@
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from typing import Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Optional
+
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 
 def success_response(
@@ -12,8 +13,14 @@ def success_response(
     """Return a standardised success JSON payload — mirrors Node.js sendSuccess()."""
     return JSONResponse(
         status_code=status_code,
-        content=jsonable_encoder({"success": True, "data": data, "message": message},
-                                 custom_encoder={datetime: lambda value: value.replace(tzinfo=value.tzinfo or timezone.utc).isoformat()}),
+        content=jsonable_encoder(
+            {"success": True, "data": data, "message": message},
+            custom_encoder={
+                datetime: lambda value: value.replace(
+                    tzinfo=value.tzinfo or timezone.utc
+                ).isoformat()
+            },
+        ),
     )
 
 

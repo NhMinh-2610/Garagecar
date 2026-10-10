@@ -11,6 +11,8 @@
     <script src="../shared/core.js" defer></script>
     <script src="../shared/access.js" defer></script>
     <script src="../shared/portal.js" defer></script>
+    <script src="../shared/workspace.js" defer></script>
+    <script src="../shared/tables.js" defer></script>
     <script src="../staff/app.js" defer></script>
     <script src="../shared/pwa.js" defer></script>
     <link rel="stylesheet" href="../shared/professional.css" />
@@ -20,16 +22,11 @@
   <body data-staff-role="hr">
     <aside id="sidebar">
       <a class="brand" href="/"
-        ><span class="brand-mark">A</span
-        ><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
+        ><span class="brand-mark">A</span><span>AutoPro<small>GARAGE WORKSPACE</small></span></a
       >
       <p class="nav-caption">NHÂN SỰ</p>
       <nav aria-label="Chức năng Nhân sự">
-        <button
-          class="nav-item"
-          data-permission="hr"
-          data-target="staffHR-section"
-        >
+        <button class="nav-item" data-permission="hr" data-target="staffHR-section">
           Hồ sơ nhân sự
         </button>
       </nav>
@@ -58,9 +55,7 @@
         <p id="staffError" class="inline-message error" role="alert" hidden></p>
         <div class="role-intro">
           <strong>Nhân sự</strong>
-          <p>
-            Hồ sơ nhân viên, phân ca, duyệt nghỉ và xác minh năng lực kỹ thuật.
-          </p>
+          <p>Hồ sơ nhân viên, phân ca, duyệt nghỉ và xác minh năng lực kỹ thuật.</p>
         </div>
         <section id="staffHR-section"><div id="staffHR"></div></section>
       </main>

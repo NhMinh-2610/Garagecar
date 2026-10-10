@@ -10,13 +10,13 @@ Strategy: progressive lockout per identifier (email or IP).
 from datetime import timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.time import utcnow
 from models.login_attempt import LoginAttempt
 
-_WINDOW    = timedelta(minutes=15)
+_WINDOW = timedelta(minutes=15)
 _MAX_FAILS = 5
 
 
@@ -32,7 +32,7 @@ async def check_rate_limit(db: AsyncSession, identifier: str) -> None:
     fail_count: int = await db.scalar(
         select(func.count()).where(
             LoginAttempt.identifier == identifier,
-            LoginAttempt.success == False,        # noqa: E712
+            LoginAttempt.success == False,  # noqa: E712
             LoginAttempt.attempted_at >= since,
         )
     )

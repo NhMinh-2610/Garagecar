@@ -1,6 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 from pathlib import Path
+from typing import Optional
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -16,7 +17,9 @@ class Settings(BaseSettings):
 
     # PostgreSQL connection URL (primary)
     # Format: postgresql+asyncpg://user:password@host:port/dbname
-    database_url: str = "postgresql+asyncpg://garagecar:garagecar@localhost:5432/garagecar"
+    database_url: str = (
+        "postgresql+asyncpg://garagecar:garagecar@localhost:5432/garagecar"
+    )
 
     cors_origin: str = "*"
     log_level: str = "INFO"
@@ -30,7 +33,7 @@ class Settings(BaseSettings):
 
     # Google Gemini
     gemini_api_key: Optional[str] = None
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.5-flash"
 
     # Ollama (local)
     ollama_base_url: str = "http://localhost:11434"

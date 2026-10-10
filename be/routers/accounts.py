@@ -1,23 +1,23 @@
 """Account lifecycle; roles stay fixed to protect existing profile ownership."""
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas.garage_care import PermissionInput
 from core.constants import Role
 from core.response import success_response
 from core.security import hash_password, verify_password
 from database.session import get_db
 from middleware.auth import get_current_user, require_role
-from models import User, Mechanic, Vehicle
+from models import Mechanic, User, Vehicle
 from schemas.auth import (
     AccountCreate,
     AccountUpdate,
-    PasswordReset,
     PasswordChange,
+    PasswordReset,
     UserResponse,
 )
+from schemas.garage_care import PermissionInput
 
 router = APIRouter(prefix="/api/auth", tags=["Accounts"])
 

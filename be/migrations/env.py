@@ -1,14 +1,18 @@
 import asyncio
+
 from alembic import context
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import create_async_engine
+
+import models  # noqa: F401
 from config.settings import settings
 from database.engine import Base
-import models  # noqa: F401
 
 
 def migrate(connection):
-    context.configure(connection=connection, target_metadata=Base.metadata, compare_type=True)
+    context.configure(
+        connection=connection, target_metadata=Base.metadata, compare_type=True
+    )
     with context.begin_transaction():
         context.run_migrations()
 
@@ -21,6 +25,8 @@ async def run():
 
 
 if context.is_offline_mode():
-    raise RuntimeError("This migration inspects existing data; use an online database connection.")
+    raise RuntimeError(
+        "This migration inspects existing data; use an online database connection."
+    )
 else:
     asyncio.run(run())
