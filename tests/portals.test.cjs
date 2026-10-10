@@ -967,6 +967,260 @@ test("repair editor submits IDs and quantities; reception opens the correct sect
   }
 });
 
+test("guided intake reuses prices and quote items through approval and ticket creation", async () => {
+  let visit = null;
+  let unitPrice = 100;
+  const resources = () =>
+    response({
+      vehicles: [{ ...vehicle, availableForIntake: !visit, activeVisitId: visit?.id }],
+      mechanics: [
+        { ...mechanic, openTickets: 3 },
+        { id: 2, fullName: "Second mechanic", openTickets: 1 },
+      ],
+      wages: [{ id: 5, name: "Change oil", price: 50 }],
+      inventory: [{ ...part, sku: "OIL-01", unitPrice, quantity: 10, fitments: [] }],
+    });
+  const { dom, w, calls, errors } = await portal("admin", {
+    "/service/resources": resources,
+    "/service/visits": (options) => {
+      if (options.method === "POST")
+        visit = {
+          ...JSON.parse(options.body),
+          id: 42,
+          status: "intake",
+          licensePlate: vehicle.licensePlate,
+          quotes: [],
+        };
+      return response(options.method === "POST" ? visit : visit ? [visit] : []);
+    },
+    "/service/visits/42/quotes": (options) => {
+      const body = JSON.parse(options.body);
+      const quote = {
+        ...body,
+        id: body.stage === "final" ? 12 : 11,
+        revision: visit.quotes.length + 1,
+        status: "pending",
+        items: body.items.map((i) => ({
+          ...i,
+          partName: part.name,
+          partPrice: unitPrice,
+          totalPrice: i.quantity * unitPrice + i.laborPrice,
+        })),
+      };
+      quote.totalAmount = quote.items.reduce((sum, i) => sum + i.totalPrice, 0);
+      visit.quotes.push(quote);
+      if (body.stage === "final") visit.status = "awaiting_approval";
+      return response(quote);
+    },
+    "/service/quotes/11/decision": () => {
+      visit.quotes[0].status = "approved";
+      visit.status = "diagnosis";
+      return response(visit.quotes[0]);
+    },
+    "/service/visits/42/diagnosis": (options) => {
+      visit.diagnosis = JSON.parse(options.body).diagnosis;
+      return response(visit);
+    },
+    "/service/quotes/12/decision": () => {
+      visit.quotes[1].status = "approved";
+      visit.status = "ready";
+      return response(visit.quotes[1]);
+    },
+    "/service/quotes/12/convert": () => {
+      visit.status = "in_workshop";
+      visit.ticketId = 77;
+      visit.ticketStatus = "draft";
+      visit.quotes[1].status = "converted";
+      return response({ id: 77 });
+    },
+  });
+  try {
+    const $ = (id) => w.document.getElementById(id);
+    const form = () => w.document.querySelector("dialog.care-dialog form");
+    const submit = async () => {
+      form().dispatchEvent(new w.Event("submit", { cancelable: true }));
+      await delay(100);
+    };
+    const action = (name) =>
+      $("serviceWorkspace").querySelector(`.visit-next-action [data-service="${name}"]`);
+    $("btnNewRepair").click();
+    await delay(100);
+    assert.equal(
+      form().elements.vehicleId.value,
+      "1",
+      "a single eligible car needs no second selection",
+    );
+    form().elements.concern.value = "Periodic oil maintenance";
+    form().elements.initialInspection.value = "No warning lights";
+    form().elements.mechanicId.value = "2";
+    await submit();
+    assert.ok(
+      $("quoteJobSelect"),
+      "saving intake opens the quotation without looking for another menu",
+    );
+    assert.match(w.document.querySelector("dialog.care-dialog h3").textContent, /sơ bộ/);
+    $("quoteJobSelect").value = "5";
+    $("quoteJobSelect").dispatchEvent(new w.Event("change"));
+    assert.equal($("quoteTask").value, "Change oil");
+    assert.equal($("quoteLabor").value, "50");
+    assert.match($("quotePart").options[1].textContent, /Gợi ý/);
+    $("quotePart").value = "1";
+    $("quoteQuantity").value = "2";
+    $("quoteAdd").click();
+    assert.match($("quoteTotal").textContent, /250/);
+    const quantity = w.document.querySelector("[data-line-quantity]");
+    quantity.value = "3";
+    quantity.dispatchEvent(new w.Event("change", { bubbles: true }));
+    assert.match($("quoteTotal").textContent, /350/);
+    await submit();
+    assert.ok(action("decision"));
+    assert.equal(action("convert"), null, "customer consent cannot be skipped");
+    action("decision").click();
+    assert.match(form().textContent, /350/);
+    assert.match(form().textContent, /Oil <safe>/);
+    assert.equal(form().querySelector("safe"), null);
+    form().elements.note.value = "Customer agreed by phone at 10:00";
+    await submit();
+    action("diagnosis").click();
+    form().elements.diagnosis.value = "Confirmed oil change required";
+    await submit();
+    unitPrice = 120;
+    // Reopen from reception to refresh resources and continue the same case.
+    await w.Garage.startService(1);
+    action("quote").click();
+    $("quoteReuse").click();
+    assert.equal(w.document.querySelectorAll(".quote-line-list li").length, 1);
+    assert.match(
+      $("quoteTotal").textContent,
+      /410/,
+      "reused parts use the current inventory price",
+    );
+    $("quoteReuse").click();
+    assert.equal(
+      w.document.querySelectorAll(".quote-line-list li").length,
+      1,
+      "reuse cannot duplicate items",
+    );
+    await submit();
+    action("decision").click();
+    form().elements.note.value = "Customer confirmed final price by phone";
+    await submit();
+    assert.match(
+      $("serviceWorkspace").querySelector('[aria-current="step"]').textContent,
+      /Tạo phiếu/,
+    );
+    action("convert").click();
+    assert.equal(form().elements.mechanicId.value, "2", "keep the mechanic who inspected this car");
+    assert.match(form().textContent, /410/);
+    await submit();
+    assert.ok(action("ticket"));
+    assert.match($("serviceFeedback").textContent, /Đã tạo phiếu/);
+    const writes = calls.filter((c) => c.method === "POST");
+    assert.equal(writes.filter((c) => c.path.endsWith("/convert")).length, 1);
+    assert.equal(
+      writes.some((c) => c.path === "/repairs"),
+      false,
+    );
+    assert.deepEqual(writes.find((c) => c.path === "/service/visits/42/quotes").body.items, [
+      { taskName: "Change oil", inventoryId: 1, quantity: 3, laborPrice: 50 },
+    ]);
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("ticket picker finds an approved car and opens an existing ticket in its correct tab", async () => {
+  const ready = {
+    ...vehicle,
+    id: 2,
+    licensePlate: "30B-READY",
+    availableForIntake: false,
+    activeVisitId: 42,
+  };
+  const working = {
+    ...vehicle,
+    id: 3,
+    licensePlate: "30C-WORK",
+    availableForIntake: false,
+    ticketId: 77,
+  };
+  const ticket = {
+    id: 77,
+    vehicleId: 3,
+    vehicle: working,
+    mechanicId: 1,
+    mechanicName: "Mechanic",
+    status: "working",
+    items: [{ id: 1, taskName: "Check engine", quantity: 1, totalPrice: 50, isCompleted: false }],
+  };
+  const { dom, w, calls, errors } = await portal("admin", {
+    "/service/resources": {
+      vehicles: [{ ...vehicle, availableForIntake: true }, ready, working],
+      mechanics: [mechanic],
+    },
+    "/service/visits": [
+      {
+        id: 42,
+        vehicleId: 2,
+        licensePlate: ready.licensePlate,
+        concern: "Oil service",
+        status: "ready",
+        diagnosis: "Confirmed",
+        quotes: [
+          { id: 8, stage: "final", revision: 2, status: "approved", totalAmount: 250, items: [] },
+        ],
+      },
+    ],
+    "/repairs": [ticket, { ...ticket, id: 78 }],
+  });
+  try {
+    const $ = (id) => w.document.getElementById(id);
+    $("btnNewRepair").click();
+    await delay(100);
+    const search = $("servicePickerSearch");
+    assert.ok(search);
+    search.value = "READY";
+    search.dispatchEvent(new w.Event("input"));
+    assert.equal($("servicePickerList").querySelectorAll("[data-picker-vehicle]").length, 1);
+    const button = $("servicePickerList").querySelector('[data-picker-vehicle="2"]');
+    assert.match(button.textContent, /Tạo phiếu/);
+    button.click();
+    await delay(100);
+    const dialog = w.document.querySelector("dialog.workflow-dialog");
+    assert.match(dialog.querySelector("h3").textContent, /Tạo phiếu & Giao thợ/);
+    assert.equal(
+      calls.some((c) => c.method === "POST"),
+      false,
+    );
+    dialog.querySelector("[data-close]").click();
+    $("btnNewRepair").click();
+    await delay(100);
+    $("servicePickerSearch").value = "WORK";
+    $("servicePickerSearch").dispatchEvent(new w.Event("input"));
+    $("servicePickerList").querySelector('[data-picker-vehicle="3"]').click();
+    await delay(100);
+    assert.ok($("repair-section").classList.contains("active-section"));
+    assert.equal($("globalRepairSearch").value, working.licensePlate);
+    assert.equal($("tabWorking").style.display, "block");
+    assert.equal(w.document.querySelector("dialog.workflow-picker"), null);
+    assert.ok($("workingTable").querySelector('[data-ticket-row="77"]'));
+    assert.equal($("workingTable").querySelector('[data-ticket-row="78"]'), null);
+    assert.equal(
+      w.document.activeElement,
+      $("workingTable").querySelector('[data-ticket-row="77"]'),
+    );
+    assert.equal($("repairFocusNotice").hidden, false);
+    $("btnShowAllRepairs").click();
+    await delay(80);
+    assert.equal($("repairFocusNotice").hidden, true);
+    assert.ok($("workingTable").querySelector('[data-ticket-row="78"]'));
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
 test("ticket creation opens the exact active visit and converts only its approved final quote", async () => {
   const visits = Array.from({ length: 14 }, (_, index) => ({
     id: index + 1,
@@ -1039,7 +1293,7 @@ test("selecting a vehicle with an open visit blocks direct creation and keeps dr
   });
   try {
     const $ = (id) => w.document.getElementById(id);
-    $("btnNewRepair").click();
+    $("btnDirectRepair").click();
     await delay(100);
     const task = $("taskSelect");
     task.value = "Change oil";

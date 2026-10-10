@@ -304,10 +304,19 @@
                 <p class="eyebrow">AUTOPRO · QUẢN LÝ GARAGE</p>
                 <h1>Sửa chữa & Dịch vụ</h1>
                 <p class="section-description">
-                  Phân công đúng người, theo dõi từng hạng mục và kiểm soát tiến độ.
+                  Tạo phiếu từ báo giá đã duyệt, giao thợ và theo dõi tiến độ tại một nơi.
                 </p>
               </div>
               <button class="btn btn-primary" id="btnNewRepair">+ Tạo phiếu sửa</button>
+            </div>
+            <div class="workflow-reuse">
+              <div>
+                <strong>Tiếp tục đúng hồ sơ, không nhập lại công việc</strong><br />
+                <span>Tiếp nhận → Báo giá → Khách xác nhận → Tạo phiếu &amp; Giao thợ.</span>
+              </div>
+              <button type="button" class="btn btn-secondary" id="btnContinueService">
+                Mở hồ sơ dịch vụ
+              </button>
             </div>
             <div class="metrics">
               <div class="metric">
@@ -353,6 +362,12 @@
                 <select id="filterMechanic" aria-label="Lọc theo thợ">
                   <option value="">Tất cả thợ</option>
                 </select>
+              </div>
+              <div class="workflow-reuse" id="repairFocusNotice" hidden>
+                <strong id="repairFocusLabel" role="status"></strong>
+                <button type="button" class="btn btn-sm" id="btnShowAllRepairs">
+                  Xem tất cả phiếu
+                </button>
               </div>
               <div class="repair-tab-content active" id="tabWaiting">
                 <div class="table-responsive">
@@ -422,6 +437,16 @@
                 Chờ sửa → Đang sửa → Hoàn thành → Thanh toán. Hoàn tất từng hạng mục trước khi đóng
                 phiếu.
               </p>
+              <details class="workflow-optional">
+                <summary>Lập phiếu riêng cho xe chưa có hồ sơ dịch vụ</summary>
+                <p class="field-help">
+                  Dành cho công việc đã thống nhất trực tiếp. Xe có lượt kiểm tra / báo giá đang mở
+                  phải tiếp tục hồ sơ đó.
+                </p>
+                <button type="button" class="btn btn-secondary" id="btnDirectRepair">
+                  Lập phiếu riêng
+                </button>
+              </details>
             </div>
             <div
               class="modal"

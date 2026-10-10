@@ -212,6 +212,167 @@ test("service list exposes the next action, expands details and keeps focused fi
   }
 });
 
+test("quote editor keeps selection and focus, warns about stock, and retains a failed draft", async () => {
+  let posts = 0;
+  const fixtures = {
+    "/service/visits": [
+      {
+        id: 1,
+        vehicleId: 1,
+        licensePlate: "30A-12345",
+        status: "intake",
+        concern: "Oil service",
+        quotes: [],
+      },
+    ],
+    "/service/resources": {
+      vehicles: [{ id: 1, carBrand: "Toyota", carModel: "Vios", modelYear: 2024, engine: "1.5" }],
+      mechanics: [],
+      wages: [{ id: 1, name: "Thay dầu động cơ", price: 50 }],
+      inventory: [
+        { id: 1, name: "Dầu động cơ", sku: "OIL-01", unitPrice: 100, quantity: 2 },
+        {
+          id: 2,
+          name: "Dầu cho Honda",
+          unitPrice: 200,
+          quantity: 8,
+          fitments: [
+            { brand: "Honda", model: "City", yearFrom: 2020, yearTo: 2026, engine: "1.5" },
+          ],
+        },
+        { id: 3, name: "Lọc dầu", sku: "FILTER-01", unitPrice: 80, quantity: 8 },
+      ],
+    },
+    "/maintenance/catalog": { components: [] },
+    "/service/visits/1/quotes": () => {
+      posts++;
+      throw Error("Giá đã thay đổi; kiểm tra lại trước khi gửi.");
+    },
+  };
+  const { dom, w, errors, refresh } = await moduleView(
+    "service.js",
+    "advisor",
+    "serviceWorkspace",
+    fixtures,
+    ["workshop"],
+  );
+  try {
+    w.document.querySelector('[data-service="quote"]').click();
+    const $ = (id) => w.document.getElementById(id);
+    const form = w.document.querySelector("dialog form");
+    assert.equal(form.querySelector('[type="submit"]').disabled, true);
+    $("quoteJobSelect").value = "1";
+    $("quoteJobSelect").dispatchEvent(new w.Event("change"));
+    assert.equal($("quoteLabor").value, "50");
+    assert.equal($("quotePart").querySelector('[value="2"]').disabled, true);
+    $("quotePart").value = "1";
+    $("quotePartSearch").value = "loc dau";
+    $("quotePartSearch").dispatchEvent(new w.Event("input"));
+    assert.equal($("quotePart").value, "1", "filtering must not silently change the chosen part");
+    assert.ok($("quotePart").querySelector('[value="3"]'));
+    $("quoteQuantity").value = "4";
+    $("quoteAdd").click();
+    assert.match($("quoteStockNotice").textContent, /bổ sung kho/);
+    const quantity = form.querySelector("[data-line-quantity]");
+    quantity.focus();
+    quantity.value = "5";
+    quantity.dispatchEvent(new w.Event("input", { bubbles: true }));
+    assert.equal(w.document.activeElement, quantity);
+    assert.match($("quoteTotal").textContent, /550/);
+    $("quoteTask").value = "Unadded task";
+    form.dispatchEvent(new w.Event("submit", { cancelable: true }));
+    await flush();
+    assert.equal(posts, 0);
+    assert.match(form.querySelector(".care-error").textContent, /chưa được thêm/);
+    $("quoteTask").value = "";
+    form.dispatchEvent(new w.Event("submit", { cancelable: true }));
+    await flush();
+    assert.equal(posts, 1);
+    assert.match(form.querySelector(".care-error").textContent, /Giá đã thay đổi/);
+    await refresh();
+    assert.equal(w.document.querySelector("dialog form"), form);
+    assert.equal(form.querySelector("[data-line-quantity]"), quantity);
+    assert.equal(quantity.value, "5");
+    assert.match($("quoteTotal").textContent, /550/);
+    assert.equal(form.querySelector('[type="submit"]').disabled, false);
+    w.document.querySelector("dialog [data-close]").click();
+    assert.equal(w.document.querySelector("dialog"), null);
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("intake searches eligible cars and preserves its draft during refresh", async () => {
+  const resources = {
+    vehicles: [
+      { id: 1, licensePlate: "30A-11111", customerName: "First", availableForIntake: true },
+      { id: 2, licensePlate: "30B-22222", customerName: "Second", availableForIntake: true },
+      { id: 3, licensePlate: "30C-33333", customerName: "Busy", availableForIntake: false },
+    ],
+    mechanics: [],
+    inventory: [],
+    wages: [],
+  };
+  const { dom, w, errors, refresh } = await moduleView(
+    "service.js",
+    "admin",
+    "serviceWorkspace",
+    { "/service/visits": [], "/service/resources": resources },
+    ["workshop"],
+  );
+  try {
+    w.document.querySelector('[data-service="intake"]').click();
+    const form = w.document.querySelector("dialog form");
+    assert.equal(form.elements.vehicleId.value, "");
+    assert.equal(form.elements.vehicleId.querySelector('[value="3"]'), null);
+    const search = form.querySelector("#intakeVehicleSearch");
+    search.value = "30B";
+    search.dispatchEvent(new w.Event("input"));
+    assert.equal(form.elements.vehicleId.value, "2");
+    form.elements.concern.value = "Unsent customer request";
+    await refresh();
+    assert.equal(w.document.querySelector("dialog form"), form);
+    assert.equal(form.elements.concern.value, "Unsent customer request");
+    assert.equal(search.value, "30B");
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("mechanics see waiting approval without being prompted to invalidate a completed diagnosis", async () => {
+  const { dom, w, errors } = await moduleView(
+    "service.js",
+    "mechanic",
+    "serviceWorkspace",
+    {
+      "/service/visits": [
+        {
+          id: 1,
+          status: "awaiting_approval",
+          licensePlate: "30A-11111",
+          concern: "Service",
+          diagnosis: "Inspection complete",
+          quotes: [
+            { id: 2, stage: "final", status: "pending", revision: 2, items: [], totalAmount: 100 },
+          ],
+        },
+      ],
+    },
+    ["workshop"],
+  );
+  try {
+    assert.equal(w.document.querySelector(".visit-next-action [data-service]"), null);
+    assert.equal(w.document.getElementById("serviceActionCount").textContent, "0");
+    assert.match(w.document.querySelector(".workflow-next").textContent, /chờ khách đồng ý/);
+    assert.ok(w.document.querySelector('details [data-service="diagnosis"]'));
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
 test("maintenance separates reminders from research, preserves EV filters and ignores a stale vehicle response", async () => {
   let resolveFirst;
   const first = new Promise((resolve) => {

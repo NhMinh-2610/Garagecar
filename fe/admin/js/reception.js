@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!(await Garage.whenAllowed("reception"))) return;
   const byId = (id) => document.getElementById(id);
   const esc = Garage.escape;
+  const canWorkshop = await Garage.whenAllowed("workshop");
   let vehicles = [],
     customers = [],
     brands = [];
@@ -39,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <td>${esc(v.carBrand)} ${esc(v.carModel || "")}</td><td>${Garage.date(v.receivedDate)?.toLocaleDateString("vi-VN") || "—"}</td>
                 <td><span class="badge badge-${v.status === "repairing" ? "working" : "pending"}">${v.status === "completed" && unpaid ? "Chờ thanh toán" : labels[v.status]}</span></td>
                 <td><div class="vehicle-actions">
-                ${v.status !== "delivered" && v.status !== "completed" && !unpaid ? `<button class="btn btn-sm btn-primary" data-action="repair" data-id="${v.id}">＋ Tạo phiếu</button>` : ""}
+                ${v.status !== "delivered" && v.status !== "completed" && !unpaid && canWorkshop ? `<button class="btn btn-sm btn-primary" data-action="repair" data-id="${v.id}">Mở hồ sơ dịch vụ</button>` : ""}
                 ${v.status === "completed" && !unpaid ? `<button class="btn btn-sm btn-success" data-action="deliver" data-id="${v.id}">Giao xe</button>` : ""}
                 ${v.status === "delivered" ? `<button class="btn btn-sm btn-success" data-action="receive" data-id="${v.id}">Tiếp nhận lại</button>` : ""}
                 <button class="btn btn-sm btn-secondary" data-action="edit" data-id="${v.id}">Sửa thông tin</button>
@@ -191,7 +192,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
       if (action === "repair") {
-        await window.openRepairModalWithVehicle(vehicle.id);
+        button.disabled = true;
+        try {
+          await Garage.startService(vehicle.id);
+        } finally {
+          button.disabled = false;
+        }
         return;
       }
       if (

@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     inventory = [],
     tickets = [],
     activeVisits = [],
+    focusedTicketId = null,
     saving = false,
     editingId = null;
   const money = formatCurrency;
@@ -30,12 +31,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const mechanic = byId("filterMechanic").value;
       const filtered = tickets.filter(
         (t) =>
+          (!focusedTicketId || t.id === focusedTicketId) &&
           (!mechanic || String(t.mechanicId) === mechanic) &&
           [t.vehicle?.licensePlate, t.vehicle?.customerName, t.mechanicName]
             .join(" ")
             .toLowerCase()
             .includes(search),
       );
+      byId("repairFocusNotice").hidden = !focusedTicketId;
+      byId("repairFocusLabel").textContent = focusedTicketId
+        ? `Đang xem phiếu #${focusedTicketId}`
+        : "";
       for (const [table, statuses] of [
         ["waitingTable", ["draft"]],
         ["workingTable", ["working"]],
@@ -49,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               const done = t.items.filter((i) => i.isCompleted).length;
               const names = t.items.map((i) => i.taskName).join(", ");
               if (t.status === "working") {
-                return `<tr><td><button class="btn btn-sm" data-action="expand" data-id="${t.id}" aria-label="Xem hạng mục">☰</button></td>
+                return `<tr data-ticket-row="${t.id}"><td><button class="btn btn-sm" data-action="expand" data-id="${t.id}" aria-label="Xem hạng mục">☰</button></td>
                             <td>${esc(v.licensePlate)}</td><td>${esc(v.carBrand)}</td><td>${esc(t.mechanicName)}</td>
                             <td>${done}/${t.items.length} hạng mục</td><td>
                             <button class="btn btn-success btn-sm" data-action="complete" data-id="${t.id}" ${done !== t.items.length || !done ? "disabled" : ""}>Hoàn thành</button>
@@ -72,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ? `<button class="btn btn-success btn-sm" data-action="pay" data-id="${t.id}">Thu tiền</button>`
                         : ""
                     }`;
-              return `<tr><td>${esc(v.licensePlate)}</td><td>${esc(v.carBrand)}</td><td>${esc(names)}</td><td>${esc(t.mechanicName)}</td>
+              return `<tr data-ticket-row="${t.id}"><td>${esc(v.licensePlate)}</td><td>${esc(v.carBrand)}</td><td>${esc(names)}</td><td>${esc(t.mechanicName)}</td>
                         ${t.status !== "draft" ? `<td>${money(t.totalAmount)}</td>` : ""}
                         <td><span class="badge ${t.status === "paid" ? "badge-done" : "badge-pending"}">${{ draft: "Chờ sửa", completed: "Chờ thanh toán", paid: "Đã thanh toán" }[t.status]}</span></td><td>${actions}</td></tr>`;
             })
@@ -231,7 +237,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector('.nav-item[data-target="repair-section"]')?.click();
     return open(Number(vehicleId));
   };
-  byId("btnNewRepair").onclick = () => open();
+  byId("btnDirectRepair").onclick = () => open();
+  byId("btnContinueService").onclick = () => Garage.navigate("service-section");
+  byId("btnNewRepair").onclick = async () => {
+    const button = byId("btnNewRepair");
+    if (button.disabled) return;
+    button.disabled = true;
+    try {
+      await Garage.startService();
+    } catch (error) {
+      showToast(error.message, "error");
+    } finally {
+      button.disabled = false;
+    }
+  };
   byId("closeRepairModal").onclick = () => {
     modal.style.display = "none";
   };
@@ -426,8 +445,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       el.classList.toggle("active", tab === name);
     }
   };
-  byId("globalRepairSearch").oninput = load;
-  byId("filterMechanic").onchange = load;
+  const resetFocus = () => {
+    focusedTicketId = null;
+    return load();
+  };
+  byId("globalRepairSearch").oninput = resetFocus;
+  byId("filterMechanic").onchange = resetFocus;
+  byId("btnShowAllRepairs").onclick = () => {
+    byId("globalRepairSearch").value = "";
+    byId("filterMechanic").value = "";
+    resetFocus();
+  };
+  Garage.openRepairTicket = async (id) => {
+    Garage.navigate("repair-section");
+    byId("globalRepairSearch").value = "";
+    byId("filterMechanic").value = "";
+    focusedTicketId = null;
+    await load();
+    const ticket = tickets.find((t) => t.id === Number(id));
+    if (!ticket) throw Error("Không tìm thấy phiếu sửa chữa. Hãy tải lại dữ liệu.");
+    focusedTicketId = ticket.id;
+    byId("globalRepairSearch").value = ticket.vehicle?.licensePlate || "";
+    await load();
+    window.switchRepairTab(
+      { draft: "waiting", working: "working", completed: "completed", paid: "completed" }[
+        ticket.status
+      ],
+    );
+    const row = byId("repair-section").querySelector(`[data-ticket-row="${ticket.id}"]`);
+    if (row) {
+      row.tabIndex = -1;
+      row.focus();
+      row.scrollIntoView({ block: "nearest" });
+    }
+  };
   Garage.subscribe(load);
   loadMechanics().catch((error) => showToast(error.message, "error"));
   load();
