@@ -1132,54 +1132,88 @@ test("saving rechecks new service visits and preserves the repair draft on a fai
   }
 });
 
-test("assignment of a ticket linked to an open service visit can still be changed", async () => {
-  const ticket = {
-    id: 7,
-    vehicleId: 1,
-    vehicle,
-    mechanicId: 1,
-    mechanicName: mechanic.fullName,
-    serviceVisitId: 42,
-    status: "working",
-    totalAmount: 50,
-    items: [
-      {
-        id: 1,
-        taskName: "Change oil",
-        inventoryId: null,
-        quantity: 1,
-        laborPrice: 50,
-        partPrice: 0,
-      },
-    ],
-  };
-  const { dom, w, calls, errors } = await portal("admin", {
-    "/repairs": [ticket],
-    "/service/visits": [
-      {
-        id: 42,
-        vehicleId: 1,
-        licensePlate: vehicle.licensePlate,
-        status: "in_workshop",
-        ticketId: 7,
-        quotes: [],
-      },
-    ],
+for (const status of ["draft", "working"]) {
+  test(`assignment of a ${status} ticket preserves the approved quote`, async () => {
+    const ticket = {
+      id: 7,
+      vehicleId: 1,
+      vehicle,
+      mechanicId: 1,
+      mechanicName: mechanic.fullName,
+      serviceVisitId: 42,
+      status,
+      totalAmount: 50,
+      items: [
+        {
+          id: 1,
+          taskName: "Change oil",
+          inventoryId: null,
+          quantity: 1,
+          laborPrice: 50,
+          partPrice: 0,
+        },
+      ],
+    };
+    const { dom, w, calls, errors } = await portal("admin", {
+      "/repairs": [ticket],
+      "/service/visits": [
+        {
+          id: 42,
+          vehicleId: 1,
+          licensePlate: vehicle.licensePlate,
+          status: "in_workshop",
+          ticketId: 7,
+          quotes: [],
+        },
+      ],
+    });
+    try {
+      w.document.querySelector('[data-action="edit"][data-id="7"]').click();
+      await delay(100);
+      assert.equal(w.document.getElementById("repairModal").style.display, "block");
+      assert.equal(w.document.getElementById("repairWorkflowNotice").hidden, true);
+      assert.equal(w.document.getElementById("btnAddItem").disabled, true);
+      assert.equal(w.document.querySelector("#repairModal .editor-panel").hidden, true);
+      assert.equal(w.document.querySelector('[data-action="delete"][data-id="7"]'), null);
+      w.document.getElementById("btnSaveTicket").click();
+      await delay(100);
+      const updated = calls.find((call) => call.path === "/repairs/7" && call.method === "PUT");
+      assert.ok(updated);
+      assert.deepEqual(updated.body, { mechanicId: 1 });
+      assert.equal(
+        calls.some((call) => call.method === "POST"),
+        false,
+      );
+      assert.deepEqual(errors, []);
+    } finally {
+      dom.window.close();
+    }
+  });
+}
+
+test("an HTML gateway error keeps the draft and reports a readable retry message", async () => {
+  const { dom, w, errors } = await portal("admin", {
+    "/repairs": (options) =>
+      options.method === "POST"
+        ? new Response("<html>Bad gateway</html>", {
+            status: 502,
+            headers: { "Content-Type": "text/html" },
+          })
+        : response([]),
   });
   try {
-    w.document.querySelector('[data-action="edit"][data-id="7"]').click();
+    await w.openRepairModalWithVehicle(1);
+    const $ = (id) => w.document.getElementById(id);
+    $("taskSelect").value = "Change oil";
+    $("taskSelect").dispatchEvent(new w.Event("change"));
+    $("btnAddItem").click();
+    $("btnSaveTicket").click();
     await delay(100);
-    assert.equal(w.document.getElementById("repairModal").style.display, "block");
-    assert.equal(w.document.getElementById("repairWorkflowNotice").hidden, true);
-    w.document.getElementById("btnSaveTicket").click();
-    await delay(100);
-    const updated = calls.find((call) => call.path === "/repairs/7" && call.method === "PUT");
-    assert.ok(updated);
-    assert.deepEqual(updated.body, { mechanicId: 1 });
-    assert.equal(
-      calls.some((call) => call.method === "POST"),
-      false,
-    );
+    assert.equal($("repairModal").style.display, "block");
+    assert.match($("repairItemsTable").textContent, /Change oil/);
+    assert.match($("toast-container").textContent, /Máy chủ tạm thời/);
+    assert.doesNotMatch($("toast-container").textContent, /Unexpected token|Bad gateway/);
+    assert.equal($("btnSaveTicket").disabled, false);
     assert.deepEqual(errors, []);
   } finally {
     dom.window.close();

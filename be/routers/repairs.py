@@ -203,8 +203,13 @@ async def update_repair(
             if ticket.status == "working" and body.mechanicId is None:
                 raise HTTPException(400, "Phiếu đang sửa cần có thợ phụ trách")
             mechanic = await assigned_mechanic(db, body.mechanicId)
+            if ticket.serviceVisitId and (not mechanic or not mechanic.userId):
+                raise HTTPException(409, "Phiếu theo báo giá cần thợ có tài khoản")
             ticket.mechanicId = body.mechanicId
             ticket.mechanicName = mechanic.fullName if mechanic else "Chưa phân công"
+            if ticket.serviceVisitId:
+                visit = await db.get(ServiceVisit, ticket.serviceVisitId)
+                visit.mechanicId = body.mechanicId
         if "items" in fields:
             if ticket.status != "draft" or body.items is None:
                 raise HTTPException(409, "Chỉ thay đổi hạng mục khi phiếu đang chờ sửa")

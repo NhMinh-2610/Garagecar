@@ -67,8 +67,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     visitId: null,
   };
   // Mo dung luot dich vu tu man hinh tao phieu, ke ca khi dang loc hoac phan trang.
-  Garage.openServiceVisit = async (visitId) => {
-    if (!(await load())) throw Error("Không tải được lượt dịch vụ. Hãy thử lại.");
+  Garage.openServiceVisit = async (visitId, vehicleId = null) => {
+    if (!(await load({}, vehicleId))) throw Error("Không tải được lượt dịch vụ. Hãy thử lại.");
     const visit = visits.find((v) => v.id === Number(visitId));
     if (!visit) throw Error("Lượt dịch vụ không còn trong danh sách. Hãy tải lại dữ liệu xe.");
     serviceView.visitId = visit.id;
@@ -244,11 +244,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   function quoteTable(q) {
     return `<div class="table-responsive"><table><thead><tr><th>Công việc / Vật tư</th><th>SL</th><th>Đơn giá</th><th>Tiền công</th><th>Thành tiền</th></tr></thead><tbody>${q.items.map((r) => `<tr><td>${esc(r.taskName)}<small>${esc(r.partName)}</small></td><td>${r.quantity}</td><td>${money(r.partPrice)}</td><td>${money(r.laborPrice)}</td><td>${money(r.totalPrice)}</td></tr>`).join("")}</tbody></table></div>`;
   }
-  async function load(context = {}) {
+  async function load(context = {}, vehicleId = null) {
     const guard = Garage.refreshGuard(context);
     try {
       const values = await Promise.all([
-        Garage.request("/service/visits"),
+        Garage.request(
+          "/service/visits" + (vehicleId ? `?active=true&vehicleId=${vehicleId}` : ""),
+        ),
         advisor ? Garage.request("/service/resources") : Promise.resolve({}),
         advisor ? Garage.request("/maintenance/catalog") : Promise.resolve(null),
       ]);

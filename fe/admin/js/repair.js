@@ -65,8 +65,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               const actions =
                 t.status === "draft"
                   ? `<button class="btn btn-success btn-sm" data-action="start" data-id="${t.id}" ${!t.mechanicId ? "disabled" : ""}>Bắt đầu</button>
-                           <button class="btn btn-primary btn-sm" data-action="edit" data-id="${t.id}">Sửa</button>
-                           <button class="btn btn-danger btn-sm" data-action="delete" data-id="${t.id}">Xóa</button>`
+                           <button class="btn btn-primary btn-sm" data-action="edit" data-id="${t.id}">${t.serviceVisitId ? "Phân công" : "Sửa"}</button>
+                           ${t.serviceVisitId ? "" : `<button class="btn btn-danger btn-sm" data-action="delete" data-id="${t.id}">Xóa</button>`}`
                   : `${!t.mechanicId ? `<button class="btn btn-secondary btn-sm" data-action="edit" data-id="${t.id}">Liên kết thợ</button>` : ""}<button class="btn btn-secondary btn-sm" data-action="view" data-id="${t.id}">Chi tiết</button><button class="btn btn-sm" data-evidence-ticket="${t.id}">Ảnh</button>${
                       t.status === "completed"
                         ? `<button class="btn btn-success btn-sm" data-action="pay" data-id="${t.id}">Thu tiền</button>`
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function openVisit(visit) {
     if (!Garage.openServiceVisit)
       throw Error("Mục Cố vấn & Báo giá chưa sẵn sàng. Hãy tải lại trang.");
-    await Garage.openServiceVisit(visit.id);
+    await Garage.openServiceVisit(visit.id, visit.vehicleId);
     modal.style.display = "none";
     showToast("Thực hiện bước tiếp theo tại lượt kiểm tra & báo giá của xe.", "info");
   }
@@ -152,7 +152,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadMechanics(),
         Garage.request("/inventory"),
         Garage.request("/settings/wages"),
-        ticket ? Promise.resolve([]) : Garage.request("/service/visits"),
+        ticket
+          ? Promise.resolve([])
+          : Garage.request(
+              "/service/visits?active=true" + (vehicleId ? `&vehicleId=${vehicleId}` : ""),
+            ),
       ]);
       activeVisits = visits.filter((v) => v.status !== "closed");
       const visit = !ticket && activeVisits.find((v) => v.vehicleId === vehicleId);
@@ -207,6 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       byId("customTask").value = "";
       byId("customTask").style.display = "none";
       byId("btnAddItem").disabled =
+        Boolean(ticket?.serviceVisitId) ||
         Boolean(ticket && ticket.status !== "draft") ||
         Boolean(ticket?.items.some((i) => !i.inventoryId && i.partPrice > 0));
       document.querySelector("#repairModal .editor-panel").hidden = byId("btnAddItem").disabled;
@@ -296,9 +301,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       // Kiem tra lai truoc khi luu: co van co the vua tao luot cho xe nay.
       if (!editingId) {
-        activeVisits = (await Garage.request("/service/visits")).filter(
-          (v) => v.status !== "closed",
+        const currentVisits = await Garage.request(
+          `/service/visits?active=true&vehicleId=${payload.vehicleId}`,
         );
+        activeVisits = activeVisits
+          .filter((v) => v.vehicleId !== payload.vehicleId)
+          .concat(currentVisits.filter((v) => v.status !== "closed"));
         if (selectedVisit()) {
           updateWorkflow();
           showToast("Xe cần chuyển phiếu từ báo giá. Mở lượt dịch vụ để tiếp tục.", "warning");

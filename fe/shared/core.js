@@ -145,7 +145,8 @@ window.Garage = (() => {
       headers: { "Content-Type": "application/json", ...options.headers },
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
     });
-    const result = await response.json();
+    const result = await response.json().catch(() => null);
+    if (!result) throw new Error("Máy chủ tạm thời không phản hồi đúng. Vui lòng thử lại.");
     if (!response.ok || !result.success) throw new Error(result.message || "Không thể tải dữ liệu");
     return result.data;
   }
