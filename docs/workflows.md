@@ -28,6 +28,12 @@ Quản trị có thể khóa bớt nhóm chức năng của từng tài khoản.
 
 Trạng thái phiếu sửa: `draft` → `working` → `completed` → `paid`. Phiếu thuộc lượt dịch vụ phải qua nghiệm thu trước khi thu; phiếu lịch sử không liên kết lượt dịch vụ giữ khả năng xử lý tương thích. Không dùng nút hoàn thành để ghi nhận tiền đã thu.
 
+### Khi nút tạo phiếu yêu cầu chuyển báo giá
+
+Xe đang có lượt dịch vụ chưa kết thúc phải tạo phiếu từ báo giá của lượt đó. Trong **Cố vấn & Báo giá**, hoàn tất kiểm tra kỹ → lập **báo giá chính thức** → ghi nhận khách duyệt → chọn **Chuyển vào xưởng** và phân công thợ có tài khoản. Duyệt báo giá sơ bộ chỉ mở bước kiểm tra kỹ.
+
+Nút tạo phiếu từ xe sẽ mở đúng lượt dịch vụ nếu đã có; hộp tạo phiếu chung hiển thị hướng dẫn khi chọn xe theo báo giá. Xe chưa có lượt dịch vụ vẫn có thể tạo phiếu trực tiếp. Nếu có người tạo lượt trong lúc bạn đang nhập, hệ thống kiểm tra lại khi lưu và giữ các hạng mục để bạn xử lý tiếp.
+
 ## Ảnh và xác nhận vật tư
 
 - Mỗi hạng mục/lần thực hiện cần ảnh hoàn thành. Hạng mục dùng vật tư cần thêm ảnh bao bì/nhãn và nhập mã SKU hoặc barcode khớp mã mong đợi.
