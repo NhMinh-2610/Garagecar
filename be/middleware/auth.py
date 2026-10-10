@@ -11,11 +11,11 @@ from core.security import decode_token
 from database.session import get_db
 from models.user import User
 
-_bearer = HTTPBearer()
+_bearer = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
@@ -23,6 +23,8 @@ async def get_current_user(
     Attaches the decoded payload (id, email, role, fullName) to the request.
     """
     try:
+        if credentials is None:
+            raise JWTError("Missing bearer token")
         payload = decode_token(credentials.credentials)
         user = await db.get(User, payload.get("id"))
         if (

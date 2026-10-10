@@ -132,7 +132,7 @@ async def test_vehicle_chat_is_private_and_uses_ev_context(api, monkeypatch):
         "messages": [{"role": "user", "content": "Xe có pin cần kiểm tra gì?"}],
         "vehicleId": vid,
     }
-    assert (await client.post("/api/ai/chat", json=body)).status_code == 403
+    assert (await client.post("/api/ai/chat", json=body)).status_code == 401
     assert (
         await client.post("/api/ai/chat", headers=auth("other"), json=body)
     ).status_code == 403

@@ -7,18 +7,21 @@ import asyncio
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import models  # noqa: F401 - Dang ky ORM models truoc khi khoi dong.
 from config.settings import settings
 from core.response import error_response
 from database.engine import engine
+from database.session import get_db
 from routers import (
     accounts,
     advisor_operations,
@@ -87,7 +90,10 @@ app.add_middleware(
 
 @app.exception_handler(StarletteHTTPException)
 async def http_error(request, exc):
-    return error_response(str(exc.detail), exc.status_code)
+    response = error_response(str(exc.detail), exc.status_code)
+    if exc.headers:
+        response.headers.update(exc.headers)
+    return response
 
 
 @app.exception_handler(RequestValidationError)
@@ -135,6 +141,15 @@ async def health():
         "version": "3.0.0",
         "ai_provider": settings.ai_provider,
     }
+
+
+@app.get("/api/ready", tags=["Health"])
+async def ready(db: AsyncSession = Depends(get_db)):
+    try:
+        await db.execute(text("SELECT 1"))
+    except (SQLAlchemyError, OSError):
+        return error_response("Database chưa sẵn sàng", 503)
+    return {"success": True, "message": "Database is ready"}
 
 
 # Serve static frontend
