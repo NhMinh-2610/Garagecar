@@ -2,12 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+
 # Install dependencies
-COPY requirements.txt .
+COPY be/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source
-COPY . .
+COPY be/ .
+COPY fe/ /fe/
+
+RUN useradd --uid 10001 --create-home appuser
+USER appuser
 
 EXPOSE 8000
 
