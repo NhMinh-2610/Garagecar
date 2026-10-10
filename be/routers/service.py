@@ -3,7 +3,7 @@
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import lazyload
 
@@ -17,7 +17,10 @@ from models import (
     RepairTicket,
     ServiceQuote,
     ServiceVisit,
+    User,
     Vehicle,
+    VehicleCare,
+    Wage,
 )
 from schemas.garage_care import (
     ConvertInput,
@@ -502,11 +505,54 @@ async def resources(
     db: AsyncSession = Depends(get_db), user=Depends(require_permission("workshop"))
 ):
     advisor(user)
-    vehicles = await db.scalars(select(Vehicle).order_by(Vehicle.id.desc()))
-    mechanics = await db.scalars(
-        select(Mechanic).where(Mechanic.status == "active").order_by(Mechanic.fullName)
+    vehicles = await db.scalars(
+        select(Vehicle)
+        .options(lazyload(Vehicle.repairTickets))
+        .order_by(Vehicle.id.desc())
     )
+    mechanic_rows = await db.execute(
+        select(Mechanic, User.disabledPermissions)
+        .join(User, User.id == Mechanic.userId)
+        .where(
+            Mechanic.status == "active",
+            User.isActive.is_(True),
+            User.role == "mechanic",
+        )
+        .order_by(Mechanic.fullName)
+    )
+    mechanics = [
+        m for m, disabled in mechanic_rows if "workshop" not in (disabled or [])
+    ]
     parts = await db.scalars(select(Inventory).order_by(Inventory.name))
+    wages = await db.scalars(select(Wage).order_by(Wage.name))
+    care = {c.vehicleId: c for c in await db.scalars(select(VehicleCare))}
+    active_visits = dict(
+        (
+            await db.execute(
+                select(ServiceVisit.vehicleId, ServiceVisit.id).where(
+                    ServiceVisit.status != "closed"
+                )
+            )
+        ).all()
+    )
+    active_tickets = dict(
+        (
+            await db.execute(
+                select(RepairTicket.vehicleId, RepairTicket.id).where(
+                    RepairTicket.status != "paid"
+                )
+            )
+        ).all()
+    )
+    workload = dict(
+        (
+            await db.execute(
+                select(RepairTicket.mechanicId, func.count(RepairTicket.id))
+                .where(RepairTicket.status.in_(["draft", "working"]))
+                .group_by(RepairTicket.mechanicId)
+            )
+        ).all()
+    )
     return success_response(
         {
             "vehicles": [
@@ -515,10 +561,29 @@ async def resources(
                     "licensePlate": v.licensePlate,
                     "customerName": v.customerName,
                     "status": v.status,
+                    "carBrand": v.carBrand,
+                    "carModel": v.carModel,
+                    "modelYear": care[v.id].modelYear if v.id in care else None,
+                    "engine": care[v.id].engine if v.id in care else None,
+                    "activeVisitId": active_visits.get(v.id),
+                    "ticketId": active_tickets.get(v.id),
+                    "availableForIntake": v.status != "delivered"
+                    and v.id not in active_visits
+                    and v.id not in active_tickets,
                 }
                 for v in vehicles
             ],
-            "mechanics": [{"id": m.id, "fullName": m.fullName} for m in mechanics],
+            "mechanics": [
+                {
+                    "id": m.id,
+                    "fullName": m.fullName,
+                    "openTickets": workload.get(m.id, 0),
+                }
+                for m in mechanics
+            ],
+            "wages": [
+                {"id": w.id, "name": w.name, "price": float(w.price)} for w in wages
+            ],
             "inventory": [
                 {
                     "id": p.id,
