@@ -64,6 +64,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     status: "all",
     page: 0,
     expanded: new Set(),
+    visitId: null,
+  };
+  // Mo dung luot dich vu tu man hinh tao phieu, ke ca khi dang loc hoac phan trang.
+  Garage.openServiceVisit = async (visitId) => {
+    if (!(await load())) throw Error("Không tải được lượt dịch vụ. Hãy thử lại.");
+    const visit = visits.find((v) => v.id === Number(visitId));
+    if (!visit) throw Error("Lượt dịch vụ không còn trong danh sách. Hãy tải lại dữ liệu xe.");
+    serviceView.visitId = visit.id;
+    serviceView.query = visit.licensePlate;
+    serviceView.status = "all";
+    serviceView.page = 0;
+    serviceView.expanded.add(String(visit.id));
+    render();
+    host.querySelector("#serviceSearch").value = serviceView.query;
+    host.querySelector("#serviceStatus").value = "all";
+    Garage.navigate("service-section");
+    const card = host.querySelector(`[data-visit-id="${visit.id}"]`);
+    card.tabIndex = -1;
+    card.focus();
+    card.scrollIntoView({ block: "nearest" });
   };
   const latestQuote = (visit) =>
     [...(visit.quotes || [])]
@@ -156,6 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ? visit.status !== "closed"
             : visit.status === serviceView.status);
       return (
+        (!serviceView.visitId || visit.id === serviceView.visitId) &&
         statusMatch &&
         [visit.id, visit.licensePlate, visit.concern, visit.diagnosis]
           .join(" ")
@@ -200,11 +221,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       host.querySelector("#serviceSearch").value = serviceView.query;
       host.querySelector("#serviceStatus").value = serviceView.status;
       host.querySelector("#serviceSearch").oninput = (event) => {
+        serviceView.visitId = null;
         serviceView.query = event.target.value;
         serviceView.page = 0;
         renderVisits();
       };
       host.querySelector("#serviceStatus").onchange = (event) => {
+        serviceView.visitId = null;
         serviceView.status = event.target.value;
         serviceView.page = 0;
         renderVisits();
@@ -236,6 +259,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       stock = values[1]?.inventory || [];
       parts = values[2]?.components || [];
       render();
+      return true;
     } catch (e) {
       if (!context.background)
         host.innerHTML = `<p class="inline-message error">${esc(e.message)}</p><button class="btn" data-service="retry">Thử lại</button>`;

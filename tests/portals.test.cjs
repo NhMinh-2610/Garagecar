@@ -967,6 +967,225 @@ test("repair editor submits IDs and quantities; reception opens the correct sect
   }
 });
 
+test("ticket creation opens the exact active visit and converts only its approved final quote", async () => {
+  const visits = Array.from({ length: 14 }, (_, index) => ({
+    id: index + 1,
+    vehicleId: 1,
+    licensePlate: vehicle.licensePlate,
+    concern: "Old visit",
+    status: "closed",
+    quotes: [],
+  }));
+  visits.push({
+    id: 42,
+    vehicleId: 1,
+    licensePlate: vehicle.licensePlate,
+    concern: "Current visit",
+    status: "ready",
+    diagnosis: "Inspection complete",
+    quotes: [
+      { id: 8, stage: "final", status: "approved", revision: 2, totalAmount: 250, items: [] },
+    ],
+  });
+  const { dom, w, calls, errors } = await portal("admin", {
+    "/service/visits": visits,
+    "/service/resources": { mechanics: [mechanic] },
+  });
+  try {
+    const host = w.document.getElementById("serviceWorkspace");
+    const status = host.querySelector("#serviceStatus");
+    status.value = "closed";
+    status.dispatchEvent(new w.Event("change"));
+    host.querySelector('[data-service-page="next"]').click();
+    await w.openRepairModalWithVehicle(1);
+    assert.ok(w.document.getElementById("service-section").classList.contains("active-section"));
+    assert.equal(w.document.getElementById("repairModal").style.display, "none");
+    assert.equal(status.value, "all");
+    assert.equal(host.querySelectorAll("[data-visit-id]").length, 1);
+    const current = host.querySelector('[data-visit-id="42"]');
+    assert.ok(current.querySelector("details").open);
+    assert.equal(w.document.activeElement, current);
+    assert.equal(
+      calls.some((call) => call.method !== "GET"),
+      false,
+    );
+    current.querySelector('[data-service="convert"]').click();
+    const form = w.document.querySelector("dialog.care-dialog form");
+    assert.equal(form.elements.mechanicId.value, "1");
+    form.dispatchEvent(new w.Event("submit", { cancelable: true }));
+    await delay(100);
+    const converted = calls.filter((call) => call.method === "POST");
+    assert.equal(converted.length, 1);
+    assert.equal(converted[0].path, "/service/quotes/8/convert");
+    assert.deepEqual(converted[0].body, { mechanicId: 1 });
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("selecting a vehicle with an open visit blocks direct creation and keeps draft items", async () => {
+  const visit = {
+    id: 42,
+    vehicleId: 1,
+    licensePlate: vehicle.licensePlate,
+    concern: "Inspect",
+    status: "intake",
+    quotes: [],
+  };
+  const { dom, w, calls, errors } = await portal("admin", {
+    "/service/visits": [visit],
+    "/vehicles": [vehicle, { ...vehicle, id: 2, licensePlate: "30A22222" }],
+  });
+  try {
+    const $ = (id) => w.document.getElementById(id);
+    $("btnNewRepair").click();
+    await delay(100);
+    const task = $("taskSelect");
+    task.value = "Change oil";
+    task.dispatchEvent(new w.Event("change"));
+    $("btnAddItem").click();
+    $("repairVehicleSelect").value = "1";
+    $("repairVehicleSelect").dispatchEvent(new w.Event("change"));
+    assert.equal($("repairWorkflowNotice").hidden, false);
+    assert.match($("repairWorkflowMessage").textContent, /#42/);
+    assert.equal($("btnSaveTicket").disabled, true);
+    $("btnSaveTicket").click();
+    assert.equal(
+      calls.some((call) => call.method === "POST"),
+      false,
+    );
+    $("repairVehicleSelect").value = "2";
+    $("repairVehicleSelect").dispatchEvent(new w.Event("change"));
+    assert.equal($("repairWorkflowNotice").hidden, true);
+    assert.equal($("btnSaveTicket").disabled, false);
+    assert.match($("repairItemsTable").textContent, /Change oil/);
+    $("repairVehicleSelect").value = "1";
+    $("repairVehicleSelect").dispatchEvent(new w.Event("change"));
+    $("btnOpenServiceVisit").click();
+    await delay(100);
+    assert.equal($("repairModal").style.display, "none");
+    assert.ok($("serviceWorkspace").querySelector('[data-visit-id="42"]'));
+    assert.equal(
+      calls.some((call) => call.method === "POST"),
+      false,
+    );
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("saving rechecks new service visits and preserves the repair draft on a failed lookup", async () => {
+  let visitCreated = false,
+    fail = false;
+  const { dom, w, calls, errors } = await portal("admin", {
+    "/service/visits": () =>
+      fail
+        ? response(null, 503, "Cannot load visits")
+        : response(
+            visitCreated
+              ? [
+                  {
+                    id: 42,
+                    vehicleId: 1,
+                    licensePlate: vehicle.licensePlate,
+                    concern: "Inspect",
+                    status: "intake",
+                    quotes: [],
+                  },
+                ]
+              : [],
+          ),
+  });
+  try {
+    const $ = (id) => w.document.getElementById(id);
+    await w.openRepairModalWithVehicle(1);
+    $("taskSelect").value = "Change oil";
+    $("taskSelect").dispatchEvent(new w.Event("change"));
+    $("btnAddItem").click();
+    fail = true;
+    $("btnSaveTicket").click();
+    await delay(100);
+    assert.equal(
+      calls.some((call) => call.method === "POST"),
+      false,
+    );
+    assert.equal($("repairModal").style.display, "block");
+    assert.match($("repairItemsTable").textContent, /Change oil/);
+    assert.equal($("btnSaveTicket").disabled, false);
+    fail = false;
+    visitCreated = true;
+    $("btnSaveTicket").click();
+    await delay(100);
+    assert.equal($("repairWorkflowNotice").hidden, false);
+    assert.equal($("btnSaveTicket").disabled, true);
+    assert.equal($("repairModal").style.display, "block");
+    assert.match($("repairItemsTable").textContent, /Change oil/);
+    assert.equal(
+      calls.some((call) => call.method === "POST"),
+      false,
+    );
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
+test("assignment of a ticket linked to an open service visit can still be changed", async () => {
+  const ticket = {
+    id: 7,
+    vehicleId: 1,
+    vehicle,
+    mechanicId: 1,
+    mechanicName: mechanic.fullName,
+    serviceVisitId: 42,
+    status: "working",
+    totalAmount: 50,
+    items: [
+      {
+        id: 1,
+        taskName: "Change oil",
+        inventoryId: null,
+        quantity: 1,
+        laborPrice: 50,
+        partPrice: 0,
+      },
+    ],
+  };
+  const { dom, w, calls, errors } = await portal("admin", {
+    "/repairs": [ticket],
+    "/service/visits": [
+      {
+        id: 42,
+        vehicleId: 1,
+        licensePlate: vehicle.licensePlate,
+        status: "in_workshop",
+        ticketId: 7,
+        quotes: [],
+      },
+    ],
+  });
+  try {
+    w.document.querySelector('[data-action="edit"][data-id="7"]').click();
+    await delay(100);
+    assert.equal(w.document.getElementById("repairModal").style.display, "block");
+    assert.equal(w.document.getElementById("repairWorkflowNotice").hidden, true);
+    w.document.getElementById("btnSaveTicket").click();
+    await delay(100);
+    const updated = calls.find((call) => call.path === "/repairs/7" && call.method === "PUT");
+    assert.ok(updated);
+    assert.deepEqual(updated.body, { mechanicId: 1 });
+    assert.equal(
+      calls.some((call) => call.method === "POST"),
+      false,
+    );
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
 test("existing stock uses atomic receipt endpoint instead of creating duplicate material", async () => {
   const { dom, w, calls } = await portal("admin");
   try {

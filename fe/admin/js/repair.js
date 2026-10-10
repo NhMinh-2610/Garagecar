@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let items = [],
     inventory = [],
     tickets = [],
+    activeVisits = [],
+    saving = false,
     editingId = null;
   const money = formatCurrency;
   const esc = Garage.escape;
@@ -105,14 +107,59 @@ document.addEventListener("DOMContentLoaded", async () => {
       items.reduce((s, i) => s + i.quantity * i.partPrice + Number(i.laborPrice), 0),
     );
   }
+  const selectedVisit = () =>
+    !editingId &&
+    activeVisits.find((v) => v.vehicleId === Number(byId("repairVehicleSelect").value));
+  function updateWorkflow() {
+    const visit = selectedVisit();
+    byId("repairWorkflowNotice").hidden = !visit;
+    byId("btnSaveTicket").disabled = saving || Boolean(visit);
+    if (!visit) return;
+    const latest = [...(visit.quotes || [])]
+      .reverse()
+      .find((q) => ["pending", "approved", "converted"].includes(q.status));
+    const nextStep = visit.ticketId
+      ? `Tiếp tục xử lý phiếu #${visit.ticketId} đã có.`
+      : latest?.stage === "final" && latest.status === "approved"
+        ? "Chọn Chuyển vào xưởng và phân công thợ để tạo phiếu từ báo giá đã duyệt."
+        : latest?.status === "pending"
+          ? "Ghi nhận xác nhận của khách cho báo giá đang chờ duyệt. Chỉ báo giá chính thức đã duyệt mới chuyển thành phiếu."
+          : "Hoàn tất kiểm tra kỹ, lập báo giá chính thức và lấy xác nhận của khách trước khi chuyển vào xưởng.";
+    byId("repairWorkflowMessage").textContent =
+      `Xe đang có lượt dịch vụ #${visit.id}. ${nextStep} Các hạng mục đang nhập được giữ lại khi bạn đổi xe.`;
+  }
+  async function openVisit(visit) {
+    if (!Garage.openServiceVisit)
+      throw Error("Mục Cố vấn & Báo giá chưa sẵn sàng. Hãy tải lại trang.");
+    await Garage.openServiceVisit(visit.id);
+    modal.style.display = "none";
+    showToast("Thực hiện bước tiếp theo tại lượt kiểm tra & báo giá của xe.", "info");
+  }
+  byId("repairVehicleSelect").onchange = updateWorkflow;
+  byId("btnOpenServiceVisit").onclick = async () => {
+    const visit = selectedVisit();
+    if (!visit) return;
+    try {
+      await openVisit(visit);
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  };
   async function open(vehicleId = null, ticket = null) {
     try {
-      const [vehicles, mechanics, parts, wages] = await Promise.all([
+      const [vehicles, mechanics, parts, wages, visits] = await Promise.all([
         Garage.request("/vehicles"),
         loadMechanics(),
         Garage.request("/inventory"),
         Garage.request("/settings/wages"),
+        ticket ? Promise.resolve([]) : Garage.request("/service/visits"),
       ]);
+      activeVisits = visits.filter((v) => v.status !== "closed");
+      const visit = !ticket && activeVisits.find((v) => v.vehicleId === vehicleId);
+      if (visit) {
+        await openVisit(visit);
+        return;
+      }
       editingId = ticket?.id || null;
       inventory = parts;
       items = ticket ? ticket.items.map((i) => ({ ...i })) : [];
@@ -123,7 +170,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       byId("repairVehicleSelect").replaceChildren(
         new Option("-- Chọn xe --", ""),
-        ...selectable.map((v) => new Option(v.licensePlate + " — " + v.customerName, v.id)),
+        ...selectable.map(
+          (v) =>
+            new Option(
+              v.licensePlate +
+                " — " +
+                v.customerName +
+                (activeVisits.some((visit) => visit.vehicleId === v.id) ? " · Theo báo giá" : ""),
+              v.id,
+            ),
+        ),
       );
       byId("repairVehicleSelect").value = ticket?.vehicleId || vehicleId || "";
       byId("repairVehicleSelect").disabled = Boolean(ticket);
@@ -159,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         : ticket
           ? "Lưu thay đổi"
           : "Tạo phiếu";
-      byId("btnSaveTicket").disabled = false;
+      updateWorkflow();
       renderItems();
       modal.style.display = "block";
     } catch (error) {
@@ -220,11 +276,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   byId("btnSaveTicket").onclick = async () => {
     const button = byId("btnSaveTicket");
+    if (button.disabled) return;
     if (!byId("repairVehicleSelect").value || !items.length) {
       showToast("Chọn xe và thêm ít nhất một hạng mục.", "warning");
       return;
     }
     button.disabled = true;
+    saving = true;
+    byId("repairVehicleSelect").disabled = true;
     const payload = { mechanicId: Number(byId("mechanicSelect").value) || null };
     if (!editingId) payload.vehicleId = Number(byId("repairVehicleSelect").value);
     if (!byId("btnAddItem").disabled)
@@ -235,6 +294,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         laborPrice,
       }));
     try {
+      // Kiem tra lai truoc khi luu: co van co the vua tao luot cho xe nay.
+      if (!editingId) {
+        activeVisits = (await Garage.request("/service/visits")).filter(
+          (v) => v.status !== "closed",
+        );
+        if (selectedVisit()) {
+          updateWorkflow();
+          showToast("Xe cần chuyển phiếu từ báo giá. Mở lượt dịch vụ để tiếp tục.", "warning");
+          return;
+        }
+      }
       await Garage.request("/repairs" + (editingId ? "/" + editingId : ""), {
         method: editingId ? "PUT" : "POST",
         body: payload,
@@ -245,7 +315,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
       showToast(error.message, "error");
     } finally {
-      button.disabled = false;
+      saving = false;
+      byId("repairVehicleSelect").disabled = Boolean(editingId);
+      updateWorkflow();
     }
   };
   byId("repair-section").addEventListener("click", async (event) => {
