@@ -30,6 +30,16 @@ Giao diện dùng chung bố cục, điều hướng theo nhóm công việc, b�
 
 ## Chạy nhanh trên Windows
 
+**Demo bằng Docker Desktop:** bật Docker Engine rồi chạy lệnh sau tại thư mục gốc; script build, chờ dịch vụ sẵn sàng và tạo dữ liệu mẫu:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1
+```
+
+Mở `http://localhost:3000`. Database Docker riêng, không tự dùng dữ liệu PostgreSQL trên máy. Hướng dẫn pgAdmin, điện thoại/HTTPS, backup và xử lý cổng nằm tại [Docker và demo Windows](docs/deployment.md).
+
+**Chạy bằng Python và PostgreSQL trên máy:**
+
 Cần Python 3.11+ và một database PostgreSQL đang chạy. Các lệnh dưới đây chạy tại thư mục gốc project:
 
 ```powershell
@@ -72,7 +82,8 @@ Xe và các hồ sơ nghiệp vụ demo được lưu trong PostgreSQL. Thư vi�
 | [AI & nhắn tin](docs/ai-and-messaging.md)                    | Cấu hình AI, quyền riêng tư và hỗ trợ khách hàng            |
 | [Vận hành](docs/operations.md)                               | Backup, migration, audit và kiểm tra sau nâng cấp           |
 | [Dữ liệu demo](docs/demo-data.md)                            | Chuẩn bị trình bày, tài khoản và kịch bản dùng thử          |
-| [Docker](docs/deployment.md)                                 | Chạy bộ dịch vụ local bằng Compose                          |
+| [Docker](docs/deployment.md)                                 | Demo Windows, điện thoại/HTTPS và hướng triển khai web      |
+| [Kiểm tra chức năng](docs/verification.md)                   | Phạm vi kiểm thử, kết quả và các giới hạn đã biết           |
 | [Định hướng](docs/roadmap.md)                                | Phạm vi đã làm và các phần cần phát triển tiếp              |
 | [Đóng góp code](CONTRIBUTING.md) · [Git](GITHUB_GUIDE.md)    | Kiểm tra chất lượng, chia commit và review qua nhánh riêng  |
 

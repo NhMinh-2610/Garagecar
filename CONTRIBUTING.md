@@ -25,9 +25,11 @@ Node.js phục vụ kiểm thử và định dạng code; ứng dụng không c�
 
 ## Kiểm tra trước khi commit
 
+Trên Windows có thể chạy toàn bộ bằng `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1`. Script dừng ngay khi một bước lỗi. Chi tiết phạm vi tại [báo cáo kiểm tra](docs/verification.md).
+
 ```powershell
-.\.venv\Scripts\python.exe -m ruff check be
-.\.venv\Scripts\python.exe -m ruff format --check be
+.\.venv\Scripts\python.exe -m ruff check be scripts
+.\.venv\Scripts\python.exe -m ruff format --check be scripts
 .\.venv\Scripts\python.exe -m pytest -q
 npm.cmd run format:check
 npm.cmd run check:files
