@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (
       localStorage.getItem("token") &&
-      ["admin", "mechanic", "customer", "advisor", "accountant", "hr"].includes(user?.role)
+      ["admin", "mechanic", "customer", "advisor", "accountant"].includes(user?.role)
     ) {
       const link = document.getElementById("loginLink");
       link.textContent = "Vào không gian của tôi";

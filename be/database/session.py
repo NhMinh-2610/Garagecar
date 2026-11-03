@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from database.engine import engine
 
-# Session factory — expire_on_commit=False keeps objects usable after commit
+# Giữ thuộc tính ORM sau commit để tạo response mà không phát sinh truy vấn ngầm.
 AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
@@ -14,8 +14,8 @@ AsyncSessionLocal = async_sessionmaker(
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    FastAPI dependency that yields an async DB session per request.
-    The context manager (async with) handles closing automatically.
+    Mỗi request dùng một session; router/service quyết định khi nào commit.
+    Thoát context sẽ đóng session và hủy giao dịch chưa commit nếu có lỗi.
     """
     async with AsyncSessionLocal() as session:
         yield session

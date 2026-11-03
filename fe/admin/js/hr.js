@@ -1,7 +1,18 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   if (!(await Garage.whenAllowed("hr"))) return;
   const byId = (id) => document.getElementById(id),
     esc = Garage.escape;
+  // Hồ sơ nhân sự không cần quyền xem tài khoản hoặc tiếp nhận xe.
+  const canAccounts = await Garage.whenAllowed("accounts");
+  const canReception = await Garage.whenAllowed("reception");
+  if (!canAccounts) {
+    document.querySelector('[data-tab="hr-users"]').hidden = true;
+    byId("hr-users").hidden = true;
+    byId("btnCreateUser").hidden = true;
+    byId("btnAddMechanic").hidden = true;
+    byId("hrAccounts").closest(".metric").hidden = true;
+    byId("hrAdmins").closest(".metric").hidden = true;
+  }
   let mechanics = [],
     users = [],
     vehicles = [];
@@ -40,7 +51,6 @@
       customer: "Khách hàng",
       advisor: "Cố vấn dịch vụ",
       accountant: "Kế toán",
-      hr: "Nhân sự",
     };
     const filtered = users.filter(
       (u) =>
@@ -94,14 +104,21 @@
             `<button class="btn btn-sm" data-create-customer="${v.id}">${esc(v.licensePlate)} · Tạo tài khoản</button>`,
         )
         .join("")}</div>`;
+    if (!canAccounts)
+      byId("mechanicsTable")
+        .querySelectorAll('[data-action="account"]')
+        .forEach((button) => {
+          button.hidden = true;
+          button.disabled = true;
+        });
   }
   async function load(context = {}) {
     const canRender = Garage.refreshGuard(context);
     try {
       [mechanics, users, vehicles] = await Promise.all([
         Garage.request("/mechanics?include_inactive=true"),
-        Garage.request("/auth/users"),
-        Garage.request("/vehicles"),
+        canAccounts ? Garage.request("/auth/users") : [],
+        canAccounts && canReception ? Garage.request("/vehicles") : [],
       ]);
       if (!canRender()) return;
       render();
@@ -310,7 +327,6 @@
         advisor: ["reception", "workshop", "maintenance", "messages"],
         mechanic: ["workshop", "maintenance"],
         accountant: ["finance", "reports"],
-        hr: ["hr"],
         customer: ["maintenance", "messages"],
       };
       const labels = {

@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     admin: "/admin",
     advisor: "/advisor",
     accountant: "/accountant",
-    hr: "/hr",
     mechanic: "/mechanic",
     customer: "/customer",
   };
@@ -12,7 +11,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     admin: "Quản trị viên",
     advisor: "Cố vấn dịch vụ",
     accountant: "Kế toán",
-    hr: "Nhân sự",
     mechanic: "Kỹ thuật viên",
     customer: "Khách hàng",
   };

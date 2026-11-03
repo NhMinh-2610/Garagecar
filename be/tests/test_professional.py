@@ -105,7 +105,7 @@ async def test_evidence_identity_privacy_and_rework_round(api):
 async def test_receipts_expenses_and_cross_role_controls(api):
     client, auth, ids, _, _ = api
     s = await staff_accounts(client, auth)
-    for role in ("advisor", "hr"):
+    for role in ("advisor",):
         assert (
             await client.get("/api/finance/expenses", headers=s[role])
         ).status_code == 403
@@ -233,10 +233,10 @@ async def test_shifts_leave_and_ev_qualifications(api):
     assert (
         await client.post("/api/hr/shifts", headers=s["advisor"], json=shift)
     ).status_code == 403
-    created = await client.post("/api/hr/shifts", headers=s["hr"], json=shift)
+    created = await client.post("/api/hr/shifts", headers=auth("admin"), json=shift)
     assert created.status_code == 201, created.text
     assert (
-        await client.post("/api/hr/shifts", headers=s["hr"], json=shift)
+        await client.post("/api/hr/shifts", headers=auth("admin"), json=shift)
     ).status_code == 409
     leave = await client.post(
         "/api/hr/leave",
@@ -247,19 +247,23 @@ async def test_shifts_leave_and_ev_qualifications(api):
     decide = f"/api/hr/leave/{lid}/decide"
     assert (
         await client.post(
-            decide, headers=s["hr"], json={"approved": True, "note": "Checked request"}
+            decide,
+            headers=auth("admin"),
+            json={"approved": True, "note": "Checked request"},
         )
     ).status_code == 409
     await client.post(
-        f"/api/hr/shifts/{created.json()['data']['id']}/cancel", headers=s["hr"]
+        f"/api/hr/shifts/{created.json()['data']['id']}/cancel", headers=auth("admin")
     )
     assert (
         await client.post(
-            decide, headers=s["hr"], json={"approved": True, "note": "Shift reassigned"}
+            decide,
+            headers=auth("admin"),
+            json={"approved": True, "note": "Shift reassigned"},
         )
     ).status_code == 200
     assert (
-        await client.post("/api/hr/shifts", headers=s["hr"], json=shift)
+        await client.post("/api/hr/shifts", headers=auth("admin"), json=shift)
     ).status_code == 409
     own = (await client.get("/api/hr/operations", headers=auth("mechanic"))).json()[
         "data"
@@ -295,7 +299,9 @@ async def test_shifts_leave_and_ev_qualifications(api):
         "validFrom": str(today()),
         "validUntil": str(today() + timedelta(days=365)),
     }
-    certificate = await client.post("/api/hr/certificates", headers=s["hr"], json=cert)
+    certificate = await client.post(
+        "/api/hr/certificates", headers=auth("admin"), json=cert
+    )
     assert certificate.status_code == 201
     assert (
         await client.post(
@@ -307,7 +313,7 @@ async def test_shifts_leave_and_ev_qualifications(api):
     assert (
         await client.post(
             f"/api/hr/certificates/{certificate.json()['data']['id']}/revoke",
-            headers=s["hr"],
+            headers=auth("admin"),
             json={"approved": False, "note": "Certificate withdrawn by issuer"},
         )
     ).status_code == 200

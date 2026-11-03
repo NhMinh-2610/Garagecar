@@ -42,7 +42,7 @@ async def test_customer_chat_privacy_read_and_reopen(api):
     cid = await begin(client, auth("customer"), vid)
     assert await begin(client, auth("customer"), vid) == cid
     path = f"/api/messaging/conversations/{cid}"
-    for actor in [auth("other"), auth("mechanic"), staff["accountant"], staff["hr"]]:
+    for actor in [auth("other"), auth("mechanic"), staff["accountant"]]:
         for endpoint, method, body in [
             ("/messages", "GET", None),
             ("/messages", "POST", message()),

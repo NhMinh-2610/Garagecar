@@ -39,9 +39,3 @@ class SystemParameterBase(BaseModel):
 
 class SystemParameterCreate(SystemParameterBase):
     pass
-
-
-class SystemParameterResponse(SystemParameterBase):
-    id: int
-
-    model_config = ConfigDict(from_attributes=True)

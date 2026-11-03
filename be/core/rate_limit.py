@@ -1,10 +1,7 @@
-"""
-core/rate_limit.py — Brute-force protection for login endpoints
-----------------------------------------------------------------
-Strategy: progressive lockout per identifier (email or IP).
-  - Window: 15 minutes
-  - Threshold: 5 failed attempts → HTTP 429
-  - No Redis required — uses the existing PostgreSQL database.
+"""Chặn đăng nhập khi một định danh có ít nhất 5 lần sai trong 15 phút.
+
+Lịch sử nằm trong PostgreSQL; đếm 15 phút gần nhất tại mỗi lần kiểm tra,
+không tăng thời gian khóa sau từng lần thử.
 """
 
 from datetime import timedelta

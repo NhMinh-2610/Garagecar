@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -23,21 +22,6 @@ class Settings(BaseSettings):
 
     cors_origin: str = "*"
     log_level: str = "INFO"
-
-    # AI provider selection: mock | openai | gemini | ollama
-    ai_provider: str = "mock"
-
-    # OpenAI
-    openai_api_key: Optional[str] = None
-    openai_model: str = "gpt-4o-mini"
-
-    # Google Gemini
-    gemini_api_key: Optional[str] = None
-    gemini_model: str = "gemini-2.5-flash"
-
-    # Ollama (local)
-    ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "llama3.2"
 
 
 settings = Settings()

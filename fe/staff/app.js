@@ -1,7 +1,7 @@
-/* Separate staff portal: no account administration is exposed to HR/accountants. */
+/* Portal cố vấn/kế toán; quản trị viên quản lý nhân sự tại portal admin. */
 document.addEventListener("DOMContentLoaded", async () => {
   const user = await Garage.permissionsReady,
-    names = { advisor: "Cố vấn dịch vụ", accountant: "Kế toán", hr: "Nhân sự" };
+    names = { advisor: "Cố vấn dịch vụ", accountant: "Kế toán" };
   if (!localStorage.getItem("token") || !names[user.role]) {
     location.replace("/login");
     return;
@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const defaults = {
     advisor: ["reception", "workshop", "maintenance", "messages"],
     accountant: ["finance", "reports"],
-    hr: ["hr"],
   };
   let allowed = defaults[user.role].filter((p) => !(user.disabledPermissions || []).includes(p));
   const esc = Garage.escape,
@@ -58,8 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     customers = [],
     catalog = { brands: [] },
     tickets = [],
-    visits = [],
-    employees = [];
+    visits = [];
   function dialog(title, body, save) {
     const d = document.createElement("dialog");
     d.className = "care-dialog";
@@ -151,10 +149,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         .join("") || '<tr><td colspan="5">Không có phiếu cần thu tiền.</td></tr>'
     }</tbody></table></div></div>`;
   }
-  function hr() {
-    document.getElementById("staffHR").innerHTML =
-      `<div class="section-heading"><div><p class="eyebrow">NHÂN SỰ / HỒ SƠ</p><h1>Hồ sơ nhân sự</h1><p class="section-description">Quản lý liên hệ, vị trí và ngày vào làm. Tài khoản và quyền truy cập do quản trị viên cấp.</p></div></div><div class="card"><div class="table-responsive"><table data-page-size="8"><thead><tr><th>Nhân viên</th><th>Vai trò / Bộ phận</th><th>Điện thoại</th><th>Ngày vào làm</th><th>Thao tác</th></tr></thead><tbody>${employees.map((u) => `<tr><td>${esc(u.fullName)}<small>${esc(u.email)} · ${u.isActive ? "Hoạt động" : "Đã khóa"}</small></td><td>${esc(names[u.role] || { mechanic: "Kỹ thuật viên", admin: "Quản trị viên" }[u.role] || u.role)}<small>${esc(u.profile?.department || "Chưa nhập")} · ${esc(u.profile?.jobTitle || "")}</small></td><td>${esc(u.profile?.phone || "—")}</td><td>${esc(u.profile?.startDate || "—")}</td><td><button class="btn btn-sm" data-staff="employee" data-id="${u.id}">Cập nhật hồ sơ</button></td></tr>`).join("") || '<tr><td colspan="5">Chưa có nhân viên.</td></tr>'}</tbody></table></div></div>`;
-  }
   async function load(context = {}) {
     const guard = Garage.refreshGuard(context);
     try {
@@ -178,13 +172,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (guard()) {
           [tickets, visits] = vals;
           finance();
-        }
-      }
-      if (allowed.includes("hr")) {
-        const rows = await Garage.request("/service/employees");
-        if (guard()) {
-          employees = rows;
-          hr();
         }
       }
     } catch (e) {
@@ -263,19 +250,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (a === "service") {
       document.querySelector('[data-target="service-section"]').click();
       return;
-    }
-    if (a === "employee") {
-      const u = employees.find((u) => u.id === id),
-        p = u.profile || {};
-      return dialog(
-        "Hồ sơ · " + u.fullName,
-        `<div class="form-grid">${field("Điện thoại", "phone", p.phone, "tel")}${field("Bộ phận", "department", p.department, "text", "required")}${field("Vị trí", "jobTitle", p.jobTitle, "text", "required")}${field("Ngày vào làm", "startDate", p.startDate, "date", "required")}</div><label class="form-group">Ghi chú<textarea name="note" rows="3" maxlength="2000">${esc(p.note || "")}</textarea></label>`,
-        (f) =>
-          Garage.request("/service/employees/" + id, {
-            method: "PUT",
-            body: Object.fromEntries(new FormData(f)),
-          }),
-      );
     }
     if (a === "pay") {
       const ticket = tickets.find((t) => t.id === id);

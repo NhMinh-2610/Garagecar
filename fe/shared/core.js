@@ -1,4 +1,4 @@
-/* Shared API, formatting and refresh contract for every portal. */
+/* HTTP client dùng chung; trì hoãn đồng bộ khi người dùng đang nhập để giữ bản nháp. */
 window.Garage = (() => {
   const base = (window.GARAGE_API_URL || `${location.origin}/api`).replace(/\/$/, "");
   const listeners = new Set();
@@ -34,6 +34,7 @@ window.Garage = (() => {
     if (label) label.textContent = text;
   }
   function refreshGuard(context = {}) {
+    // Ghi lại phiên thao tác trước khi tải; bỏ render nền nếu người dùng vừa sửa form.
     const version = activityVersion;
     return () => {
       if (!context.background || (version === activityVersion && !editing())) return true;

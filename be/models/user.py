@@ -6,8 +6,8 @@ from database.engine import Base
 
 class User(Base):
     """
-    User account — supports multiple roles: admin, advisor, accountant, hr, mechanic, customer.
-    Column names use camelCase to match the existing database schema.
+    Năm vai trò: admin, advisor, accountant, mechanic, customer.
+    Nhân sự thuộc admin. Giữ tên cột camelCase để tương thích dữ liệu hiện có.
     """
 
     __tablename__ = "users"

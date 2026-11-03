@@ -55,7 +55,7 @@ async def authorize_ticket(db, ticket, user):
 
 
 async def lock_ticket(db, ticket_id):
-    # Vehicle first: identical lock order to intake/create/delivery.
+    # Luôn khóa xe trước phiếu, cùng thứ tự với tiếp nhận/giao xe để giảm deadlock.
     vehicle_id = await db.scalar(
         select(RepairTicket.vehicleId).where(RepairTicket.id == ticket_id)
     )
@@ -79,6 +79,7 @@ async def replace_items(db, ticket, requested):
     for item in requested:
         if item.inventoryId:
             needed[item.inventoryId] += item.quantity
+    # Hoàn lượng cũ rồi trừ lượng mới trong cùng giao dịch; khóa theo ID tăng dần.
     ids = sorted(old.keys() | needed.keys())
     stock = {}
     if ids:
@@ -131,6 +132,7 @@ async def replace_items(db, ticket, requested):
     items = []
     for data in requested:
         part = stock.get(data.inventoryId)
+        # Giá vật tư lấy từ server; không dùng giá do client gửi.
         price = Decimal(part.unitPrice) if part else Decimal(0)
         labor = Decimal(data.laborPrice)
         total = price * data.quantity + labor

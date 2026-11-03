@@ -19,8 +19,9 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    FastAPI dependency: extract and validate the JWT Bearer token.
-    Attaches the decoded payload (id, email, role, fullName) to the request.
+    Đọc JWT, rồi lấy tài khoản và quyền hiện tại từ database.
+    Tài khoản bị khóa, vai trò cũ hoặc sessionVersion lệch đều nhận 401.
+    Không tin vai trò do client hoặc token cũ cung cấp.
     """
     try:
         if credentials is None:
@@ -30,6 +31,7 @@ async def get_current_user(
         if (
             user is None
             or not user.isActive
+            or user.role not in {role.value for role in Role}
             or payload.get("version", 0) != user.sessionVersion
         ):
             raise JWTError("Account no longer exists")
@@ -73,7 +75,6 @@ def require_role(*roles: Role) -> Callable:
             "settings": "catalog",
             "reports": "reports",
             "mechanics": "hr",
-            "ai": "workshop",
         }
         path = request.url.path.split("/")
         domain = domains.get(path[2]) if len(path) > 2 else None

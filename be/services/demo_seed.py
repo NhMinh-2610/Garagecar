@@ -58,7 +58,6 @@ DEMO_ACCOUNTS = {
     "admin": "Quản trị mẫu",
     "advisor": "Nguyễn An · Cố vấn mẫu",
     "accountant": "Lê Thu · Kế toán mẫu",
-    "hr": "Phạm Hà · Nhân sự mẫu",
     "mechanic": "Trần Minh · Kỹ thuật viên mẫu",
     "customer": "Hoàng Linh · Khách hàng mẫu",
 }
@@ -175,7 +174,7 @@ async def seed_demo(db, on: date | None = None):
             isActive=True,
             disabledPermissions=[],
         )
-    admin, advisor, accountant, hr, worker, customer = (
+    admin, advisor, accountant, worker, customer = (
         users[role] for role in DEMO_ACCOUNTS
     )
     mechanic = await dataset.add(
@@ -186,7 +185,7 @@ async def seed_demo(db, on: date | None = None):
         specialty="Chẩn đoán, bảo dưỡng và an toàn EV · DEMO",
         status="active",
     )
-    for role in ("admin", "advisor", "accountant", "hr", "mechanic"):
+    for role in ("admin", "advisor", "accountant", "mechanic"):
         await dataset.add(
             EmployeeProfile,
             userId=users[role].id,
@@ -195,13 +194,12 @@ async def seed_demo(db, on: date | None = None):
                 "admin": "Điều hành",
                 "advisor": "Dịch vụ",
                 "accountant": "Kế toán",
-                "hr": "Nhân sự",
                 "mechanic": "Xưởng kỹ thuật",
             }[role],
             jobTitle=DEMO_ACCOUNTS[role],
             startDate=on - timedelta(days=365),
             note=DEMO_NOTE,
-            updatedBy=hr.id,
+            updatedBy=admin.id,
         )
     for kind, offset in (
         ("ev_safety", 365),
@@ -216,10 +214,10 @@ async def seed_demo(db, on: date | None = None):
             certificateNumber=f"DEMO-{kind.upper()}",
             validFrom=on - timedelta(days=365),
             validUntil=on + timedelta(days=offset),
-            verifiedBy=hr.id,
+            verifiedBy=admin.id,
             status="verified",
         )
-    for role in ("advisor", "accountant", "hr", "mechanic"):
+    for role in ("advisor", "accountant", "mechanic"):
         for day_offset in (0, 1):
             await dataset.add(
                 StaffShift,
@@ -228,7 +226,7 @@ async def seed_demo(db, on: date | None = None):
                 endsAt=stamp(on + timedelta(days=day_offset), 10),
                 bay="Cầu nâng EV 01" if role == "mechanic" else "Văn phòng dịch vụ",
                 note=DEMO_NOTE,
-                createdBy=hr.id,
+                createdBy=admin.id,
                 status="scheduled",
             )
     for role, days, status in (
@@ -243,7 +241,7 @@ async def seed_demo(db, on: date | None = None):
             toDate=on + timedelta(days=days),
             reason=f"{DEMO_NOTE} Xin nghỉ việc gia đình.",
             status=status,
-            decidedBy=hr.id if status != "pending" else None,
+            decidedBy=admin.id if status != "pending" else None,
             decidedAt=stamp(on) if status != "pending" else None,
             decisionNote="[DEMO] Đã kiểm tra lịch phân ca."
             if status != "pending"

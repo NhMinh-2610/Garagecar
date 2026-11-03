@@ -63,7 +63,7 @@ async def register_staff(
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_role(Role.ADMIN)),
 ):
-    """Admin-only: create mechanic or admin accounts."""
+    """Quản trị viên cấp tài khoản cho một trong bốn vai trò nội bộ."""
     if body.role not in [r.value for r in STAFF_ROLES]:
         return error_response(
             f"Chỉ có thể tạo tài khoản với vai trò: {', '.join(r.value for r in STAFF_ROLES)}",
@@ -134,6 +134,7 @@ async def login(
     if (
         not user
         or not user.isActive
+        or user.role not in {role.value for role in Role}
         or not verify_password(body.password, user.password)
     ):
         # Record failure for both identifiers; always commit so counts are durable

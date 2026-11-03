@@ -25,7 +25,6 @@ from database.session import get_db
 from routers import (
     accounts,
     advisor_operations,
-    ai,
     auth,
     bookings,
     employees,
@@ -70,9 +69,9 @@ app = FastAPI(
     title="GarageCar API",
     description=(
         "RESTful API for GarageCar garage management system.\n\n"
-        "Features: multi-role authentication (admin/advisor/accountant/hr/mechanic/customer), "
+        "Features: five roles (admin/advisor/accountant/mechanic/customer), "
         "vehicle intake, repair ticket workflow, inventory management, "
-        "and an integrated **AI assistant** for repair diagnosis & cost estimation."
+        "maintenance schedules, finance, staff management and customer messaging."
     ),
     version="3.0.0",
     lifespan=lifespan,
@@ -118,7 +117,6 @@ app.include_router(vehicles.router)
 app.include_router(repairs.router)
 app.include_router(inventory.router)
 app.include_router(mechanics.router)
-app.include_router(ai.router)
 app.include_router(settings_router.router)
 app.include_router(reports.router)
 app.include_router(bookings.router)
@@ -139,7 +137,6 @@ async def health():
         "success": True,
         "message": "GarageCar Python API is running",
         "version": "3.0.0",
-        "ai_provider": settings.ai_provider,
     }
 
 
@@ -194,9 +191,13 @@ if _fe_dir.exists():
     async def accountant_page():
         return RedirectResponse(url="/static/accountant/index.html")
 
+    # Giữ liên kết cũ; nhân sự nay nằm trong portal quản trị.
     @app.get("/hr", include_in_schema=False)
+    @app.get("/hr/", include_in_schema=False)
+    @app.get("/hr/index.html", include_in_schema=False)
+    @app.get("/static/hr/index.html", include_in_schema=False)
     async def hr_page():
-        return RedirectResponse(url="/static/hr/index.html")
+        return RedirectResponse(url="/admin")
 
     @app.get("/service-worker.js", include_in_schema=False)
     async def service_worker():

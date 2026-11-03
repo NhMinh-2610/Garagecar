@@ -17,12 +17,10 @@ router = APIRouter(prefix="/api/mechanics", tags=["Mechanics"])
 async def list_mechanics(
     include_inactive: bool = False,
     db: AsyncSession = Depends(get_db),
-    user: dict = Depends(
-        require_role(Role.ADMIN, Role.MECHANIC, Role.ADVISOR, Role.HR)
-    ),
+    user: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC, Role.ADVISOR)),
 ):
     stmt = select(Mechanic).order_by(Mechanic.createdAt.desc())
-    if include_inactive and user["role"] not in ("admin", "hr"):
+    if include_inactive and user["role"] != "admin":
         raise HTTPException(403, "Chỉ admin được xem hồ sơ ngừng hoạt động")
     if not include_inactive:
         stmt = stmt.where(Mechanic.status == "active")

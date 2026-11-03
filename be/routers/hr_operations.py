@@ -20,8 +20,6 @@ router = APIRouter(prefix="/api/hr", tags=["HR operations"])
 def staff(user):
     if user["role"] == "customer":
         raise HTTPException(403, "Chỉ dành cho nhân viên garage")
-    if user["role"] == "hr" and "hr" not in user["permissions"]:
-        raise HTTPException(403, "Chức năng nhân sự đã bị khóa")
 
 
 async def employee(db, user_id):

@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     admin: "Quản trị",
     advisor: "Cố vấn",
     accountant: "Kế toán",
-    hr: "Nhân sự",
     mechanic: "Kỹ thuật viên",
   };
   const labels = {
@@ -77,7 +76,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     {
       advisor: "reception",
       accountant: "finance",
-      hr: "hr",
       mechanic: "workshop",
     }[user.role],
   );

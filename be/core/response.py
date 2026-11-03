@@ -10,7 +10,7 @@ def success_response(
     message: str = "Success",
     status_code: int = 200,
 ) -> JSONResponse:
-    """Return a standardised success JSON payload — mirrors Node.js sendSuccess()."""
+    """Trả JSON thống nhất cho frontend; thời gian thiếu múi giờ được hiểu là UTC."""
     return JSONResponse(
         status_code=status_code,
         content=jsonable_encoder(
@@ -29,7 +29,7 @@ def error_response(
     status_code: int = 400,
     error: Optional[str] = None,
 ) -> JSONResponse:
-    """Return a standardised error JSON payload — mirrors Node.js sendError()."""
+    """Trả lỗi theo cùng cấu trúc success/message để frontend hiển thị."""
     content: dict[str, Any] = {"success": False, "message": message}
     if error:
         content["error"] = error

@@ -77,7 +77,8 @@ def calculate_due(care, rules, records, on=None):
             status = "needs_review"
         if stale and due_date is None and not past_km:
             status = "needs_odometer"
-        # Cycle identifies the service event/initial baseline, never severity or today's date.
+        # Một chu kỳ gắn với lần bảo dưỡng/mốc ban đầu, không đổi theo ngày quét.
+        # Nhờ vậy worker chạy lại không tạo thêm nhắc hạn cho cùng một chu kỳ.
         anchor = (
             f"{last.id}:{last.performedOn}:{last.odometer}"
             if last

@@ -22,7 +22,7 @@ from jose import jwt
 
 from config.settings import settings
 
-# Argon2id parameters (OWASP recommended minimums)
+# Tham số Argon2id hiện dùng; thay đổi sẽ được needs_rehash phát hiện khi đăng nhập.
 _ph = PasswordHasher(
     time_cost=3,  # iterations
     memory_cost=65536,  # 64 MB — makes GPU/ASIC brute-force very expensive
@@ -43,7 +43,7 @@ def verify_password(plain: str, hashed: str) -> bool:
     """
     Verify password against stored hash.
     Supports both Argon2id (new) and bcrypt (legacy) hashes transparently.
-    Returns False on any mismatch — never raises to the caller.
+    Sai mật khẩu hoặc hash không hợp lệ trả False; lỗi hạ tầng khác không bị che.
     """
     if _BCRYPT_PREFIX.match(hashed):
         # Legacy bcrypt path — kept for backward compatibility

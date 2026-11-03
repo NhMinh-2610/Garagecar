@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     e = Garage.escape;
   host.innerHTML = `<div class="section-heading"><div><p class="eyebrow">CHAT / ${customer ? "GARAGE" : "KHÁCH HÀNG"}</p><h1 id="supportTitle">${customer ? "Nhắn garage" : "Hộp thư khách hàng"}</h1><p class="section-description">Tin nhắn được lưu trong tài khoản. Tự cập nhật mỗi 5 giây khi trang đang mở.</p></div><button class="btn" id="supportRefresh" type="button">Làm mới tin nhắn</button></div>
     <p id="supportError" class="inline-message error" role="alert" hidden></p><div class="support-layout">
-    <aside class="card support-inbox">${customer ? `<div class="support-new"><label for="supportVehicle">Trao đổi về xe</label><select id="supportVehicle"><option value="">Tư vấn chung</option></select><button id="supportNew" class="btn btn-primary" type="button">Bắt đầu / Mở hội thoại</button><button id="supportAskAI" class="btn" type="button">Hỏi AI trước</button></div>` : ""}
+    <aside class="card support-inbox">${customer ? `<div class="support-new"><label for="supportVehicle">Trao đổi về xe</label><select id="supportVehicle"><option value="">Tư vấn chung</option></select><button id="supportNew" class="btn btn-primary" type="button">Bắt đầu / Mở hội thoại</button></div>` : ""}
     <label for="supportSearch">Tìm hội thoại</label><input type="search" id="supportSearch" maxlength="100" placeholder="${customer ? "Tên, biển số…" : "Tên khách, biển số…"}"><div id="supportList" class="support-list"></div>
     <div class="support-pagination"><button id="supportPrev" class="btn btn-sm" type="button" disabled>Trước</button><button id="supportNext" class="btn btn-sm" type="button" disabled>Sau</button></div></aside>
     <div class="card support-thread"><div id="supportEmpty" class="support-empty"><strong>${customer ? "Garage sẵn sàng nhận câu hỏi của bạn" : "Chọn một hội thoại để trả lời"}</strong><p>${customer ? "Chọn xe hoặc tư vấn chung rồi bắt đầu. Garage sẽ trả lời khi có nhân viên phụ trách." : "Nhận phụ trách trước khi trả lời. Các hội thoại chưa phân công nằm trong hộp thư chung."}</p></div>
@@ -52,7 +52,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     changing = false,
     lastMarked = 0,
     retry = null;
-  let vehicleChoiceReady;
   const visible = () =>
     document.visibilityState !== "hidden" &&
     $("messages-section").classList.contains("active-section");
@@ -265,9 +264,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       showError(failure.message);
     }
   });
-  $("supportAskAI")?.addEventListener("click", () =>
-    document.querySelector('[data-target="chat-section"]')?.click(),
-  );
   $("supportList").addEventListener("click", (event) => {
     const button = event.target.closest("[data-thread]");
     if (button) openThread(inbox.find((thread) => thread.id === Number(button.dataset.thread)));
@@ -397,33 +393,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       status: selected?.status === "closed" ? "open" : "closed",
     }),
   );
-  Garage.openSupport = async ({ question = "", vehicleId = null } = {}) => {
-    if (!customer) return;
-    document.querySelector('[data-target="messages-section"]')?.click();
-    await vehicleChoiceReady;
-    try {
-      await ensureConversation(vehicleId);
-      if (question) {
-        if ($("supportInput").value.trim()) {
-          showError("Bạn đang có bản nháp. Hãy gửi hoặc xóa bản nháp trước khi chuyển câu hỏi AI.");
-          return;
-        }
-        $("supportInput").value = question.slice(0, 4000);
-        drafts.set(selected.id, $("supportInput").value);
-        $("supportInput").focus();
-        $("supportSendState").textContent =
-          "Câu hỏi được chuyển thành bản nháp; bấm Gửi khi bạn sẵn sàng.";
-      }
-    } catch (failure) {
-      showError(failure.message);
-    }
-  };
   Garage.messaging = { refresh };
   document.addEventListener("garage:section", (event) => {
     if (event.detail?.target === "messages-section") refresh();
   });
   if (customer) {
-    vehicleChoiceReady = Garage.request("/vehicles/my-vehicles")
+    Garage.request("/vehicles/my-vehicles")
       .then((vehicles) => {
         for (const vehicle of vehicles) {
           const option = document.createElement("option");

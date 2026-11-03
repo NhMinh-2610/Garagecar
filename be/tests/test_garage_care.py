@@ -107,7 +107,7 @@ def test_exact_scope_and_stale_odometer():
 
 async def staff_accounts(client, auth):
     headers = {}
-    for role in ["advisor", "accountant", "hr"]:
+    for role in ["advisor", "accountant"]:
         result = await client.post(
             "/api/auth/users",
             headers=auth("admin"),
@@ -508,7 +508,7 @@ async def test_quotation_consent_stock_qc_and_cashier_permissions(api):
         )
     ).status_code == 200
     assert (
-        await client.post(followup_path, headers=s["hr"], json=followup_body)
+        await client.post(followup_path, headers=s["accountant"], json=followup_body)
     ).status_code == 403
     assert (
         await client.post(followup_path, headers=s["advisor"], json=followup_body)
@@ -526,17 +526,17 @@ async def test_quotation_consent_stock_qc_and_cashier_permissions(api):
 
 
 @pytest.mark.asyncio
-async def test_feature_lock_and_hr_cannot_grant_accounts(api):
+async def test_admin_manages_staff_and_feature_locks(api):
     client, auth, ids, factory, _ = api
     s = await staff_accounts(client, auth)
     assert (
-        await client.get("/api/service/employees", headers=s["hr"])
+        await client.get("/api/service/employees", headers=auth("admin"))
     ).status_code == 200
     uid = s["advisor_id"]
     assert (
         await client.put(
             f"/api/service/employees/{uid}",
-            headers=s["hr"],
+            headers=auth("admin"),
             json={
                 "department": "Service",
                 "jobTitle": "Advisor",
@@ -547,7 +547,7 @@ async def test_feature_lock_and_hr_cannot_grant_accounts(api):
     assert (
         await client.post(
             "/api/auth/users",
-            headers=s["hr"],
+            headers=s["accountant"],
             json={
                 "username": "hack",
                 "fullName": "Hack",

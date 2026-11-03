@@ -17,7 +17,6 @@ window.Garage.permissionsReady = window.Garage.request("/auth/me")
       ],
       advisor: ["reception", "workshop", "maintenance", "messages"],
       accountant: ["finance", "reports"],
-      hr: ["hr"],
       mechanic: ["workshop", "maintenance"],
       customer: ["maintenance", "messages"],
     };

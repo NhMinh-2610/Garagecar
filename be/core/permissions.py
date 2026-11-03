@@ -1,4 +1,7 @@
-"""Position defaults. Feature restrictions can only remove permissions."""
+"""Quyền mặc định của năm vai trò; khóa chức năng chỉ thu hẹp quyền.
+
+Quản trị viên quản lý nhân sự qua quyền ``hr``; đây không còn là vai trò riêng.
+"""
 
 ROLE_PERMISSIONS = {
     "admin": {
@@ -14,7 +17,6 @@ ROLE_PERMISSIONS = {
     },
     "advisor": {"reception", "workshop", "maintenance", "messages"},
     "accountant": {"finance", "reports"},
-    "hr": {"hr"},
     "mechanic": {"workshop", "maintenance"},
     "customer": {"maintenance", "messages"},
 }

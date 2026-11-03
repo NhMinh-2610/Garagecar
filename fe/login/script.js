@@ -61,8 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return "/advisor";
       case "accountant":
         return "/accountant";
-      case "hr":
-        return "/hr";
       case "admin":
         return "/admin";
       case "mechanic":
@@ -80,8 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return "Cố vấn dịch vụ";
       case "accountant":
         return "Kế toán";
-      case "hr":
-        return "Nhân sự";
       case "admin":
         return "Quản Trị Viên";
       case "mechanic":

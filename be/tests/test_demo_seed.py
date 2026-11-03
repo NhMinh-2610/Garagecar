@@ -53,7 +53,7 @@ async def test_complete_demo_is_additive_repeatable_and_has_valid_business_links
         manifest = await seed_demo(db)
         await db.commit()
     assert manifest["created"] is True
-    assert len(manifest["accounts"]) == 6
+    assert len(manifest["accounts"]) == 5
     assert len(manifest["vehicles"]) == 8
     after = await snapshot(factory)
     for table, rows in before.items():
@@ -158,7 +158,7 @@ async def test_complete_demo_is_additive_repeatable_and_has_valid_business_links
             )
         )
 
-    # Exercise actual portal APIs as all six seeded roles, including credentials.
+    # Exercise actual portal APIs as all five seeded roles, including credentials.
     tokens = {}
     for account in manifest["accounts"]:
         response = await client.post(
@@ -173,7 +173,7 @@ async def test_complete_demo_is_additive_repeatable_and_has_valid_business_links
         ("admin", "/api/bookings"),
         ("advisor", "/api/service/visits"),
         ("accountant", "/api/finance/receipts"),
-        ("hr", "/api/hr/operations"),
+        ("admin", "/api/hr/operations"),
         ("mechanic", "/api/repairs/my-tasks"),
         ("customer", "/api/repairs/my-repairs"),
         ("customer", "/api/maintenance/reminders"),
@@ -240,7 +240,7 @@ async def test_complete_demo_is_additive_repeatable_and_has_valid_business_links
         (
             "POST",
             f"/api/hr/leave/{leave_id}/decide",
-            "hr",
+            "admin",
             {"approved": True, "note": "Demo leave approved"},
             200,
         ),

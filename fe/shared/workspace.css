@@ -1030,7 +1030,7 @@ dialog table {
   }
 }
 
-/* One compact shell for the six roles. Tables and dialogs own their scrolling. */
+/* Bố cục chung cho năm vai trò; bảng và hộp thoại có vùng cuộn riêng. */
 body.workspace-shell {
   --sidebar-width: 248px;
   --workspace-header-height: 72px;

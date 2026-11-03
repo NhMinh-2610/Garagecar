@@ -4,6 +4,7 @@ from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 REQUIRED_TABLES = {
+    "legacy_hr_role_migration",
     "vehicles",
     "users",
     "repair_tickets",

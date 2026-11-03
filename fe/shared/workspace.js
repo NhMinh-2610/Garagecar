@@ -5,7 +5,6 @@
     advisor: "Cố vấn dịch vụ",
     mechanic: "Kỹ thuật viên",
     accountant: "Kế toán",
-    hr: "Nhân sự",
     customer: "Khách hàng",
   };
   const groups = {
@@ -50,7 +49,6 @@
     advisor: ["workshop", "care", "personal"],
     mechanic: ["workshop", "care", "personal"],
     accountant: ["finance", "personal"],
-    hr: ["people", "personal"],
     customer: ["vehicles", "support"],
   };
   const labels = {
@@ -75,14 +73,11 @@
     "service-section": "Kiểm tra & Báo giá",
     "maintenance-section": "Bảo dưỡng & Nhắc hạn",
     "messages-section": "Hộp thư khách hàng",
-    "chat-section": "Hỏi AI về xe",
   };
   const grouping = (target, role) => {
     if (target === "dashboard-section") return "home";
     if (role === "customer")
-      return ["chat-section", "messages-section", "maintenance-section"].includes(target)
-        ? "support"
-        : "vehicles";
+      return ["messages-section", "maintenance-section"].includes(target) ? "support" : "vehicles";
     if (target === "myWork-section") return role === "admin" ? "people" : "personal";
     if (
       ["finance-section", "financeOps-section", "report-section", "staffReport-section"].includes(
@@ -123,7 +118,6 @@
   const targetIcon = (target) => {
     if (target === "dashboard-section") return "grid";
     if (/message/.test(target)) return "message";
-    if (/chat/.test(target)) return "spark";
     if (/inventory/.test(target)) return "box";
     if (/maintenance/.test(target)) return "shield";
     if (/booking|myWork|hrOps/.test(target)) return "calendar";
@@ -580,11 +574,6 @@
         ["financeOps-section", "Đề nghị chi & Sổ thu"],
         ["staffReport-section", "Xem doanh thu"],
       ],
-      hr: [
-        ["staffHR-section", "Hồ sơ nhân sự"],
-        ["hrOps-section", "Phân ca & Chứng chỉ"],
-        ["myWork-section", "Lịch cá nhân"],
-      ],
       customer: [
         ["booking-section", "Đặt lịch dịch vụ"],
         ["service-section", "Xác nhận báo giá"],
@@ -789,7 +778,6 @@
           advisor: "reception",
           accountant: "finance",
           mechanic: "workshop",
-          hr: "hr",
         }[role];
         add(
           personalPermission,

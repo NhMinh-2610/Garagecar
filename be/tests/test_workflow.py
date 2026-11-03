@@ -29,6 +29,7 @@ def migrate(connection):
         "005_professional_workflow.py",
         "006_car_brands.py",
         "007_support_chat.py",
+        "008_merge_hr_role.py",
     ]:
         spec = importlib.util.spec_from_file_location(
             "migration", Path(__file__).parents[1] / "migrations/versions" / filename

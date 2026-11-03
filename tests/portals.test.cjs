@@ -133,54 +133,6 @@ test("support chat preserves drafts, renders safe messages and retries with the 
   }
 });
 
-test("AI question becomes a garage draft without sending it or replacing an existing draft", async () => {
-  const thread = {
-    id: 10,
-    customerId: 1,
-    vehicleId: 1,
-    licensePlate: vehicle.licensePlate,
-    status: "open",
-    unreadCount: 0,
-  };
-  const { dom, w, calls, errors } = await portal("customer", {
-    "/messaging/conversations": (options) =>
-      response(options.method === "POST" ? thread : { items: [thread], totalUnread: 0 }),
-    "/messaging/conversations/10/messages": {
-      conversation: thread,
-      items: [],
-      customerReadId: 0,
-      staffReadId: 0,
-    },
-  });
-  try {
-    const $ = (id) => w.document.getElementById(id);
-    $("chatInput").value = "Xe rung khi phanh, garage kiểm tra được không?";
-    $("chatVehicle").value = "1";
-    $("chatToGarage").click();
-    await delay(100);
-    assert.ok($("messages-section").classList.contains("active-section"));
-    assert.equal($("supportInput").value, $("chatInput").value);
-    assert.equal(
-      calls.find((call) => call.path === "/messaging/conversations" && call.method === "POST").body
-        .vehicleId,
-      1,
-    );
-    assert.equal(
-      calls.filter((call) => call.path.endsWith("/messages") && call.method === "POST").length,
-      0,
-    );
-    $("supportInput").value = "Existing unsent draft";
-    $("supportInput").dispatchEvent(new w.Event("input"));
-    $("chatToGarage").click();
-    await delay(90);
-    assert.equal($("supportInput").value, "Existing unsent draft");
-    assert.ok($("supportError").textContent.includes("bản nháp"));
-    assert.deepEqual(errors, []);
-  } finally {
-    dom.window.close();
-  }
-});
-
 test("support timeout preserves the draft when the server already stored the message", async () => {
   let attempt = 0,
     stored;
@@ -306,113 +258,6 @@ test("advisor claims and closes chat, admin assigns chat, and feature restrictio
       calls.some((call) => call.path.startsWith("/messaging")),
       false,
     );
-    assert.deepEqual(errors, []);
-  } finally {
-    dom.window.close();
-  }
-});
-
-test("customer chat keeps context, shares vehicle history only by choice and renders replies safely", async () => {
-  const { dom, w, calls, errors } = await portal("customer", {
-    "/ai/chat/info": {
-      provider: "ollama",
-      model: "test-model",
-      isDemo: false,
-      configured: true,
-      usesExternalService: false,
-    },
-    "/ai/chat": {
-      reply: "<img src=x onerror=alert(1)> Kiểm tra tại garage.",
-      isDemo: false,
-      sources: [
-        { title: "Bad link", url: "javascript:alert(1)" },
-        { title: "Hãng", url: "https://example.com/manual", type: "manufacturer_reference" },
-      ],
-    },
-  });
-  try {
-    const $ = (id) => w.document.getElementById(id);
-    w.document.querySelector('[data-target="chat-section"]').click();
-    assert.ok($("chat-section").classList.contains("active-section"));
-    assert.equal($("chatSend").disabled, false);
-    const ask = async (text) => {
-      $("chatInput").value = text;
-      $("chatForm").dispatchEvent(new w.Event("submit", { cancelable: true }));
-      await delay(60);
-    };
-    await ask("Xe rung");
-    assert.equal(calls.find((c) => c.path === "/ai/chat").body.vehicleId, undefined);
-    assert.equal($("chatMessages").querySelector("img"), null);
-    assert.ok($("chatMessages").textContent.includes("<img src=x"));
-    assert.equal($("chatMessages").querySelectorAll("a").length, 1);
-    $("chatVehicle").value = "1";
-    $("chatVehicle").dispatchEvent(new w.Event("change"));
-    assert.equal($("chatUseHistory").disabled, false);
-    $("chatUseHistory").checked = true;
-    $("chatUseHistory").dispatchEvent(new w.Event("change"));
-    await ask("Cần bảo dưỡng gì?");
-    let sent = calls.filter((c) => c.path === "/ai/chat").at(-1).body;
-    assert.equal(sent.vehicleId, 1);
-    assert.equal(sent.messages.length, 1);
-    await ask("Vậy tôi cần đến garage khi nào?");
-    sent = calls.filter((c) => c.path === "/ai/chat").at(-1).body;
-    assert.deepEqual(
-      sent.messages.map((m) => m.role),
-      ["user", "assistant", "user"],
-    );
-    $("chatVehicle").value = "";
-    $("chatVehicle").dispatchEvent(new w.Event("change"));
-    await ask("Hỏi chung");
-    sent = calls.filter((c) => c.path === "/ai/chat").at(-1).body;
-    assert.equal(sent.vehicleId, undefined);
-    assert.equal(sent.messages.length, 1);
-    $("chatBooking").click();
-    assert.ok($("booking-section").classList.contains("active-section"));
-    assert.deepEqual(errors, []);
-  } finally {
-    dom.window.close();
-  }
-});
-
-test("chat keeps failed questions, prevents duplicate sends and labels demo replies", async () => {
-  let finish;
-  const { dom, w, calls, errors } = await portal("customer", {
-    "/ai/chat/info": {
-      provider: "mock",
-      isDemo: true,
-      configured: true,
-      usesExternalService: false,
-    },
-    "/ai/chat": () =>
-      new Promise((resolve) => {
-        finish = resolve;
-      }),
-  });
-  try {
-    const $ = (id) => w.document.getElementById(id);
-    const submit = () => $("chatForm").dispatchEvent(new w.Event("submit", { cancelable: true }));
-    assert.ok($("chatProvider").textContent.includes("demo"));
-    $("chatInput").value = "Xe có tiếng kêu";
-    submit();
-    submit();
-    await delay(20);
-    assert.equal(calls.filter((c) => c.path === "/ai/chat").length, 1);
-    assert.equal($("chatReset").disabled, true);
-    assert.equal($("chatVehicle").disabled, true);
-    finish(response(null, 503, "AI tạm thời chưa kết nối"));
-    await delay(60);
-    assert.equal($("chatInput").value, "Xe có tiếng kêu");
-    assert.ok($("chatError").textContent.includes("AI tạm thời"));
-    submit();
-    await delay(20);
-    finish(response({ reply: "Câu trả lời mẫu", isDemo: true }));
-    await delay(60);
-    assert.equal(calls.filter((c) => c.path === "/ai/chat").at(-1).body.messages.length, 1);
-    assert.ok($("chatMessages").textContent.includes("[Câu trả lời mẫu]"));
-    assert.equal($("chatInput").value, "");
-    assert.equal($("chatSend").disabled, false);
-    $("chatReset").click();
-    assert.equal($("chatMessages").querySelectorAll("article").length, 0);
     assert.deepEqual(errors, []);
   } finally {
     dom.window.close();
@@ -897,6 +742,68 @@ async function portal(role, overrides = {}, options = {}) {
   return { dom, w, calls, errors };
 }
 
+test("admin with only HR permission edits staff profiles without requesting account or reception access", async () => {
+  let reject = true;
+  const { dom, w, errors, calls } = await portal("admin", {
+    "/auth/me": {
+      id: 1,
+      role: "admin",
+      fullName: "HR manager",
+      disabledPermissions: [
+        "accounts",
+        "reception",
+        "workshop",
+        "catalog",
+        "finance",
+        "reports",
+        "maintenance",
+        "messages",
+      ],
+    },
+    "/service/employees": [
+      {
+        id: 2,
+        role: "advisor",
+        fullName: "Cố vấn",
+        email: "advisor@example.com",
+        isActive: true,
+        profile: {
+          department: "Dịch vụ",
+          jobTitle: "Cố vấn",
+          startDate: "2026-01-01",
+          phone: "0901234567",
+        },
+      },
+    ],
+    "/service/employees/2": () => (reject ? response(null, 409, "Chưa lưu được") : response(null)),
+  });
+  try {
+    assert.ok(w.document.getElementById("hr-users").hidden);
+    assert.equal(
+      calls.some((c) => ["/auth/users", "/vehicles"].includes(c.path)),
+      false,
+    );
+    w.document.querySelector('[data-employee="2"]').click();
+    const form = w.document.querySelector("dialog[open] form");
+    form.elements.department.value = "Dịch vụ mới";
+    form.dispatchEvent(new w.Event("submit", { cancelable: true }));
+    await delay(60);
+    assert.equal(form.elements.department.value, "Dịch vụ mới");
+    assert.match(form.querySelector(".care-error").textContent, /Chưa lưu/);
+    reject = false;
+    form.dispatchEvent(new w.Event("submit", { cancelable: true }));
+    await delay(60);
+    assert.equal(form.isConnected, false);
+    assert.equal(
+      calls.filter((c) => c.path === "/service/employees/2").at(-1).body.department,
+      "Dịch vụ mới",
+    );
+    assert.deepEqual(errors, []);
+  } finally {
+    dom.window.close();
+  }
+});
+
 test("a portal on a custom port loads vehicle data from the same server", async () => {
   const { dom, w, errors, calls } = await portal(
     "customer",
@@ -914,7 +821,7 @@ test("a portal on a custom port loads vehicle data from the same server", async 
   }
 });
 
-for (const role of ["admin", "customer", "mechanic", "advisor", "accountant", "hr"]) {
+for (const role of ["admin", "customer", "mechanic", "advisor", "accountant"]) {
   test(`${role} portal loads its actual HTML and scripts without runtime errors`, async () => {
     const { dom, w, errors, calls } = await portal(role);
     try {
@@ -922,6 +829,20 @@ for (const role of ["admin", "customer", "mechanic", "advisor", "accountant", "h
       assert.ok(w.document.querySelector("section.active-section"));
       assert.ok(calls.length > 0);
       assert.equal(w.Garage.base, "http://localhost:8000/api");
+      assert.equal(
+        calls.some((call) => call.path.startsWith("/ai/")),
+        false,
+      );
+      if (role === "customer") {
+        assert.equal(w.document.getElementById("chat-section"), null);
+        assert.equal(w.document.getElementById("supportAskAI"), null);
+      }
+      if (role === "admin") {
+        assert.deepEqual(
+          [...w.document.querySelectorAll("#newRole option")].map((o) => o.value).sort(),
+          ["accountant", "admin", "advisor", "customer", "mechanic"],
+        );
+      }
       const contentArea = w.document.querySelector(".content-body");
       assert.ok(contentArea);
       for (const button of w.document.querySelectorAll("#sidebar .nav-item[data-target]")) {
@@ -1718,7 +1639,7 @@ test("customer approves the displayed quotation revision and cannot edit scopes"
 });
 
 test("staff portals load only their job functions and accountant waits for QC", async () => {
-  for (const role of ["advisor", "accountant", "hr"]) {
+  for (const role of ["advisor", "accountant"]) {
     const overrides = {
       "/auth/me": { id: 1, role, fullName: "Staff", disabledPermissions: [] },
       "/auth/customer-lookup": [],
@@ -1740,11 +1661,7 @@ test("staff portals load only their job functions and accountant waits for QC", 
       const visible = [...w.document.querySelectorAll(".nav-item:not([hidden])")].map(
         (n) => n.dataset.permission,
       );
-      assert.ok(
-        visible.includes(
-          role === "advisor" ? "workshop" : role === "accountant" ? "finance" : "hr",
-        ),
-      );
+      assert.ok(visible.includes(role === "advisor" ? "workshop" : "finance"));
       assert.ok(!calls.some((c) => c.path === "/auth/users"));
       if (role === "accountant") {
         assert.equal(w.document.querySelector('[data-staff="pay"]').disabled, true);
@@ -1827,7 +1744,7 @@ test("VinFast model filter excludes combustion parts on an EV", async () => {
 });
 
 test("independent staff pages contain only their job menus and operations", async () => {
-  for (const role of ["advisor", "accountant", "hr"]) {
+  for (const role of ["advisor", "accountant"]) {
     const { dom, w, calls, errors } = await portal(role, {
       "/maintenance/catalog": { components: [], brands: [], presets: [] },
       "/maintenance/vehicles": [],
@@ -1847,11 +1764,6 @@ test("independent staff pages contain only their job menus and operations", asyn
         assert.ok(pages.includes("financeOps-section"));
         assert.ok(!pages.includes("staffHR-section"));
         assert.ok(!calls.some((x) => x.path === "/service/employees"));
-      }
-      if (role === "hr") {
-        assert.ok(pages.includes("hrOps-section"));
-        assert.ok(!pages.includes("service-section"));
-        assert.ok(!calls.some((x) => x.path === "/repairs"));
       }
       assert.deepEqual(errors, []);
     } finally {

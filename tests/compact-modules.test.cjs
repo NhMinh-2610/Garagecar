@@ -104,7 +104,7 @@ test("professional tabs paginate independently and retain filters, selection and
   };
   const { dom, w, errors, refresh } = await moduleView(
     "professional.js",
-    "hr",
+    "admin",
     "hrOpsWorkspace",
     fixtures,
     ["hr"],

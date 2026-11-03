@@ -27,7 +27,7 @@ class RegisterRequest(BaseModel):
 
 
 class StaffRegisterRequest(RegisterRequest):
-    """Used by admin to create mechanic / admin accounts."""
+    """Quản trị viên cấp tài khoản nhân viên theo STAFF_ROLES."""
 
     role: str  # validated against STAFF_ROLES in the router
     mechanicId: Optional[PositiveId] = None
@@ -60,7 +60,7 @@ class TokenResponse(BaseModel):
 
 class AccountCreate(RegisterRequest):
     model_config = ConfigDict(extra="forbid")
-    role: Literal["admin", "mechanic", "customer", "advisor", "accountant", "hr"]
+    role: Literal["admin", "mechanic", "customer", "advisor", "accountant"]
     mechanicId: Optional[PositiveId] = None
     vehicleIds: list[PositiveId] = Field(default_factory=list, max_length=100)
 

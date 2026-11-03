@@ -1,5 +1,5 @@
-/* Update by changing the cache version. Never intercept authenticated API requests. */
-const CACHE = "autopro-public-shell-v13";
+/* Tăng CACHE khi đổi danh sách tệp. Chỉ cache tài nguyên tĩnh, luôn bỏ qua API và token. */
+const CACHE = "autopro-public-shell-v14";
 const FILES = [
   "/static/shared/icons.svg",
   "/static/shared/garage-illustration.svg",
@@ -13,13 +13,11 @@ const FILES = [
   "/static/shared/messaging.js",
   "/static/shared/messaging.css",
   "/static/shared/chat.css",
-  "/static/customer/js/chat.js",
   "/static/shared/evidence.js",
   "/static/shared/professional.js",
   "/static/shared/professional.css",
   "/static/advisor/index.html",
   "/static/accountant/index.html",
-  "/static/hr/index.html",
   "/static/staff/app.js",
   "/static/offline.html",
   "/static/shared/ui.css",

@@ -95,7 +95,6 @@ def main():
                     "/api/service/visits",
                     f"/api/reports/revenue?month={date.today():%Y-%m}",
                 ],
-                "hr": ["/api/service/employees", "/api/hr/operations"],
                 "mechanic": [
                     "/api/repairs/my-tasks",
                     "/api/service/visits",
@@ -108,7 +107,6 @@ def main():
                     "/api/service/visits",
                     "/api/maintenance/reminders",
                     "/api/messaging/conversations",
-                    "/api/ai/chat/info",
                 ],
             }
             for role, endpoints in paths.items():

@@ -21,7 +21,7 @@
     <script src="js/workspace.js" defer></script>
     <script src="../shared/booking.js" defer></script>
     <link rel="stylesheet" href="../shared/chat.css" />
-    <script src="js/chat.js" defer></script>
+
     <link rel="stylesheet" href="../shared/messaging.css" />
     <script src="../shared/messaging.js" defer></script>
     <link rel="stylesheet" href="../shared/care.css" />
@@ -50,9 +50,7 @@
         <button class="nav-item" data-target="booking-section">
           <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>Đặt lịch dịch vụ
         </button>
-        <button class="nav-item" data-target="chat-section">
-          <i class="fa-solid fa-comments" aria-hidden="true"></i>Hỏi AI về xe
-        </button>
+
         <button class="nav-item" data-title="Nhắn garage" data-target="messages-section">
           Nhắn garage <span id="supportUnread" class="support-badge" hidden>0</span>
         </button>
@@ -326,108 +324,7 @@
             </div>
           </div>
         </section>
-        <section id="chat-section" aria-labelledby="chatTitle">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">KHÁCH HÀNG / TRỢ LÝ XE</p>
-              <h1 id="chatTitle">Hỏi AI về xe</h1>
-              <p class="section-description">
-                Mô tả dấu hiệu bất thường, hỏi cách chăm sóc xe hoặc tìm hiểu một hạng mục sửa chữa.
-              </p>
-            </div>
-            <button id="chatReset" class="btn" type="button">Cuộc trò chuyện mới</button>
-          </div>
-          <div class="chat-layout">
-            <div class="card chat-card">
-              <div class="chat-toolbar">
-                <span id="chatProvider" class="chat-provider" role="status"
-                  >Đang kiểm tra kết nối…</span
-                ><span class="muted">Trợ lý tư vấn ô tô</span>
-              </div>
-              <div
-                id="chatMessages"
-                class="chat-messages"
-                role="log"
-                aria-label="Cuộc trò chuyện với trợ lý AI"
-                aria-live="polite"
-                aria-relevant="additions text"
-              >
-                <p class="chat-empty">
-                  Xin chào! Bạn đang gặp vấn đề gì với xe? Hãy cho biết triệu chứng, lúc xảy ra và
-                  đèn báo nếu có.
-                </p>
-              </div>
-              <p id="chatError" class="text-red" role="alert" hidden></p>
-              <form id="chatForm" class="chat-composer">
-                <label for="chatInput">Câu hỏi của bạn</label
-                ><textarea
-                  id="chatInput"
-                  rows="3"
-                  maxlength="2000"
-                  required
-                  placeholder="Ví dụ: Xe rung khi phanh ở tốc độ thấp, tôi nên kiểm tra gì?"
-                ></textarea>
-                <div class="chat-actions">
-                  <span id="chatCount" class="muted">0 / 2000</span
-                  ><span id="chatPending" role="status" hidden>AI đang trả lời…</span
-                  ><button id="chatStop" class="btn" type="button" hidden>Dừng chờ</button
-                  ><button id="chatSend" class="btn btn-primary" type="submit" disabled>
-                    Gửi câu hỏi
-                  </button>
-                </div>
-              </form>
-            </div>
-            <aside class="card chat-context">
-              <h3>Hỏi theo xe của tôi</h3>
-              <div class="form-group">
-                <label for="chatVehicle">Chọn xe</label
-                ><select id="chatVehicle">
-                  <option value="">Hỏi chung về xe</option>
-                </select>
-              </div>
-              <label class="chat-consent"
-                ><input id="chatUseHistory" type="checkbox" disabled /><span
-                  >Sử dụng hồ sơ và lịch sử sửa chữa của xe đã chọn</span
-                ></label
-              >
-              <p id="chatPrivacy" class="field-help">
-                Chỉ gửi hồ sơ khi bạn bật lựa chọn này. Lịch sử chat giữ trong trang đang mở và mất
-                khi tải lại.
-              </p>
-              <h3>Gợi ý câu hỏi</h3>
-              <div class="chat-suggestions">
-                <button
-                  class="btn"
-                  type="button"
-                  data-chat-question="Xe có tiếng kêu khi phanh, tôi nên kiểm tra gì?"
-                >
-                  Tiếng kêu khi phanh</button
-                ><button
-                  class="btn"
-                  type="button"
-                  data-chat-question="Xe VinFast báo lỗi khi sạc, tôi nên làm gì?"
-                >
-                  Lỗi sạc xe điện</button
-                ><button
-                  class="btn"
-                  type="button"
-                  data-chat-question="Xe của tôi cần kiểm tra những gì trước chuyến đi dài?"
-                >
-                  Chuẩn bị chuyến đi
-                </button>
-              </div>
-              <p class="panel-note">
-                AI hỗ trợ tìm hiểu ban đầu. Chẩn đoán, mã phụ tùng, chu kỳ bảo dưỡng và báo giá cần
-                được garage đối chiếu đúng xe. Nếu mất phanh, có khói/cháy hoặc rò nhiên liệu, hãy
-                dừng an toàn và gọi cứu hộ.
-              </p>
-              <button id="chatToGarage" class="btn" type="button">Chuyển câu hỏi cho cố vấn</button
-              ><button id="chatBooking" class="btn" type="button">
-                Đặt lịch kiểm tra tại garage
-              </button>
-            </aside>
-          </div>
-        </section>
+
         <section id="messages-section" aria-labelledby="supportTitle">
           <div id="supportWorkspace"></div>
         </section>
