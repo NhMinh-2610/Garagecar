@@ -12,9 +12,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1
 
 Script tạo `be/.env` với JWT secret ngẫu nhiên **chỉ khi file chưa tồn tại**, build image, chờ các dịch vụ healthy rồi tạo dữ liệu demo. Lần đầu cần Internet để tải image và thư viện. Những lần sau Docker dùng lại các lớp đã build. Seed demo chạy lặp không tạo lại bộ dữ liệu đã đánh dấu.
 
-Nếu đã có `be/.env`, script giữ nguyên file; kiểm tra JWT secret riêng và đặt `AI_PROVIDER=mock` khi muốn demo không gọi dịch vụ AI trả phí. Để chạy mà không seed: thêm `-NoSeed`.
+Nếu đã có `be/.env`, script giữ nguyên file; kiểm tra JWT secret riêng. Hệ thống không cần cấu hình AI. Để chạy mà không seed: thêm `-NoSeed`.
 
-Mở **[ứng dụng](http://localhost:3000)**. Email demo: `{role}.demo@autopro.com`, role gồm `admin`, `advisor`, `accountant`, `hr`, `mechanic`, `customer`; mật khẩu `Demo123456!`. Xem [kịch bản dữ liệu mẫu](demo-data.md).
+Mở **[ứng dụng](http://localhost:3000)**. Email demo: `{role}.demo@autopro.com`, role gồm `admin`, `advisor`, `accountant`, `mechanic`, `customer`; mật khẩu `Demo123456!`. Xem [kịch bản dữ liệu mẫu](demo-data.md).
 
 Có thể dùng lệnh Docker trực tiếp sau khi chuẩn bị `.env`:
 
@@ -73,7 +73,7 @@ docker compose logs --tail 100 backend frontend
 python scripts/smoke-test.py --demo
 ```
 
-Nếu Python không có trong PATH, dùng `.\.venv\Scripts\python.exe scripts/smoke-test.py --demo` hoặc `py scripts/smoke-test.py --demo`. Với cổng khác, thêm `--url http://localhost:3001`. Script kiểm tra HTTP thật, đăng nhập và đọc API theo sáu vai trò; không tạo phiếu, thu tiền hoặc sửa dữ liệu nghiệp vụ. Bỏ `--demo` để chỉ kiểm tra tài nguyên công khai/readiness.
+Nếu Python không có trong PATH, dùng `.\.venv\Scripts\python.exe scripts/smoke-test.py --demo` hoặc `py scripts/smoke-test.py --demo`. Với cổng khác, thêm `--url http://localhost:3001`. Script kiểm tra HTTP thật, đăng nhập và đọc API theo năm vai trò; không tạo phiếu, thu tiền hoặc sửa dữ liệu nghiệp vụ. Bỏ `--demo` để chỉ kiểm tra tài nguyên công khai/readiness.
 
 Sau khi sửa code:
 
@@ -81,7 +81,7 @@ Sau khi sửa code:
 docker compose up --build -d --wait --wait-timeout 180
 ```
 
-Frontend được mount chỉ đọc từ `fe/`; backend cần rebuild để nhận code Python mới. Compose khởi động lại Nginx sau khi cập nhật backend để nhận đúng địa chỉ container. Khi chỉ đổi cấu hình Nginx, chạy `docker compose restart frontend`. Không dùng `--reload` trong Docker để tránh quét OneDrive liên tục. Nginx nén CSS/JS/JSON; API không cache, các file giao diện được kiểm tra lại để tránh phiên bản cũ. Giữ một worker backend cho demo vì giới hạn AI và tác vụ nhắc hạn hiện nằm trong từng tiến trình.
+Frontend được mount chỉ đọc từ `fe/`; backend cần rebuild để nhận code Python mới. Compose khởi động lại Nginx sau khi cập nhật backend để nhận đúng địa chỉ container. Khi chỉ đổi cấu hình Nginx, chạy `docker compose restart frontend`. Không dùng `--reload` trong Docker để tránh quét OneDrive liên tục. Nginx nén CSS/JS/JSON; API không cache, các file giao diện được kiểm tra lại để tránh phiên bản cũ. Giữ một worker backend cho demo vì tác vụ nhắc hạn hiện chạy trong từng tiến trình.
 
 Dừng dịch vụ mà giữ dữ liệu:
 

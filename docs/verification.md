@@ -1,5 +1,7 @@
 # Kiểm tra chức năng · 10/10/2026
 
+> Đây là kết quả lịch sử của bản trước khi bỏ AI/gộp HR. Không dùng các số liệu dưới đây để xác nhận phiên bản hiện tại. Xem [kiểm thử bản 5 vai trò](report/testing-and-demo.md).
+
 Phạm vi: kiểm thử nghiệp vụ với PostgreSQL, tương tác frontend bằng HTML/script thật trong jsdom và HTTP qua bộ Docker PostgreSQL–FastAPI–Nginx. Các ca backend dùng schema `garage_test_*` tạm, không ghi vào bảng nghiệp vụ `public` đang sử dụng.
 
 ## Kết quả

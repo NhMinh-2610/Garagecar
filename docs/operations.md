@@ -24,17 +24,28 @@ Backup/audit không tự liên kết xe với khách hoặc thợ với tài kho
 
 ## Migration hiện tại
 
-| Revision           | Nội dung                                                                 |
-| ------------------ | ------------------------------------------------------------------------ |
-| `001`              | Chuẩn hóa dữ liệu và liên kết nghiệp vụ ban đầu                          |
-| `002`              | Chống dò đăng nhập                                                       |
-| `003`              | Tài khoản và kiểm soát phiên đăng nhập                                   |
-| `004`              | Hồ sơ/lịch bảo dưỡng, tiếp nhận/báo giá, nhân viên và giới hạn chức năng |
-| `005`              | Ảnh/mã vật tư, thu–chi, phân ca/chứng chỉ/nghỉ phép, chăm sóc sau sửa    |
-| `006`              | Bổ sung thương hiệu xe, gồm VinFast                                      |
-| `007_support_chat` | Hội thoại, tin nhắn và con trỏ đọc hỗ trợ khách hàng                     |
+| Revision            | Nội dung                                                                 |
+| ------------------- | ------------------------------------------------------------------------ |
+| `001`               | Chuẩn hóa dữ liệu và liên kết nghiệp vụ ban đầu                          |
+| `002`               | Chống dò đăng nhập                                                       |
+| `003`               | Tài khoản và kiểm soát phiên đăng nhập                                   |
+| `004`               | Hồ sơ/lịch bảo dưỡng, tiếp nhận/báo giá, nhân viên và giới hạn chức năng |
+| `005`               | Ảnh/mã vật tư, thu–chi, phân ca/chứng chỉ/nghỉ phép, chăm sóc sau sửa    |
+| `006`               | Bổ sung thương hiệu xe, gồm VinFast                                      |
+| `007_support_chat`  | Hội thoại, tin nhắn và con trỏ đọc hỗ trợ khách hàng                     |
+| `008_merge_hr_role` | Gộp vai trò HR vào admin, giữ lịch sử, khóa tài khoản chờ xét quyền      |
 
-Tên đầy đủ và phụ thuộc xem trong [migrations/versions](../be/migrations/versions). Migration mới nhất thêm ba bảng chat; không cần xóa hoặc tạo lại database để dùng tính năng.
+Tên đầy đủ và phụ thuộc xem trong [migrations/versions](../be/migrations/versions). Migration mới nhất thêm bảng ghi nhận chuyển đổi tài khoản; không xóa hoặc tạo lại database.
+
+## Chuyển tài khoản nhân sự cũ
+
+Revision `008_merge_hr_role` giữ nguyên ID và mọi liên kết lịch sử. Tài khoản `hr` được chuyển thành `admin` nhưng **bị khóa**, tăng `sessionVersion` và khóa toàn bộ chức năng. Trạng thái cũ được lưu tại `legacy_hr_role_migration`. Không tự cấp toàn quyền cho người trước đây chỉ quản lý nhân sự.
+
+Sau nâng cấp, đăng nhập bằng quản trị viên hiện có; đối chiếu người dùng cũ, xét chức năng cần cấp trong **Nhân sự & Tài khoản → Khóa chức năng**, rồi mới mở lại tài khoản nếu phù hợp. Nếu chỉ phụ trách nhân sự, giữ khóa các nhóm còn lại và mở `hr`. Vai trò vẫn là admin nhưng quyền đã được thu hẹp. Không dùng SQL để bỏ đồng loạt các khóa.
+
+Đường dẫn cũ `/hr` chuyển đến `/admin`; người chưa được mở lại không đăng nhập được. Không còn tạo tài khoản vai trò HR qua API/UI. Tài khoản admin cũ không bị đổi. Nếu cần quay về phiên bản trước, phục hồi **bản backup đã xác minh** cùng mã nguồn tương ứng; migration không tự downgrade vì người dùng có thể đã đổi quyền sau nâng cấp.
+
+Code không đọc cấu hình AI nữa; các biến AI cũ trong môi trường không được dùng. Không cần khóa API AI để chạy project.
 
 ## Kiểm tra sau nâng cấp
 
@@ -64,6 +75,6 @@ Báo cáo doanh thu hiện tổng hợp phiếu đã thanh toán, còn sổ thu 
 
 Giữ bản dump ngoài thư mục làm việc và thử phục hồi vào **database thử riêng** bằng công cụ Restore của pgAdmin/`pg_restore`. Xác minh dữ liệu và cấu hình trước khi quyết định chuyển ứng dụng sang bản phục hồi; không phục hồi đè database đang dùng để thử nghiệm.
 
-Theo dõi lỗi API, dung lượng PostgreSQL/ảnh, backup, worker nhắc hạn và dịch vụ AI. Ảnh đang nằm trong database nên dung lượng backup sẽ tăng theo sử dụng. Không ghi token, mật khẩu, API key hoặc toàn bộ nội dung chat riêng vào log.
+Theo dõi lỗi API, dung lượng PostgreSQL/ảnh, backup, worker nhắc hạn. Ảnh đang nằm trong database nên dung lượng backup sẽ tăng theo sử dụng. Không ghi token, mật khẩu, API key hoặc toàn bộ nội dung chat riêng vào log.
 
 Compose local tự chạy migration khi backend khởi động, phù hợp thử nghiệm; database đang sử dụng vẫn cần backup và quy trình nâng cấp riêng. Xem [Docker](deployment.md).

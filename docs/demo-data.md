@@ -13,6 +13,8 @@ Sau khi database đã ở migration mới nhất, chạy tại thư mục gốc:
 
 Sau lần tạo thành công, manifest `demo_dataset_v1` trong `system_parameters` đánh dấu bộ đã cài. Chạy lại không nhân bản hoặc reset mật khẩu/trạng thái đã được người dùng thay đổi. Không xóa manifest để ép seed lại trên database đang dùng; muốn trình bày từ đầu hãy tạo database thử riêng.
 
+Bộ demo mới có 5 tài khoản. Nếu database từng tạo bản 6 vai trò, manifest cũ được giữ nguyên để không ghi đè dữ liệu; tài khoản nhân sự cũ được migration 008 chuyển sang admin ở trạng thái khóa, chờ xét quyền. Không dùng tài khoản đó cho demo 5 vai trò.
+
 ## Đăng nhập
 
 | Vai trò       | Email                         | Portal        |
@@ -20,13 +22,12 @@ Sau lần tạo thành công, manifest `demo_dataset_v1` trong `system_parameter
 | Quản trị      | `admin.demo@autopro.com`      | `/admin`      |
 | Cố vấn        | `advisor.demo@autopro.com`    | `/advisor`    |
 | Kế toán       | `accountant.demo@autopro.com` | `/accountant` |
-| Nhân sự       | `hr.demo@autopro.com`         | `/hr`         |
 | Kỹ thuật viên | `mechanic.demo@autopro.com`   | `/mechanic`   |
 | Khách hàng    | `customer.demo@autopro.com`   | `/customer`   |
 
-Mật khẩu ban đầu của cả 6 tài khoản: **`Demo123456!`**. Nếu đã đổi mật khẩu, seed không đặt lại.
+Mật khẩu ban đầu của cả 5 tài khoản: **`Demo123456!`**. Nếu đã đổi mật khẩu, seed không đặt lại.
 
-Lệnh cũ `python be/seed.py` chỉ tạo bộ tối thiểu khi bảng `users` trống: `admin@autopro.com`, `mechanic@autopro.com`, `customer@autopro.com`, mật khẩu ban đầu `123456`. Nó bỏ qua database đã có người dùng; không tạo tài khoản cố vấn/kế toán/nhân sự. Dùng `--demo` để thử đầy đủ chức năng.
+Lệnh cũ `python be/seed.py` chỉ tạo bộ tối thiểu khi bảng `users` trống: `admin@autopro.com`, `mechanic@autopro.com`, `customer@autopro.com`, mật khẩu ban đầu `123456`. Nó bỏ qua database đã có người dùng; không tạo tài khoản cố vấn/kế toán. Dùng `--demo` để thử đầy đủ chức năng.
 
 ## Các tình huống có sẵn
 
@@ -46,8 +47,8 @@ Lệnh cũ `python be/seed.py` chỉ tạo bộ tối thiểu khi bảng `users`
 1. Quản trị mở bảng điều hành để giới thiệu các nhóm công việc và dữ liệu tổng hợp.
 2. Cố vấn xem xe/lượt tiếp nhận; khách mở báo giá đang chờ để thấy cơ chế xác nhận.
 3. Thợ mở phiếu được giao, ảnh bao bì/mã vật tư và checklist; cố vấn xem phần nghiệm thu.
-4. Kế toán xem phiếu chờ thu/chứng từ; nhân sự xem phân ca, chứng chỉ và nghỉ phép.
-5. Khách xem bảo dưỡng, hỏi AI với `mock` rồi nhắn garage; cố vấn trả lời trong hộp thư riêng.
+4. Kế toán xem phiếu chờ thu/chứng từ; quản trị viên xem phân ca, chứng chỉ và nghỉ phép.
+5. Khách xem bảo dưỡng, nhắn garage; cố vấn trả lời trong hộp thư riêng.
 
 Thao tác xác nhận/thu tiền sẽ thay đổi trạng thái của chính bản demo. Ngày dữ liệu được neo tại lần seed đầu, không tự dịch sang ngày mới mỗi lần chạy. Nên dùng database thử riêng nếu cần lặp lại bài trình bày từ đầu.
 

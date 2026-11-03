@@ -2,7 +2,7 @@
 
 Ứng dụng quản lý garage ô tô vừa và lớn, kết nối tiếp nhận, xưởng, kho, tài chính, nhân sự và khách hàng trên cùng dữ liệu. **GarageCar** là tên project; **AutoPro** là tên hiển thị trên giao diện.
 
-Khách hàng và kỹ thuật viên có thể cài PWA từ trình duyệt điện thoại. Quản trị viên, cố vấn, kế toán và nhân sự có các portal riêng, dùng chung hệ thống tài khoản và phân quyền.
+Khách hàng và kỹ thuật viên có thể cài PWA từ trình duyệt điện thoại. Quản trị viên, cố vấn và kế toán có các portal riêng; quản trị viên phụ trách nhân sự, dùng chung hệ thống tài khoản và phân quyền.
 
 ## Chức năng chính
 
@@ -13,7 +13,7 @@ Khách hàng và kỹ thuật viên có thể cài PWA từ trình duyệt đi�
 | Bảo dưỡng           | 41 nhóm bộ phận, 15 hãng và 100 dòng xe, gồm VinFast; lịch theo cấu hình xe, nguồn xác minh và hàng đợi nhắc hạn |
 | Tài chính & báo cáo | Thu tiền phiếu hoàn thành, đề nghị/duyệt chi, báo cáo doanh thu theo kỳ                                          |
 | Nhân sự & tài khoản | Hồ sơ, phân ca, nghỉ phép, chứng chỉ; cấp tài khoản, khóa chức năng và thu hồi phiên đăng nhập                   |
-| Hỗ trợ khách hàng   | Hỏi AI về xe, tùy chọn chia sẻ lịch sử xe; nhắn trực tiếp garage, phân công cố vấn và theo dõi tin chưa đọc      |
+| Hỗ trợ khách hàng   | Nhắn trực tiếp garage, phân công cố vấn và theo dõi tin chưa đọc                                                 |
 
 Giao diện dùng chung bố cục, điều hướng theo nhóm công việc, bảng phân trang và biểu mẫu. Đồng bộ dữ liệu không tải lại trang và trì hoãn cập nhật khi người dùng đang nhập liệu.
 
@@ -27,7 +27,6 @@ Giao diện dùng chung bố cục, điều hướng theo nhóm công việc, b�
 | Dữ liệu    | PostgreSQL, asyncpg, Alembic; pgAdmin 4 dùng để quản trị database |
 | Frontend   | HTML, CSS, JavaScript thuần; Chart.js và Font Awesome             |
 | Xác thực   | JWT, mật khẩu Argon2, quyền theo vai trò và chức năng             |
-| AI         | Mock để demo; adapter OpenAI, Gemini hoặc Ollama qua cấu hình     |
 | Kiểm tra   | Pytest, Node test runner + jsdom, Ruff, Prettier                  |
 
 ## Chạy nhanh trên Windows
@@ -67,13 +66,17 @@ Mở [ứng dụng](http://localhost:8000), [đăng nhập](http://localhost:800
 
 ## Tài khoản demo
 
-Sau khi chạy `seed.py --demo`, đăng nhập bằng email `{role}.demo@autopro.com`, với `role` là `admin`, `advisor`, `accountant`, `hr`, `mechanic` hoặc `customer`. Mật khẩu ban đầu của cả 6 tài khoản: **`Demo123456!`**.
+Sau khi chạy `seed.py --demo`, đăng nhập bằng email `{role}.demo@autopro.com`, với `role` là `admin`, `advisor`, `accountant`, `mechanic` hoặc `customer`. Mật khẩu ban đầu của cả 5 tài khoản: **`Demo123456!`**.
 
-Dữ liệu demo được đánh dấu và tạo một lần, không ghi đè dữ liệu có sẵn. Xem [danh sách tài khoản và kịch bản demo](docs/demo-data.md). `AI_PROVIDER=mock` là phản hồi mô phỏng, chưa phải LLM thật.
+Dữ liệu demo được đánh dấu và tạo một lần, không ghi đè dữ liệu có sẵn. Xem [danh sách tài khoản và kịch bản demo](docs/demo-data.md). Hệ thống không tích hợp AI và không gọi API nhà cung cấp AI.
 
-Xe và các hồ sơ nghiệp vụ demo được lưu trong PostgreSQL. Thư viện tham khảo bảo dưỡng đọc từ JSON; số liệu bảng điều hành được tổng hợp từ API. Xem [nguồn dữ liệu hiển thị](docs/architecture.md#nguồn-dữ-liệu-hiển-thị) để phân biệt dữ liệu đã lưu, tài nguyên tham khảo và phản hồi AI.
+Xe và các hồ sơ nghiệp vụ demo được lưu trong PostgreSQL. Thư viện tham khảo bảo dưỡng đọc từ JSON; số liệu bảng điều hành được tổng hợp từ API. Xem [nguồn dữ liệu hiển thị](docs/architecture.md#nguồn-dữ-liệu-hiển-thị) để phân biệt dữ liệu đã lưu, tài nguyên tham khảo.
 
 ## Tài liệu
+
+**Bắt đầu tại [Hướng dẫn hiểu code](docs/code-guide.md) và [Bộ tài liệu báo cáo](docs/report/README.md)**: yêu cầu, use case, kiến trúc, ERD, tuần tự, trạng thái, bảng API/dữ liệu, kế hoạch và kiểm thử.
+
+Phiên bản hiện tại có **5 vai trò, không AI**. Đã có web/PWA; ứng dụng di động riêng trong phiếu nhiệm vụ còn phải triển khai. Database cũ cần [migration 008](docs/operations.md#chuyển-tài-khoản-nhân-sự-cũ) trước khi chạy code mới.
 
 | Tài liệu                                                     | Dùng khi                                                    |
 | ------------------------------------------------------------ | ----------------------------------------------------------- |
@@ -81,7 +84,7 @@ Xe và các hồ sơ nghiệp vụ demo được lưu trong PostgreSQL. Thư vi�
 | [Kiến trúc](docs/architecture.md)                            | Tìm vị trí code, quan hệ dữ liệu và quy tắc giao dịch       |
 | [Nghiệp vụ & vai trò](docs/workflows.md)                     | Hiểu công việc của từng chức danh và luồng sửa chữa         |
 | [Bảo dưỡng & nguồn nghiên cứu](docs/maintenance-research.md) | Tra phạm vi hãng xe, xác minh lịch và quản lý nhắc hạn      |
-| [AI & nhắn tin](docs/ai-and-messaging.md)                    | Cấu hình AI, quyền riêng tư và hỗ trợ khách hàng            |
+| [Nhắn tin garage](docs/messaging.md)                         | Hội thoại khách/cố vấn, phân công, quyền riêng tư           |
 | [Vận hành](docs/operations.md)                               | Backup, migration, audit và kiểm tra sau nâng cấp           |
 | [Dữ liệu demo](docs/demo-data.md)                            | Chuẩn bị trình bày, tài khoản và kịch bản dùng thử          |
 | [Docker](docs/deployment.md)                                 | Demo Windows, điện thoại/HTTPS và hướng triển khai web      |

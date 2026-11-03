@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1140" viewBox="0 0 1120 1140" role="img" aria-labelledby="title"><title id="title">03-service-activity</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">03 · Luồng hoạt động dịch vụ</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Luồng thông thường theo lượt; các nhánh lỗi giữ dữ liệu để chỉnh sửa, không lưu giao dịch dở dang.</text>
+<rect x="270" y="130" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="173" text-anchor="middle" font-size="16" fill="#182d49">Tiếp nhận / Kiểm tra đầu vào</text>
+<text x="245" y="173" text-anchor="end" font-size="14" fill="#182d49">Cố vấn</text>
+<polyline points="500,204 500,233" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,233 504,224 496,224" fill="#526c8a"/>
+<rect x="270" y="233" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="276" text-anchor="middle" font-size="16" fill="#182d49">Báo giá sơ bộ / Đồng ý phạm vi</text>
+<text x="245" y="276" text-anchor="end" font-size="14" fill="#182d49">Cố vấn + Khách</text>
+<polyline points="500,307 500,336" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,336 504,327 496,327" fill="#526c8a"/>
+<rect x="270" y="336" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="379" text-anchor="middle" font-size="16" fill="#182d49">Kiểm tra kỹ / Ghi chẩn đoán</text>
+<text x="245" y="379" text-anchor="end" font-size="14" fill="#182d49">Thợ được giao</text>
+<polyline points="500,410 500,439" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,439 504,430 496,430" fill="#526c8a"/>
+<rect x="270" y="439" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="482" text-anchor="middle" font-size="16" fill="#182d49">Báo giá chính thức / Duyệt phiên bản</text>
+<text x="245" y="482" text-anchor="end" font-size="14" fill="#182d49">Cố vấn + Khách</text>
+<polyline points="500,513 500,542" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,542 504,533 496,533" fill="#526c8a"/>
+<rect x="270" y="542" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="585" text-anchor="middle" font-size="16" fill="#182d49">Kiểm tra giá, thợ, tồn / Tạo phiếu</text>
+<text x="245" y="585" text-anchor="end" font-size="14" fill="#182d49">Cố vấn + Backend</text>
+<polyline points="500,616 500,645" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,645 504,636 496,636" fill="#526c8a"/>
+<rect x="270" y="645" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="688" text-anchor="middle" font-size="16" fill="#182d49">Thực hiện / Ảnh và mã / Hoàn thành</text>
+<text x="245" y="688" text-anchor="end" font-size="14" fill="#182d49">Kỹ thuật viên</text>
+<polyline points="500,719 500,748" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,748 504,739 496,739" fill="#526c8a"/>
+<rect x="270" y="748" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="791" text-anchor="middle" font-size="16" fill="#182d49">Nghiệm thu công việc và an toàn</text>
+<text x="245" y="791" text-anchor="end" font-size="14" fill="#182d49">Cố vấn</text>
+<polyline points="500,822 500,851" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,851 504,842 496,842" fill="#526c8a"/>
+<rect x="270" y="851" width="460" height="74" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="894" text-anchor="middle" font-size="16" fill="#182d49">Ghi nhận thu đủ / Lưu chứng từ</text>
+<text x="245" y="894" text-anchor="end" font-size="14" fill="#182d49">Kế toán</text>
+<polyline points="500,925 500,954" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="500,954 504,945 496,945" fill="#526c8a"/>
+<rect x="270" y="954" width="460" height="74" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="500" y="997" text-anchor="middle" font-size="16" fill="#182d49">Giao xe / Chăm sóc sau sửa</text>
+<text x="245" y="997" text-anchor="end" font-size="14" fill="#182d49">Cố vấn</text>
+<rect x="785" y="230" width="285" height="92" rx="12" fill="#fff3db" stroke="#8096b0" stroke-width="1.5" />
+<text x="927.5" y="259" text-anchor="middle" font-size="16" fill="#182d49">Chưa đồng ý</text>
+<text x="927.5" y="282.2" text-anchor="middle" font-size="16" fill="#182d49">Chỉnh/lập lại hoặc kết thúc</text>
+<text x="927.5" y="305.4" text-anchor="middle" font-size="16" fill="#182d49">lượt chưa có phiếu</text>
+<polyline points="730,270 785,270" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="785,270 776,266 776,274" fill="#526c8a"/>
+<text x="758" y="256" text-anchor="middle" font-size="14" fill="#182d49">Không</text>
+<polyline points="730,475 765,475 765,277 785,277" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="785,277 776,273 776,281" fill="#526c8a"/>
+<rect x="785" y="538" width="285" height="92" rx="12" fill="#fff3db" stroke="#8096b0" stroke-width="1.5" />
+<text x="927.5" y="567" text-anchor="middle" font-size="16" fill="#182d49">Giá/tồn/thợ không hợp lệ</text>
+<text x="927.5" y="590.2" text-anchor="middle" font-size="16" fill="#182d49">Rollback toàn bộ</text>
+<text x="927.5" y="613.4" text-anchor="middle" font-size="16" fill="#182d49">Kiểm tra rồi thử lại</text>
+<polyline points="730,578 785,578" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="785,578 776,574 776,582" fill="#526c8a"/>
+<rect x="785" y="720" width="285" height="100" rx="12" fill="#fff3db" stroke="#8096b0" stroke-width="1.5" />
+<text x="927.5" y="753" text-anchor="middle" font-size="16" fill="#182d49">Thiếu bằng chứng / chưa QC</text>
+<text x="927.5" y="776.2" text-anchor="middle" font-size="16" fill="#182d49">Chặn chuyển bước</text>
+<text x="927.5" y="799.4" text-anchor="middle" font-size="16" fill="#182d49">Hoàn thiện điều kiện</text>
+<polyline points="730,681 765,681 765,755 785,755" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="785,755 776,751 776,759" fill="#526c8a"/>
+<polyline points="730,784 785,784" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="785,784 776,780 776,788" fill="#526c8a"/>
+<text x="50" y="1100" text-anchor="start" font-size="16" fill="#182d49">Thu tiền không đồng nghĩa giao xe. Mũi tên đi xuống chỉ tiếp tục khi điều kiện của bước đã đạt.</text></g></svg>

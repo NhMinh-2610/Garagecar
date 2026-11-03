@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="970" viewBox="0 0 1140 970" role="img" aria-labelledby="title"><title id="title">10-screen-map</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">10 · Bản đồ màn hình chính</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Phác thảo cấu trúc từ giao diện hiện có; không phải ảnh chụp nghiệm thu hay thiết kế app native.</text>
+<rect x="40" y="130" width="505" height="225" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="292.5" y="248.5" text-anchor="middle" font-size="16" fill="#182d49"></text>
+<rect x="52" y="142" width="481" height="42" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="292.5" y="169" text-anchor="middle" font-size="16" fill="#182d49">Quản trị viên</text>
+<text x="66" y="218" text-anchor="start" font-size="17" fill="#182d49">Menu nhóm | Bảng điều hành</text>
+<text x="66" y="242.65" text-anchor="start" font-size="17" fill="#182d49">Tiếp nhận · Xưởng · Kho · Tài chính</text>
+<text x="66" y="267.3" text-anchor="start" font-size="17" fill="#182d49">Nhân sự &amp; tài khoản · Ca/chứng chỉ</text>
+<text x="66" y="291.95" text-anchor="start" font-size="17" fill="#182d49">Bảo dưỡng · Hộp thư</text>
+<rect x="595" y="130" width="505" height="225" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="847.5" y="248.5" text-anchor="middle" font-size="16" fill="#182d49"></text>
+<rect x="607" y="142" width="481" height="42" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="847.5" y="169" text-anchor="middle" font-size="16" fill="#182d49">Cố vấn dịch vụ</text>
+<text x="621" y="218" text-anchor="start" font-size="17" fill="#182d49">Tiếp nhận &amp; lịch hẹn | Lọc xe</text>
+<text x="621" y="242.65" text-anchor="start" font-size="17" fill="#182d49">Lượt dịch vụ | Hướng dẫn bước tiếp</text>
+<text x="621" y="267.3" text-anchor="start" font-size="17" fill="#182d49">Báo giá / Chẩn đoán / QC</text>
+<text x="621" y="291.95" text-anchor="start" font-size="17" fill="#182d49">Bảo dưỡng · Hộp thư · Lịch cá nhân</text>
+<rect x="40" y="410" width="505" height="225" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="292.5" y="528.5" text-anchor="middle" font-size="16" fill="#182d49"></text>
+<rect x="52" y="422" width="481" height="42" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="292.5" y="449" text-anchor="middle" font-size="16" fill="#182d49">Kỹ thuật viên</text>
+<text x="66" y="498" text-anchor="start" font-size="17" fill="#182d49">Công việc được giao | Lọc trạng thái</text>
+<text x="66" y="522.65" text-anchor="start" font-size="17" fill="#182d49">Phiếu | Hạng mục / Bằng chứng</text>
+<text x="66" y="547.3" text-anchor="start" font-size="17" fill="#182d49">Tải ảnh / Nhập mã / Hoàn thành</text>
+<text x="66" y="571.95" text-anchor="start" font-size="17" fill="#182d49">Tra kho · Bảo dưỡng · Lịch cá nhân</text>
+<rect x="595" y="410" width="505" height="225" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="847.5" y="528.5" text-anchor="middle" font-size="16" fill="#182d49"></text>
+<rect x="607" y="422" width="481" height="42" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="847.5" y="449" text-anchor="middle" font-size="16" fill="#182d49">Kế toán</text>
+<text x="621" y="498" text-anchor="start" font-size="17" fill="#182d49">Phiếu chờ thu | Điều kiện QC</text>
+<text x="621" y="522.65" text-anchor="start" font-size="17" fill="#182d49">Phương thức / Tham chiếu / Thu tiền</text>
+<text x="621" y="547.3" text-anchor="start" font-size="17" fill="#182d49">Sổ thu · Đề nghị chi · Báo cáo</text>
+<text x="621" y="571.95" text-anchor="start" font-size="17" fill="#182d49">Lịch cá nhân</text>
+<rect x="40" y="690" width="505" height="225" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="292.5" y="808.5" text-anchor="middle" font-size="16" fill="#182d49"></text>
+<rect x="52" y="702" width="481" height="42" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="292.5" y="729" text-anchor="middle" font-size="16" fill="#182d49">Khách hàng</text>
+<text x="66" y="778" text-anchor="start" font-size="17" fill="#182d49">Xe của tôi | Tiến độ / Chi phí</text>
+<text x="66" y="802.65" text-anchor="start" font-size="17" fill="#182d49">Báo giá chờ quyết định</text>
+<text x="66" y="827.3" text-anchor="start" font-size="17" fill="#182d49">Ảnh / Chứng từ / Bảo dưỡng</text>
+<text x="66" y="851.95" text-anchor="start" font-size="17" fill="#182d49">Đặt lịch · Nhắn garage</text>
+<text x="610" y="755" text-anchor="start" font-size="17" fill="#182d49">Trên điện thoại: menu thu gọn;</text>
+<text x="610" y="779.65" text-anchor="start" font-size="17" fill="#182d49">biểu mẫu giữ bản nháp khi lỗi.</text>
+<text x="610" y="804.3" text-anchor="start" font-size="17" fill="#182d49">Cùng API và quyền với bản web.</text>
+<text x="610" y="828.95" text-anchor="start" font-size="17" fill="#182d49">Không có màn hỏi đáp AI hoặc portal HR.</text></g></svg>

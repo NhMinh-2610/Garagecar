@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="720" viewBox="0 0 1120 720" role="img" aria-labelledby="title"><title id="title">09-maintenance</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">09 · Bảo dưỡng theo quy tắc</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Không AI: dựa vào cấu hình xe, nguồn được xác minh, ODO và lịch sử dịch vụ.</text>
+<rect x="50" y="140" width="310" height="100" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="205" y="173" text-anchor="middle" font-size="16" fill="#182d49">Danh mục JSON tham khảo</text>
+<text x="205" y="196.2" text-anchor="middle" font-size="16" fill="#182d49">Bộ phận / hãng / dòng xe</text>
+<text x="205" y="219.4" text-anchor="middle" font-size="16" fill="#182d49">Chưa phải lịch được duyệt</text>
+<rect x="420" y="140" width="310" height="100" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="575" y="173" text-anchor="middle" font-size="16" fill="#182d49">maintenance_profiles</text>
+<text x="575" y="196.2" text-anchor="middle" font-size="16" fill="#182d49">scope + rules + source</text>
+<text x="575" y="219.4" text-anchor="middle" font-size="16" fill="#182d49">Người phụ trách xác minh</text>
+<rect x="790" y="140" width="280" height="100" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="930" y="173" text-anchor="middle" font-size="16" fill="#182d49">vehicle_care</text>
+<text x="930" y="196.2" text-anchor="middle" font-size="16" fill="#182d49">Cấu hình, ODO, ngày dùng</text>
+<text x="930" y="219.4" text-anchor="middle" font-size="16" fill="#182d49">profileId phù hợp</text>
+<polyline points="360,190 420,190" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polygon points="420,190 411,186 411,194" fill="#526c8a"/>
+<text x="389" y="174" text-anchor="middle" font-size="14" fill="#182d49">Tra cứu</text>
+<polyline points="730,190 790,190" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="790,190 781,186 781,194" fill="#526c8a"/>
+<text x="759" y="174" text-anchor="middle" font-size="14" fill="#182d49">Chọn</text>
+<rect x="50" y="390" width="310" height="100" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="205" y="423" text-anchor="middle" font-size="16" fill="#182d49">maintenance_records</text>
+<text x="205" y="446.2" text-anchor="middle" font-size="16" fill="#182d49">Công việc đã thực hiện</text>
+<text x="205" y="469.4" text-anchor="middle" font-size="16" fill="#182d49">Ngày + ODO + liên kết phiếu</text>
+<rect x="420" y="390" width="310" height="100" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="575" y="423" text-anchor="middle" font-size="16" fill="#182d49">Tính hạn / Worker</text>
+<text x="575" y="446.2" text-anchor="middle" font-size="16" fill="#182d49">Km hoặc thời gian</text>
+<text x="575" y="469.4" text-anchor="middle" font-size="16" fill="#182d49">Khóa chu kỳ chống nhắc trùng</text>
+<rect x="790" y="390" width="280" height="100" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="930" y="423" text-anchor="middle" font-size="16" fill="#182d49">maintenance_reminders</text>
+<text x="930" y="446.2" text-anchor="middle" font-size="16" fill="#182d49">pending → published</text>
+<text x="930" y="469.4" text-anchor="middle" font-size="16" fill="#182d49">Cố vấn/admin công bố</text>
+<polyline points="360,440 420,440" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="420,440 411,436 411,444" fill="#526c8a"/>
+<polyline points="575,240 575,390" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="575,390 579,381 571,381" fill="#526c8a"/>
+<polyline points="930,240 930,300 675,300 675,390" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="675,390 679,381 671,381" fill="#526c8a"/>
+<polyline points="730,440 790,440" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="790,440 781,436 781,444" fill="#526c8a"/>
+<rect x="790" y="580" width="280" height="75" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="930" y="612" text-anchor="middle" font-size="16" fill="#182d49">Khách xem nhắc của xe mình</text>
+<text x="930" y="635.2" text-anchor="middle" font-size="16" fill="#182d49">Chỉ bản đã công bố</text>
+<polyline points="930,490 930,580" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="930,580 934,571 926,571" fill="#526c8a"/>
+<text x="50" y="582" text-anchor="start" font-size="16" fill="#182d49">ERD liên quan: vehicle_care.vehicleId là PK/FK vehicles;</text>
+<text x="50" y="605.2" text-anchor="start" font-size="16" fill="#182d49">records/reminders có vehicleId, reminders có profileId.</text>
+<text x="50" y="628.4" text-anchor="start" font-size="16" fill="#182d49">Worker không gửi SMS/email/push. Nguồn DEMO chỉ minh họa.</text></g></svg>

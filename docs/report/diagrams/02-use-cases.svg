@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="985" viewBox="0 0 1350 985" role="img" aria-labelledby="title"><title id="title">02-use-cases</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">02 · Use case tổng quan</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Tác nhân chính theo từng nhóm; UC03/UC12 còn có tương tác của khách theo đặc tả chi tiết.</text>
+<rect x="225" y="115" width="1080" height="740" rx="6" fill="none" stroke="#8096b0" stroke-width="2"/>
+<text x="765" y="145" text-anchor="middle" font-size="19" fill="#182d49">Hệ thống GarageCar · 5 vai trò</text>
+<g fill="none" stroke="#365879" stroke-width="2"><circle cx="110" cy="215" r="13"/><path d="M110,228v39 m-24,-24h48 m-24,24l-20,29 m20,-29l20,29"/></g>
+<text x="110" y="320" text-anchor="middle" font-size="16" fill="#182d49">Quản trị viên</text>
+<polyline points="135,242 205,242 205,184 373,184 373,207" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="373" cy="245" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="373" y="239.5" text-anchor="middle" font-size="15" fill="#182d49">UC01</text>
+<text x="373" y="261.25" text-anchor="middle" font-size="15" fill="#182d49">Tài khoản và quyền</text>
+<polyline points="135,242 205,242 205,176 628,176 628,207" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="628" cy="245" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="628" y="239.5" text-anchor="middle" font-size="15" fill="#182d49">UC09</text>
+<text x="628" y="261.25" text-anchor="middle" font-size="15" fill="#182d49">Kho / Danh mục</text>
+<polyline points="135,242 205,242 205,168 883,168 883,207" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="883" cy="245" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="883" y="239.5" text-anchor="middle" font-size="15" fill="#182d49">UC11</text>
+<text x="883" y="261.25" text-anchor="middle" font-size="15" fill="#182d49">Quản lý nhân sự</text>
+<polyline points="135,242 205,242 205,160 1138,160 1138,207" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="1138" cy="245" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="1138" y="239.5" text-anchor="middle" font-size="15" fill="#182d49">UC12</text>
+<text x="1138" y="261.25" text-anchor="middle" font-size="15" fill="#182d49">Bảo dưỡng / Nhắc hạn</text>
+<g fill="none" stroke="#365879" stroke-width="2"><circle cx="110" cy="355" r="13"/><path d="M110,368v39 m-24,-24h48 m-24,24l-20,29 m20,-29l20,29"/></g>
+<text x="110" y="460" text-anchor="middle" font-size="16" fill="#182d49">Cố vấn dịch vụ</text>
+<polyline points="135,382 205,382 205,324 373,324 373,347" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="373" cy="385" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="373" y="379.5" text-anchor="middle" font-size="15" fill="#182d49">UC03</text>
+<text x="373" y="401.25" text-anchor="middle" font-size="15" fill="#182d49">Lập báo giá</text>
+<polyline points="135,382 205,382 205,316 628,316 628,347" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="628" cy="385" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="628" y="379.5" text-anchor="middle" font-size="15" fill="#182d49">UC05</text>
+<text x="628" y="401.25" text-anchor="middle" font-size="15" fill="#182d49">Chuyển phiếu sửa</text>
+<polyline points="135,382 205,382 205,308 883,308 883,347" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="883" cy="385" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="883" y="379.5" text-anchor="middle" font-size="15" fill="#182d49">UC07</text>
+<text x="883" y="401.25" text-anchor="middle" font-size="15" fill="#182d49">QC / Bàn giao</text>
+<g fill="none" stroke="#365879" stroke-width="2"><circle cx="110" cy="495" r="13"/><path d="M110,508v39 m-24,-24h48 m-24,24l-20,29 m20,-29l20,29"/></g>
+<text x="110" y="600" text-anchor="middle" font-size="16" fill="#182d49">Kỹ thuật viên</text>
+<polyline points="135,522 205,522 205,464 373,464 373,487" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="373" cy="525" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="373" y="519.5" text-anchor="middle" font-size="15" fill="#182d49">UC04</text>
+<text x="373" y="541.25" text-anchor="middle" font-size="15" fill="#182d49">Kiểm tra kỹ</text>
+<polyline points="135,522 205,522 205,456 628,456 628,487" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="628" cy="525" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="628" y="519.5" text-anchor="middle" font-size="15" fill="#182d49">UC06</text>
+<text x="628" y="541.25" text-anchor="middle" font-size="15" fill="#182d49">Thực hiện / Bằng chứng</text>
+<g fill="none" stroke="#365879" stroke-width="2"><circle cx="110" cy="635" r="13"/><path d="M110,648v39 m-24,-24h48 m-24,24l-20,29 m20,-29l20,29"/></g>
+<text x="110" y="740" text-anchor="middle" font-size="16" fill="#182d49">Kế toán</text>
+<polyline points="135,662 205,662 205,604 373,604 373,627" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="373" cy="665" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="373" y="659.5" text-anchor="middle" font-size="15" fill="#182d49">UC08</text>
+<text x="373" y="681.25" text-anchor="middle" font-size="15" fill="#182d49">Thu tiền / Chứng từ</text>
+<polyline points="135,662 205,662 205,596 628,596 628,627" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="628" cy="665" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="628" y="659.5" text-anchor="middle" font-size="15" fill="#182d49">UC10</text>
+<text x="628" y="681.25" text-anchor="middle" font-size="15" fill="#182d49">Thu–chi / Báo cáo</text>
+<g fill="none" stroke="#365879" stroke-width="2"><circle cx="110" cy="775" r="13"/><path d="M110,788v39 m-24,-24h48 m-24,24l-20,29 m20,-29l20,29"/></g>
+<text x="110" y="880" text-anchor="middle" font-size="16" fill="#182d49">Khách hàng</text>
+<polyline points="135,802 205,802 205,744 373,744 373,767" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="373" cy="805" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="373" y="799.5" text-anchor="middle" font-size="15" fill="#182d49">UC14</text>
+<text x="373" y="821.25" text-anchor="middle" font-size="15" fill="#182d49">Theo dõi xe của mình</text>
+<polyline points="135,802 205,802 205,736 628,736 628,767" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="628" cy="805" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="628" y="799.5" text-anchor="middle" font-size="15" fill="#182d49">UC13</text>
+<text x="628" y="821.25" text-anchor="middle" font-size="15" fill="#182d49">Nhắn garage</text>
+<polyline points="135,802 205,802 205,728 883,728 883,767" fill="none" stroke="#526c8a" stroke-width="1.7"  />
+<ellipse cx="883" cy="805" rx="115" ry="38" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5"/>
+<text x="883" y="799.5" text-anchor="middle" font-size="15" fill="#182d49">UC02</text>
+<text x="883" y="821.25" text-anchor="middle" font-size="15" fill="#182d49">Gửi đặt lịch</text>
+<text x="50" y="895" text-anchor="start" font-size="15" fill="#182d49">Quản trị có thể xử lý nghiệp vụ theo quyền; vẫn chịu điều kiện trạng thái và quy tắc không tự duyệt.</text>
+<text x="50" y="916.75" text-anchor="start" font-size="15" fill="#182d49">UC12 Bảo dưỡng/nhắc hạn: admin/cố vấn quản lý, khách xem xe mình. Các liên hệ phụ xem bảng use case.</text>
+<text x="50" y="938.5" text-anchor="start" font-size="15" fill="#182d49">Nhân viên xem ca/gửi nghỉ cá nhân. Đặt lịch công khai không tạo thêm vai trò đăng nhập.</text></g></svg>

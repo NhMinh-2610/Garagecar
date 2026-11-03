@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1080" viewBox="0 0 1120 1080" role="img" aria-labelledby="title"><title id="title">06-data-service</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">06 · Quan hệ dữ liệu dịch vụ</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Mũi tên từ bảng con tới bảng được tham chiếu; nhãn là FK. Mỗi bảng cha có thể có 0..n dòng con nếu không ghi UNIQUE.</text>
+<rect x="40" y="130" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="180" y="187" text-anchor="middle" font-size="16" fill="#182d49">users</text>
+<text x="180" y="210.2" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<rect x="400" y="130" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="540" y="175.5" text-anchor="middle" font-size="16" fill="#182d49">vehicles</text>
+<text x="540" y="198.7" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="540" y="221.9" text-anchor="middle" font-size="16" fill="#182d49">FK customerId (nullable)</text>
+<rect x="800" y="130" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="940" y="175.5" text-anchor="middle" font-size="16" fill="#182d49">mechanics</text>
+<text x="940" y="198.7" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="940" y="221.9" text-anchor="middle" font-size="16" fill="#182d49">FK userId (nullable, UNIQUE)</text>
+<rect x="40" y="340" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="180" y="374" text-anchor="middle" font-size="16" fill="#182d49">service_quotes</text>
+<text x="180" y="397.2" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="180" y="420.4" text-anchor="middle" font-size="16" fill="#182d49">FK visitId</text>
+<text x="180" y="443.6" text-anchor="middle" font-size="16" fill="#182d49">items: JSON, revision, stage</text>
+<rect x="400" y="340" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="540" y="374" text-anchor="middle" font-size="16" fill="#182d49">service_visits</text>
+<text x="540" y="397.2" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="540" y="420.4" text-anchor="middle" font-size="16" fill="#182d49">FK vehicleId, mechanicId</text>
+<text x="540" y="443.6" text-anchor="middle" font-size="16" fill="#182d49">advisorId, qcBy → users</text>
+<rect x="800" y="340" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="940" y="374" text-anchor="middle" font-size="16" fill="#182d49">repair_tickets</text>
+<text x="940" y="397.2" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="940" y="420.4" text-anchor="middle" font-size="16" fill="#182d49">FK vehicleId, mechanicId</text>
+<text x="940" y="443.6" text-anchor="middle" font-size="16" fill="#182d49">serviceVisitId nullable UNIQUE</text>
+<rect x="40" y="590" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="180" y="635.5" text-anchor="middle" font-size="16" fill="#182d49">inventories</text>
+<text x="180" y="658.7" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="180" y="681.9" text-anchor="middle" font-size="16" fill="#182d49">sku, barcode, quantity</text>
+<rect x="400" y="590" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="540" y="624" text-anchor="middle" font-size="16" fill="#182d49">repair_items</text>
+<text x="540" y="647.2" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="540" y="670.4" text-anchor="middle" font-size="16" fill="#182d49">FK repairTicketId, inventoryId</text>
+<text x="540" y="693.6" text-anchor="middle" font-size="16" fill="#182d49">inventoryId nullable</text>
+<rect x="800" y="590" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="940" y="624" text-anchor="middle" font-size="16" fill="#182d49">payment_receipts</text>
+<text x="940" y="647.2" text-anchor="middle" font-size="16" fill="#182d49">PK id</text>
+<text x="940" y="670.4" text-anchor="middle" font-size="16" fill="#182d49">FK ticketId UNIQUE</text>
+<text x="940" y="693.6" text-anchor="middle" font-size="16" fill="#182d49">receivedBy → users</text>
+<rect x="40" y="820" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="180" y="865.5" text-anchor="middle" font-size="16" fill="#182d49">inventory_movements</text>
+<text x="180" y="888.7" text-anchor="middle" font-size="16" fill="#182d49">FK inventoryId</text>
+<text x="180" y="911.9" text-anchor="middle" font-size="16" fill="#182d49">reference: văn bản, không FK</text>
+<rect x="400" y="820" width="280" height="125" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="540" y="854" text-anchor="middle" font-size="16" fill="#182d49">repair_evidence</text>
+<text x="540" y="877.2" text-anchor="middle" font-size="16" fill="#182d49">FK itemId</text>
+<text x="540" y="900.4" text-anchor="middle" font-size="16" fill="#182d49">createdBy → users</text>
+<text x="540" y="923.6" text-anchor="middle" font-size="16" fill="#182d49">round, image, productCode</text>
+<polyline points="400,190 320,190" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="320,190 329,194 329,186" fill="#526c8a"/>
+<text x="360" y="178" text-anchor="middle" font-size="14" fill="#182d49">customerId</text>
+<polyline points="800,160 770,160 770,108 180,108 180,130" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="180,130 184,121 176,121" fill="#526c8a"/>
+<text x="500" y="100" text-anchor="middle" font-size="14" fill="#182d49">userId</text>
+<polyline points="320,400 400,400" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="400,400 391,396 391,404" fill="#526c8a"/>
+<text x="360" y="388" text-anchor="middle" font-size="14" fill="#182d49">visitId</text>
+<polyline points="540,340 540,255" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="540,255 536,264 544,264" fill="#526c8a"/>
+<text x="584" y="298" text-anchor="middle" font-size="14" fill="#182d49">vehicleId</text>
+<polyline points="800,400 680,400" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="680,400 689,404 689,396" fill="#526c8a"/>
+<text x="741" y="387" text-anchor="middle" font-size="14" fill="#182d49">serviceVisitId</text>
+<polyline points="940,340 940,255" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,255 936,264 944,264" fill="#526c8a"/>
+<text x="991" y="301" text-anchor="middle" font-size="14" fill="#182d49">mechanicId</text>
+<polyline points="850,340 850,290 650,290 650,255" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="650,255 646,264 654,264" fill="#526c8a"/>
+<text x="752" y="281" text-anchor="middle" font-size="14" fill="#182d49">vehicleId</text>
+<polyline points="540,590 540,530 880,530 880,465" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="880,465 876,474 884,474" fill="#526c8a"/>
+<text x="700" y="518" text-anchor="middle" font-size="14" fill="#182d49">repairTicketId</text>
+<polyline points="400,652 320,652" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="320,652 329,656 329,648" fill="#526c8a"/>
+<text x="360" y="640" text-anchor="middle" font-size="14" fill="#182d49">inventoryId</text>
+<polyline points="940,590 940,465" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,465 936,474 944,474" fill="#526c8a"/>
+<text x="984" y="527" text-anchor="middle" font-size="14" fill="#182d49">ticketId</text>
+<polyline points="180,820 180,715" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="180,715 176,724 184,724" fill="#526c8a"/>
+<text x="230" y="776" text-anchor="middle" font-size="14" fill="#182d49">inventoryId</text>
+<polyline points="540,820 540,715" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="540,715 536,724 544,724" fill="#526c8a"/>
+<text x="575" y="776" text-anchor="middle" font-size="14" fill="#182d49">itemId</text>
+<text x="50" y="1000" text-anchor="start" font-size="15" fill="#182d49">Các FK người tạo/duyệt và quan hệ phụ xem từ điển dữ liệu. Một FK nullable có 0..1 cha, FK bắt buộc có 1 cha.</text>
+<text x="50" y="1021.75" text-anchor="start" font-size="15" fill="#182d49">serviceVisitId và ticketId UNIQUE: tối đa một phiếu/lượt và một chứng từ/phiếu. Booking lưu liên hệ, chưa có FK users.</text></g></svg>

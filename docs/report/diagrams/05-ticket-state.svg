@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="650" viewBox="0 0 1160 650" role="img" aria-labelledby="title"><title id="title">05-ticket-state</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">05 · Trạng thái phiếu sửa chữa</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Trạng thái của RepairTicket, khác với trạng thái xe và lượt dịch vụ.</text>
+<rect x="50" y="230" width="200" height="85" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="150" y="278.5" text-anchor="middle" font-size="16" fill="#182d49">draft</text>
+<rect x="330" y="230" width="200" height="85" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="430" y="278.5" text-anchor="middle" font-size="16" fill="#182d49">working</text>
+<rect x="610" y="230" width="200" height="85" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="710" y="278.5" text-anchor="middle" font-size="16" fill="#182d49">completed</text>
+<rect x="890" y="230" width="200" height="85" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="990" y="278.5" text-anchor="middle" font-size="16" fill="#182d49">paid</text>
+<polyline points="250,272 330,272" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="330,272 321,268 321,276" fill="#526c8a"/>
+<text x="290" y="252" text-anchor="middle" font-size="14" fill="#182d49">Bắt đầu</text>
+<polyline points="530,272 610,272" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="610,272 601,268 601,276" fill="#526c8a"/>
+<text x="570" y="252" text-anchor="middle" font-size="14" fill="#182d49">Hoàn tất</text>
+<polyline points="810,272 890,272" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="890,272 881,268 881,276" fill="#526c8a"/>
+<text x="850" y="252" text-anchor="middle" font-size="14" fill="#182d49">Thu tiền</text>
+<rect x="50" y="120" width="200" height="65" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="150" y="147" text-anchor="middle" font-size="16" fill="#182d49">Tạo từ báo giá hoặc</text>
+<text x="150" y="170.2" text-anchor="middle" font-size="16" fill="#182d49">phiếu trực tiếp hợp lệ</text>
+<polyline points="150,185 150,230" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="150,230 154,221 146,221" fill="#526c8a"/>
+<rect x="265" y="370" width="295" height="100" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="412.5" y="403" text-anchor="middle" font-size="16" fill="#182d49">Thợ được giao / admin</text>
+<text x="412.5" y="426.2" text-anchor="middle" font-size="16" fill="#182d49">Có quyền workshop</text>
+<text x="412.5" y="449.4" text-anchor="middle" font-size="16" fill="#182d49">Phiếu đủ điều kiện bắt đầu</text>
+<rect x="585" y="370" width="250" height="100" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="710" y="403" text-anchor="middle" font-size="16" fill="#182d49">Tất cả hạng mục xong</text>
+<text x="710" y="426.2" text-anchor="middle" font-size="16" fill="#182d49">Bằng chứng hợp lệ</text>
+<text x="710" y="449.4" text-anchor="middle" font-size="16" fill="#182d49">Đúng lần thực hiện</text>
+<rect x="860" y="370" width="250" height="100" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="985" y="403" text-anchor="middle" font-size="16" fill="#182d49">Kế toán / admin + finance</text>
+<text x="985" y="426.2" text-anchor="middle" font-size="16" fill="#182d49">QC nếu có lượt dịch vụ</text>
+<text x="985" y="449.4" text-anchor="middle" font-size="16" fill="#182d49">Một chứng từ thu</text>
+<text x="50" y="545" text-anchor="start" font-size="16" fill="#182d49">Phiếu trực tiếp ở draft có thể xóa và trả kho; phiếu gắn báo giá không được xóa.</text>
+<text x="50" y="568.2" text-anchor="start" font-size="16" fill="#182d49">Mở lại một hạng mục trong khi working tăng evidenceRound, không đổi vòng đời phiếu.</text>
+<text x="50" y="591.4" text-anchor="start" font-size="16" fill="#182d49">Gửi lại thao tác paid không tạo lần thu thứ hai. Không có trạng thái refunded/partial-paid trong bản này.</text></g></svg>

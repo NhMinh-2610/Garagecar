@@ -27,7 +27,6 @@ Cấu hình tối thiểu **lưu trong `be/.env`**:
 DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@localhost:5432/garagecar
 JWT_SECRET=replace-with-a-long-random-secret
 PORT=8000
-AI_PROVIDER=mock
 ```
 
 Thay `USER`, `PASSWORD`, port và tên database theo PostgreSQL thực tế. Mật khẩu là của tài khoản PostgreSQL, không phải mật khẩu mở pgAdmin. Nếu mật khẩu chứa ký tự đặc biệt trong URL, cần URL-encode phần mật khẩu. Đặt chuỗi bí mật riêng cho JWT; không commit file `.env`.

@@ -4,12 +4,11 @@
 
 | Vai trò       | Công việc chính                                                                           | Giới hạn mặc định                                 |
 | ------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Quản trị      | Giám sát, kho/danh mục, phân quyền tài khoản, duyệt chi, cấu hình lịch bảo dưỡng          | Có toàn bộ nhóm chức năng                         |
+| Quản trị      | Giám sát, kho/danh mục, phân quyền tài khoản, duyệt chi, nhân sự, cấu hình lịch bảo dưỡng | Có toàn bộ nhóm chức năng                         |
 | Cố vấn        | Tiếp nhận, kiểm tra đầu vào, báo giá, điều phối, nghiệm thu, giao xe, nhắc khách, hộp thư | Không quản lý nhân sự hoặc thu tiền               |
 | Kế toán       | Thu tiền, chứng từ, đề nghị chi, doanh thu                                                | Không sửa kết quả xưởng hoặc xem ảnh sửa chữa     |
-| Nhân sự       | Hồ sơ nhân viên, phân ca, nghỉ phép, chứng chỉ                                            | Không cấp tài khoản admin hoặc xem tài chính      |
 | Kỹ thuật viên | Kiểm tra kỹ, phiếu được giao, bằng chứng thực hiện, tra kho, lịch cá nhân                 | Không xác nhận thanh toán hoặc tự duyệt chứng chỉ |
-| Khách hàng    | Xe của mình, lịch hẹn, duyệt báo giá, tiến độ/ảnh/chi phí, bảo dưỡng, hỏi AI, nhắn garage | Không xem xe hoặc hội thoại của người khác        |
+| Khách hàng    | Xe của mình, lịch hẹn, duyệt báo giá, tiến độ/ảnh/chi phí, bảo dưỡng, nhắn garage         | Không xem xe hoặc hội thoại của người khác        |
 
 Quản trị có thể khóa bớt nhóm chức năng của từng tài khoản. API kiểm tra lại quyền ở mỗi yêu cầu; ẩn menu chỉ là hỗ trợ giao diện. Những thao tác cá nhân như xem ca hoặc xin nghỉ vẫn gắn với chính người đăng nhập.
 
@@ -70,6 +69,6 @@ Báo cáo doanh thu có kỳ tháng/quý/năm. Giá trị kho theo số lượng
 
 Phân ca theo nhân viên, thời gian có múi giờ Việt Nam, khu vực và ghi chú; một ca tối đa 16 giờ. Chặn trùng ca hoặc trùng kỳ nghỉ đã duyệt. Hủy/phân lại ca trước khi duyệt nghỉ bị xung đột; vị trí trong ca chưa phải cơ chế đặt chỗ cầu nâng.
 
-Nhân viên tự gửi đơn nghỉ, nhân sự/quản trị duyệt hoặc từ chối có ghi chú và không tự duyệt. Chứng chỉ có nhóm năng lực, đơn vị/mã hồ sơ, thời hạn, người xác minh; thu hồi có căn cứ và giữ lịch sử, không tự xác minh chứng chỉ của mình.
+Nhân viên tự gửi đơn nghỉ, quản trị viên duyệt hoặc từ chối có ghi chú và không tự duyệt. Chứng chỉ có nhóm năng lực, đơn vị/mã hồ sơ, thời hạn, người xác minh; thu hồi có căn cứ và giữ lịch sử, không tự xác minh chứng chỉ của mình.
 
 Chưa triển khai thanh toán một phần, hoàn tiền, hóa đơn điện tử, sổ cái kép, chốt quỹ, chấm công, tính lương hoặc phân lịch tài nguyên tự động. Xem [định hướng](roadmap.md).
