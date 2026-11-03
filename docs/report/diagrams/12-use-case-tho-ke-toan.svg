@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 954" width="1100" height="954" role="img"><title>Sơ đồ use case 2 · Kỹ thuật viên và kế toán</title><style>text{fill:#19334e}.title{font-weight:bold}.muted{fill:#52667d}</style><rect width="1100" height="954" fill="white"/>
+<text x="40" y="42" text-anchor="start" font-size="27" font-family="Segoe UI, Arial, sans-serif" class="title">Sơ đồ use case 2 · Kỹ thuật viên và kế toán</text>
+<text x="40" y="73" text-anchor="start" font-size="16" font-family="Segoe UI, Arial, sans-serif" class="muted">Các thao tác vẫn phụ thuộc phân công, trạng thái nghiệp vụ và quyền đang được cấp.</text>
+<rect x="240" y="100" width="620" height="704" rx="4" fill="#fff" stroke="#47617f" stroke-width="2"/>
+<text x="550" y="130" text-anchor="middle" font-size="20" font-family="Segoe UI, Arial, sans-serif" class="title">Hệ thống GarageCar</text>
+<line x1="129" y1="448" x2="350" y2="175" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="448" x2="350" y2="253" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="448" x2="350" y2="331" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="448" x2="350" y2="409" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="448" x2="350" y2="487" stroke="#42617d" stroke-width="1.5"/>
+<g fill="none" stroke="#203f60" stroke-width="2.3"><circle cx="105" cy="410" r="13"/><path d="M105 423v45 M81 448h48 M105 468l-21 31 M105 468l21 31"/></g>
+<text x="105" y="522" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" class="">Kỹ thuật viên</text>
+<line x1="971" y1="448" x2="750" y2="487" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="448" x2="750" y2="565" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="448" x2="750" y2="643" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="448" x2="750" y2="721" stroke="#42617d" stroke-width="1.5"/>
+<g fill="none" stroke="#203f60" stroke-width="2.3"><circle cx="995" cy="410" r="13"/><path d="M995 423v45 M971 448h48 M995 468l-21 31 M995 468l21 31"/></g>
+<text x="995" y="522" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" class="">Kế toán</text>
+<ellipse cx="550" cy="175" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="182" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC04b · Kiểm tra và ghi chẩn đoán</text>
+<ellipse cx="550" cy="253" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="260" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC06 · Thực hiện phiếu và nộp bằng chứng</text>
+<ellipse cx="550" cy="331" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="338" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC09a · Tra cứu vật tư</text>
+<ellipse cx="550" cy="409" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="416" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC12c · Xem bảo dưỡng xe được giao</text>
+<ellipse cx="550" cy="487" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="494" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC11a · Xem lịch làm và gửi đơn nghỉ</text>
+<ellipse cx="550" cy="565" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="572" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC08 · Thu tiền và xem chứng từ</text>
+<ellipse cx="550" cy="643" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="650" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC10a · Lập và ghi chi đề nghị</text>
+<ellipse cx="550" cy="721" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="728" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC10b · Xem báo cáo doanh thu</text>
+<text x="40" y="846" text-anchor="start" font-size="15" font-family="Segoe UI, Arial, sans-serif" class="muted">Thợ cập nhật công việc được giao; kế toán ghi nhận thu đủ khi phiếu đáp ứng điều kiện.</text>
+<text x="40" y="870" text-anchor="start" font-size="15" font-family="Segoe UI, Arial, sans-serif" class="muted">Đề nghị chi chỉ được ghi chi sau khi quản trị viên khác người lập phê duyệt.</text></svg>

@@ -124,7 +124,7 @@ Chưa có số đo tải đồng thời hoặc khảo sát hài lòng để kh�
 | UC13 | Nhắn tin garage                | Khách, cố vấn, quản trị              | Hội thoại đúng quyền, không trùng tin    |
 | UC14 | Theo dõi xe/dịch vụ            | Khách                                | Xe, tiến độ, chi phí và ảnh của mình     |
 
-Quản trị có thể thực hiện nghiệp vụ khi có quyền tương ứng nhưng vẫn chịu các điều kiện trạng thái và không tự duyệt. Sơ đồ [use case](diagrams/02-use-cases.svg) trình bày các nhóm chính; bảng trên là danh mục chi tiết.
+Quản trị có thể thực hiện nghiệp vụ khi có quyền tương ứng nhưng vẫn chịu các điều kiện trạng thái và không tự duyệt. Sơ đồ [use case tổng quan](diagrams/02-use-cases.svg) chỉ nối tác nhân chính. Xem [ba sơ đồ theo nhóm vai trò và bảng đối chiếu mã](use-case-chi-tiet.md) để thấy tương tác của từng tác nhân rõ hơn.
 
 ## 8. Đặc tả use case trọng tâm
 

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1188" width="1100" height="1188" role="img"><title>Sơ đồ use case 1 · Khách hàng và cố vấn</title><style>text{fill:#19334e}.title{font-weight:bold}.muted{fill:#52667d}</style><rect width="1100" height="1188" fill="white"/>
+<text x="40" y="42" text-anchor="start" font-size="27" font-family="Segoe UI, Arial, sans-serif" class="title">Sơ đồ use case 1 · Khách hàng và cố vấn</text>
+<text x="40" y="73" text-anchor="start" font-size="16" font-family="Segoe UI, Arial, sans-serif" class="muted">Các đường nối biểu thị tác nhân có thể thực hiện use case trong phạm vi được phép.</text>
+<rect x="240" y="100" width="620" height="938" rx="4" fill="#fff" stroke="#47617f" stroke-width="2"/>
+<text x="550" y="130" text-anchor="middle" font-size="20" font-family="Segoe UI, Arial, sans-serif" class="title">Hệ thống GarageCar</text>
+<line x1="129" y1="565" x2="350" y2="175" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="565" x2="350" y2="253" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="565" x2="350" y2="331" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="565" x2="350" y2="409" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="565" x2="350" y2="487" stroke="#42617d" stroke-width="1.5"/>
+<g fill="none" stroke="#203f60" stroke-width="2.3"><circle cx="105" cy="527" r="13"/><path d="M105 540v45 M81 565h48 M105 585l-21 31 M105 585l21 31"/></g>
+<text x="105" y="639" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" class="">Khách hàng</text>
+<line x1="971" y1="565" x2="750" y2="331" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="409" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="565" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="643" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="721" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="799" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="877" stroke="#42617d" stroke-width="1.5"/>
+<line x1="971" y1="565" x2="750" y2="955" stroke="#42617d" stroke-width="1.5"/>
+<g fill="none" stroke="#203f60" stroke-width="2.3"><circle cx="995" cy="527" r="13"/><path d="M995 540v45 M971 565h48 M995 585l-21 31 M995 585l21 31"/></g>
+<text x="995" y="639" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" class="">Cố vấn</text>
+<text x="995" y="662" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" class="">dịch vụ</text>
+<ellipse cx="550" cy="175" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="182" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC02a · Gửi yêu cầu đặt lịch</text>
+<ellipse cx="550" cy="253" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="260" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC14 · Theo dõi xe và tiến độ</text>
+<ellipse cx="550" cy="331" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="338" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC03a · Xác nhận báo giá</text>
+<ellipse cx="550" cy="409" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="416" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC13 · Trao đổi qua hộp thư</text>
+<ellipse cx="550" cy="487" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="494" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC12a · Xem nhắc bảo dưỡng</text>
+<ellipse cx="550" cy="565" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="572" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC02b · Tiếp nhận và lập lượt dịch vụ</text>
+<ellipse cx="550" cy="643" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="650" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC03b · Lập báo giá theo phiên bản</text>
+<ellipse cx="550" cy="721" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="728" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC04a · Phân công kiểm tra kỹ</text>
+<ellipse cx="550" cy="799" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="806" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC05 · Chuyển báo giá thành phiếu</text>
+<ellipse cx="550" cy="877" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="884" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC07 · Nghiệm thu và giao xe</text>
+<ellipse cx="550" cy="955" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="962" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC12b · Quản lý và công bố nhắc hạn</text>
+<text x="40" y="1080" text-anchor="start" font-size="15" font-family="Segoe UI, Arial, sans-serif" class="muted">Đặt lịch có thể thực hiện công khai; với UC03a, cố vấn ghi nhận căn cứ khách đã xác nhận.</text>
+<text x="40" y="1104" text-anchor="start" font-size="15" font-family="Segoe UI, Arial, sans-serif" class="muted">Khách xem dữ liệu của mình; cố vấn xử lý theo quyền và phạm vi hội thoại được phân công.</text></svg>
