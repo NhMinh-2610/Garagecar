@@ -1,6 +1,6 @@
 # Đọc và hiểu mã nguồn GarageCar
 
-Tài liệu dành cho người đang học, sửa và bảo vệ đồ án này. Phạm vi ngày 29/10/2026: **5 vai trò, web/PWA, không tích hợp AI**. Quản trị viên phụ trách cả nhân sự. Tên hiển thị trên giao diện là AutoPro. Ứng dụng di động riêng trong phiếu nhiệm vụ **chưa có mã nguồn** trong repository này.
+Tài liệu dành cho người đang học, sửa và bảo vệ đồ án này. Phạm vi ngày 04/11/2026: **5 vai trò, web/PWA, không tích hợp AI**. Quản trị viên phụ trách cả nhân sự. Tên hiển thị trên giao diện là AutoPro. Ứng dụng di động riêng trong phiếu nhiệm vụ **chưa có mã nguồn** trong repository này. Xem [nhật ký refactor](refactoring-20261104.md) để tra các phần dùng chung mới được tách.
 
 ## 1. Nên đọc theo thứ tự nào?
 
@@ -99,6 +99,7 @@ Các vật tư được khóa theo thứ tự ID ổn định. Khóa xe trước
 | Module                                          | Công việc                                                           |
 | ----------------------------------------------- | ------------------------------------------------------------------- |
 | `core.js`                                       | Gọi API cùng origin, xử lý lỗi, refresh và dữ liệu đang nhập        |
+| `forms.js`                                      | Gửi dialog, chặn gửi lặp, hiện lỗi và giữ dữ liệu khi lưu thất bại  |
 | `access.js`, `session.js`                       | Lấy quyền hiện tại, hiện menu, thông tin tài khoản và chuyển portal |
 | `workspace.js`                                  | Nhóm menu, dashboard, lối tắt và menu điện thoại                    |
 | `tables.js`                                     | Phân trang bảng; vẫn giữ các nút thao tác trên dòng                 |
@@ -108,7 +109,7 @@ Các vật tư được khóa theo thứ tự ID ổn định. Khóa xe trước
 
 Không render lại cả vùng khi người dùng đang nhập. `refreshGuard` và phiên bản hoạt động giúp bỏ kết quả nền đã cũ. Khi thêm module mới, cần giữ bản nháp khi API lỗi, chặn bấm gửi lặp, escape nội dung người dùng và không chèn HTML từ tin nhắn.
 
-PWA dùng cùng HTML/JS/API. Service worker cache tài nguyên tĩnh, bỏ qua API và request có Authorization. Mất mạng không thể tiếp tục giao dịch sửa chữa/thu tiền. Sau khi đổi tài nguyên đã cache, tăng phiên bản cache; lần này đã tăng từ v13 lên v14. PWA cài ra biểu tượng riêng vẫn cần server; nó không phải ứng dụng native Android/iOS.
+PWA dùng cùng HTML/JS/API. Service worker cache tài nguyên tĩnh, bỏ qua API và request có Authorization. Mất mạng không thể tiếp tục giao dịch sửa chữa/thu tiền. Sau khi đổi tài nguyên đã cache, tăng phiên bản cache; bản refactor này dùng v15 và thêm `forms.js`. PWA cài ra biểu tượng riêng vẫn cần server; nó không phải ứng dụng native Android/iOS.
 
 ## 9. Muốn sửa tính năng thì vào đâu?
 
