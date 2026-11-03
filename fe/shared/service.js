@@ -28,11 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     stock = [],
     parts = [],
     wages = [];
-  const money = (v) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(Number(v) || 0);
+  const money = formatCurrency;
   function dialog(title, body, save, options = {}) {
     const d = document.createElement("dialog");
     d.className = "care-dialog workflow-dialog";
@@ -41,17 +37,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.append(d);
     d.querySelectorAll("[data-close]").forEach((b) => (b.onclick = () => d.close()));
     d.onclose = () => d.remove();
-    d.querySelector("form").onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector("[type=submit]");
-      if (btn.disabled || !e.target.reportValidity()) return;
-      btn.disabled = true;
-      try {
-        const result = await save(e.target);
-        d.close();
+    Garage.bindDialogForm(
+      d,
+      save,
+      async (result) => {
         await load();
         const visitId = options.visitId || result?.visitId || result?.id;
-        if (visitId && visits.some((v) => v.id === visitId)) focusVisit(visitId);
+        if (visitId && visits.some((visit) => visit.id === visitId)) focusVisit(visitId);
         const feedback = host.querySelector("#serviceFeedback");
         if (feedback) {
           feedback.hidden = false;
@@ -59,16 +51,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             options.success || "Đã lưu. Bước tiếp theo đã được cập nhật bên dưới.";
         }
         if (options.nextQuote && visitId) {
-          const visit = visits.find((v) => v.id === visitId);
+          const visit = visits.find((visit) => visit.id === visitId);
           if (visit) quoteEditor(visit, "preliminary");
         }
-      } catch (error) {
-        d.querySelector(".care-error").textContent = error.message;
-        d.querySelector(".care-error").focus();
-      } finally {
-        btn.disabled = false;
-      }
-    };
+      },
+      { focusError: true },
+    );
     d.showModal();
     return d;
   }

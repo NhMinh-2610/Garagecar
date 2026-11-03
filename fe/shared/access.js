@@ -3,29 +3,10 @@ window.Garage.permissionsReady = window.Garage.request("/auth/me")
   .then((me) => {
     const cached = JSON.parse(localStorage.getItem("user") || "{}");
     const user = me?.role ? me : cached;
-    const defaults = {
-      admin: [
-        "reception",
-        "workshop",
-        "maintenance",
-        "catalog",
-        "finance",
-        "reports",
-        "hr",
-        "accounts",
-        "messages",
-      ],
-      advisor: ["reception", "workshop", "maintenance", "messages"],
-      accountant: ["finance", "reports"],
-      mechanic: ["workshop", "maintenance"],
-      customer: ["maintenance", "messages"],
-    };
     if (me?.role) localStorage.setItem("user", JSON.stringify(me));
     return {
       ...user,
-      permissions: (defaults[user.role] || []).filter(
-        (p) => !(user.disabledPermissions || []).includes(p),
-      ),
+      permissions: Garage.permissionsFor(user),
     };
   })
   .catch(() => ({ permissions: [] }));

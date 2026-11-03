@@ -1,7 +1,5 @@
-window.formatCurrency = (amount) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
-    Number(amount) || 0,
-  );
+const currencyFormatter = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" });
+window.formatCurrency = (amount) => currencyFormatter.format(Number(amount) || 0);
 window.formatDate = (value) => Garage.date(value)?.toLocaleDateString("vi-VN") || "—";
 window.showToast = Garage.toast;
 

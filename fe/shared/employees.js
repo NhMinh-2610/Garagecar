@@ -38,24 +38,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.append(d);
     d.querySelector("[data-close]").onclick = () => d.close();
     d.onclose = () => d.remove();
-    d.querySelector("form").onsubmit = async (e) => {
-      e.preventDefault();
-      const b = e.target.querySelector("button");
-      if (b.disabled || !e.target.reportValidity()) return;
-      b.disabled = true;
-      try {
-        await Garage.request("/service/employees/" + u.id, {
+    Garage.bindDialogForm(
+      d,
+      (form) =>
+        Garage.request("/service/employees/" + u.id, {
           method: "PUT",
-          body: Object.fromEntries(new FormData(e.target)),
-        });
-        d.close();
-        await load();
-      } catch (err) {
-        d.querySelector(".care-error").textContent = err.message;
-      } finally {
-        b.disabled = false;
-      }
-    };
+          body: Object.fromEntries(new FormData(form)),
+        }),
+      () => load(),
+    );
     d.showModal();
   };
   Garage.subscribe(load);

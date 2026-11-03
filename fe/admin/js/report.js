@@ -2,6 +2,7 @@
   if (!(await Garage.whenAllowed("reports"))) return;
   const byId = (id) => document.getElementById(id);
   const now = new Date();
+  const compactNumberFormatter = new Intl.NumberFormat("vi-VN", { notation: "compact" });
   byId("reportMonth").value = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
   let rows = [],
     chart = null,
@@ -76,8 +77,7 @@
               y: {
                 beginAtZero: true,
                 ticks: {
-                  callback: (v) =>
-                    new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(v),
+                  callback: (value) => compactNumberFormatter.format(value),
                 },
                 grid: { color: "#edf0f6" },
               },

@@ -1,6 +1,11 @@
 ﻿document.addEventListener("DOMContentLoaded", async () => {
   if (!(await Garage.whenAllowed("finance"))) return;
   const byId = (id) => document.getElementById(id);
+  const monthFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+  });
   const select = byId("paymentSelect");
   const button = byId("confirmPayment");
   const paymentControls = document.createElement("div");
@@ -72,12 +77,7 @@
       const pending = all.filter((r) => r.status === "completed");
       const paid = all.filter((r) => r.status === "paid");
       const now = new Date();
-      const monthKey = (date) =>
-        new Intl.DateTimeFormat("en-CA", {
-          timeZone: "Asia/Ho_Chi_Minh",
-          year: "numeric",
-          month: "2-digit",
-        }).format(date);
+      const currentMonth = monthFormatter.format(now);
       byId("financePending").textContent = pending.length;
       byId("financeOutstanding").textContent = formatCurrency(
         pending.reduce((s, r) => s + r.totalAmount, 0),
@@ -85,7 +85,7 @@
       byId("financePaidCount").textContent = paid.length;
       byId("financeMonth").textContent = formatCurrency(
         paid
-          .filter((r) => r.paidAt && monthKey(Garage.date(r.paidAt)) === monthKey(now))
+          .filter((r) => r.paidAt && monthFormatter.format(Garage.date(r.paidAt)) === currentMonth)
           .reduce((s, r) => s + r.totalAmount, 0),
       );
       const value = select.value;

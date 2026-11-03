@@ -1,31 +1,69 @@
-/* HTTP client dùng chung; trì hoãn đồng bộ khi người dùng đang nhập để giữ bản nháp. */
+/* Cấu hình vai trò và HTTP client chung; trì hoãn đồng bộ khi đang nhập để giữ bản nháp. */
 window.Garage = (() => {
   const base = (window.GARAGE_API_URL || `${location.origin}/api`).replace(/\/$/, "");
+  const roleDefinitions = new Map([
+    [
+      "admin",
+      {
+        label: "Quản trị viên",
+        permissions: [
+          "reception",
+          "workshop",
+          "maintenance",
+          "catalog",
+          "finance",
+          "reports",
+          "hr",
+          "accounts",
+          "messages",
+        ],
+      },
+    ],
+    [
+      "advisor",
+      {
+        label: "Cố vấn dịch vụ",
+        permissions: ["reception", "workshop", "maintenance", "messages"],
+      },
+    ],
+    ["accountant", { label: "Kế toán", permissions: ["finance", "reports"] }],
+    ["mechanic", { label: "Kỹ thuật viên", permissions: ["workshop", "maintenance"] }],
+    ["customer", { label: "Khách hàng", permissions: ["maintenance", "messages"] }],
+  ]);
+  const defaultPermissions = (role) => [...(roleDefinitions.get(role)?.permissions || [])];
+  const permissionsFor = (user) =>
+    defaultPermissions(user.role).filter(
+      (permission) => !(user.disabledPermissions || []).includes(permission),
+    );
+  const isKnownRole = (role) => roleDefinitions.has(role);
+  const portalPath = (role) => (isKnownRole(role) ? `/${role}` : "/login");
+  const roleName = (role) => roleDefinitions.get(role)?.label || role;
   const listeners = new Set();
   let refreshTimer;
   let refreshing = false;
   let activityVersion = 0,
-    lastActivity = 0,
-    pending = false;
-  const dirty = new Set();
-  function visible(node) {
+    lastActivityAt = 0,
+    refreshPending = false;
+  const dirtyScopes = new Set();
+  function isVisible(node) {
     if (!node?.isConnected || node.closest("[hidden]")) return false;
     const modal = node.closest(".modal"),
       dialog = node.closest("dialog");
     if (modal?.style.display === "none" || (dialog && !dialog.open)) return false;
     return !node.closest("section") || node.closest("section").classList.contains("active-section");
   }
-  function editing() {
+  function isEditing() {
     return (
-      Date.now() - lastActivity < 1800 ||
+      Date.now() - lastActivityAt < 1800 ||
       document.activeElement?.matches('input,select,textarea,[contenteditable="true"]') ||
       [...document.querySelectorAll("dialog[open],.modal")].some(
         (el) =>
-          el.open || (el.classList.contains("modal") && el.style.display !== "none" && visible(el)),
+          el.open ||
+          (el.classList.contains("modal") && el.style.display !== "none" && isVisible(el)),
       ) ||
-      [...dirty].some(visible) ||
+      [...dirtyScopes].some(isVisible) ||
       [...document.querySelectorAll('tr[id^="details-"],tr[id^="vehicle-history-"]')].some(
-        (el) => !el.hidden && visible(el),
+        (el) => !el.hidden && isVisible(el),
       )
     );
   }
@@ -37,8 +75,8 @@ window.Garage = (() => {
     // Ghi lại phiên thao tác trước khi tải; bỏ render nền nếu người dùng vừa sửa form.
     const version = activityVersion;
     return () => {
-      if (!context.background || (version === activityVersion && !editing())) return true;
-      pending = true;
+      if (!context.background || (version === activityVersion && !isEditing())) return true;
+      refreshPending = true;
       syncStatus("Đang thao tác · Đồng bộ sau");
       return false;
     };
@@ -48,16 +86,16 @@ window.Garage = (() => {
       name,
       (event) => {
         activityVersion++;
-        lastActivity = Date.now();
+        lastActivityAt = Date.now();
         if (name === "input" || name === "change") {
           const form = event.target.closest("form");
           if (form || event.target.closest("#inv-settings,.editor-panel"))
-            dirty.add(form || event.target);
+            dirtyScopes.add(form || event.target);
         }
       },
       true,
     );
-  document.addEventListener("reset", (event) => dirty.delete(event.target), true);
+  document.addEventListener("reset", (event) => dirtyScopes.delete(event.target), true);
   const escape = (value) =>
     String(value ?? "").replace(
       /[&<>"']/g,
@@ -87,19 +125,19 @@ window.Garage = (() => {
   }
   async function refresh() {
     if (refreshing || document.hidden || !localStorage.getItem("token")) return;
-    if (editing()) {
-      pending = true;
+    if (isEditing()) {
+      refreshPending = true;
       syncStatus("Đang thao tác · Đồng bộ sau");
       return;
     }
     refreshing = true;
-    pending = false;
+    refreshPending = false;
     try {
       await Promise.allSettled([...listeners].map((fn) => fn({ background: true })));
     } finally {
       refreshing = false;
     }
-    if (!pending) syncStatus("Đã đồng bộ · " + new Date().toLocaleTimeString("vi-VN"));
+    if (!refreshPending) syncStatus("Đã đồng bộ · " + new Date().toLocaleTimeString("vi-VN"));
   }
   function changed() {
     clearTimeout(refreshTimer);
@@ -132,8 +170,8 @@ window.Garage = (() => {
       options.notifyChange !== false
     ) {
       if (editScope)
-        for (const node of dirty) {
-          if (editScope.contains(node)) dirty.delete(node);
+        for (const node of dirtyScopes) {
+          if (editScope.contains(node)) dirtyScopes.delete(node);
         }
       changed();
       localStorage.setItem("garage:data-changed", String(Date.now()));
@@ -168,7 +206,7 @@ window.Garage = (() => {
   });
   setInterval(refresh, 20000);
   setInterval(() => {
-    if (pending && !editing()) refresh();
+    if (refreshPending && !isEditing()) refresh();
   }, 2000);
   document.addEventListener("DOMContentLoaded", () => {
     window.showToast = toast;
@@ -183,6 +221,11 @@ window.Garage = (() => {
     });
   });
   return {
+    defaultPermissions,
+    permissionsFor,
+    isKnownRole,
+    portalPath,
+    roleName,
     base,
     apiFetch,
     request,

@@ -312,23 +312,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!button) return;
     const user = users.find((u) => u.id === Number(button.dataset.user));
     if (button.dataset.action === "permissions") {
-      const defaults = {
-        admin: [
-          "reception",
-          "workshop",
-          "maintenance",
-          "catalog",
-          "finance",
-          "reports",
-          "hr",
-          "accounts",
-          "messages",
-        ],
-        advisor: ["reception", "workshop", "maintenance", "messages"],
-        mechanic: ["workshop", "maintenance"],
-        accountant: ["finance", "reports"],
-        customer: ["maintenance", "messages"],
-      };
       const labels = {
         reception: "Tiếp nhận",
         workshop: "Sửa chữa / Cố vấn",
@@ -346,7 +329,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         '<div class="card-heading"><h3>Khóa chức năng · ' +
         esc(user.fullName) +
         '</h3><button data-close class="btn-icon">×</button></div><form><p>Chọn chức năng cần khóa. Tài khoản chỉ có quyền trong vị trí đã cấp.</p>' +
-        defaults[user.role]
+        Garage.defaultPermissions(user.role)
           .map(
             (p) =>
               '<p><label><input type="checkbox" name="disabled" value="' +

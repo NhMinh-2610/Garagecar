@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!(await Garage.whenAllowed("catalog"))) return;
   const token = localStorage.getItem("token");
   const byId = (id) => document.getElementById(id);
+  const currencyFormatter = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" });
   const existingSelect = byId("existingInventory");
   const importForm = byId("importForm");
   const importDialog = byId("stockImportDialog");
@@ -190,13 +191,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (list) {
           list.innerHTML = "";
           wages = result.data;
-          result.data.forEach((wage) => {
-            const priceStr = new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(wage.price);
-            list.innerHTML += `<li><span>${Garage.escape(wage.name)} · ${priceStr}</span><span><button class="btn-sm btn-edit-catalog" data-kind="wages" data-id="${wage.id}">Sửa</button> <button class="btn-sm text-red btn-delete-wage" data-id="${wage.id}">Xóa</button></span></li>`;
-          });
+          list.innerHTML = result.data
+            .map((wage) => {
+              const price = currencyFormatter.format(wage.price);
+              return `<li><span>${Garage.escape(wage.name)} · ${price}</span><span><button class="btn-sm btn-edit-catalog" data-kind="wages" data-id="${wage.id}">Sửa</button> <button class="btn-sm text-red btn-delete-wage" data-id="${wage.id}">Xóa</button></span></li>`;
+            })
+            .join("");
         }
       }
     } catch (e) {

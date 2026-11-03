@@ -358,21 +358,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.append(d);
     d.querySelector("[data-close]").onclick = () => d.close();
     d.onclose = () => d.remove();
-    d.querySelector("form").onsubmit = async (event) => {
-      event.preventDefault();
-      const btn = event.target.querySelector("[type=submit]");
-      if (btn.disabled || !event.target.reportValidity()) return;
-      btn.disabled = true;
-      try {
-        await save(Object.fromEntries(new FormData(event.target)));
-        d.close();
-        await load();
-      } catch (err) {
-        d.querySelector(".care-error").textContent = err.message;
-      } finally {
-        btn.disabled = false;
-      }
-    };
+    Garage.bindDialogForm(
+      d,
+      (form) => save(Object.fromEntries(new FormData(form))),
+      () => load(),
+    );
     d.showModal();
   }
   document.addEventListener("click", async (event) => {

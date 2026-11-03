@@ -50,6 +50,7 @@ async function moduleView(file, role, host, fixtures, permissions) {
       return typeof value === "function" ? value(options) : (value ?? []);
     },
   };
+  w.eval(fs.readFileSync(path.join(root, "fe", "shared", "forms.js"), "utf8"));
   w.eval(fs.readFileSync(path.join(root, "fe", "shared", file), "utf8"));
   w.document.dispatchEvent(new w.Event("DOMContentLoaded"));
   await flush();

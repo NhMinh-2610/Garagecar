@@ -11,17 +11,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.replace("/" + user.role);
     return;
   }
-  const defaults = {
-    advisor: ["reception", "workshop", "maintenance", "messages"],
-    accountant: ["finance", "reports"],
-  };
-  let allowed = defaults[user.role].filter((p) => !(user.disabledPermissions || []).includes(p));
+  let allowed = Garage.permissionsFor(user);
   const esc = Garage.escape,
-    money = (v) =>
-      new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(Number(v) || 0);
+    money = formatCurrency;
   for (const [id, p] of [
     ["serviceWorkspace", "workshop"],
     ["maintenanceWorkspace", "maintenance"],
@@ -65,21 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.append(d);
     d.querySelector("[data-close]").onclick = () => d.close();
     d.onclose = () => d.remove();
-    d.querySelector("form").onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector("[type=submit]");
-      if (btn.disabled || !e.target.reportValidity()) return;
-      btn.disabled = true;
-      try {
-        await save(e.target);
-        d.close();
-        await load();
-      } catch (err) {
-        d.querySelector(".care-error").textContent = err.message;
-      } finally {
-        btn.disabled = false;
-      }
-    };
+    Garage.bindDialogForm(d, save, () => load());
     d.showModal();
     return d;
   }
@@ -317,7 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   Promise.resolve(user)
     .then((me) => {
       localStorage.setItem("user", JSON.stringify(me));
-      allowed = defaults[me.role].filter((p) => !(me.disabledPermissions || []).includes(p));
+      allowed = Garage.permissionsFor(me);
       document.querySelectorAll(".nav-item").forEach((n) => {
         n.hidden = !allowed.includes(n.dataset.permission);
         n.disabled = n.hidden;

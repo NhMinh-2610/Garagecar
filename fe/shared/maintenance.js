@@ -44,21 +44,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.body.append(dialog);
     dialog.querySelector("[data-close]").onclick = () => dialog.close();
     dialog.onclose = () => dialog.remove();
-    dialog.querySelector("form").onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector("[type=submit]");
-      if (btn.disabled || !e.target.reportValidity()) return;
-      btn.disabled = true;
-      try {
-        await onSubmit(e.target, dialog);
-        dialog.close();
-        await load();
-      } catch (error) {
-        dialog.querySelector(".care-error").textContent = error.message;
-      } finally {
-        btn.disabled = false;
-      }
-    };
+    Garage.bindDialogForm(
+      dialog,
+      (form) => onSubmit(form, dialog),
+      () => load(),
+    );
     dialog.showModal();
     return dialog;
   }

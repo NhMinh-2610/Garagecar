@@ -55,39 +55,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }),
   );
 
-  function getRedirectUrl(role) {
-    switch (role) {
-      case "advisor":
-        return "/advisor";
-      case "accountant":
-        return "/accountant";
-      case "admin":
-        return "/admin";
-      case "mechanic":
-        return "/mechanic";
-      case "customer":
-        return "/customer";
-      default:
-        return "/login";
-    }
-  }
-
-  function getRoleDisplayName(role) {
-    switch (role) {
-      case "advisor":
-        return "Cố vấn dịch vụ";
-      case "accountant":
-        return "Kế toán";
-      case "admin":
-        return "Quản Trị Viên";
-      case "mechanic":
-        return "Kỹ Thuật Viên";
-      case "customer":
-        return "Khách Hàng";
-      default:
-        return "Người dùng";
-    }
-  }
+  const getRedirectUrl = Garage.portalPath;
+  const roleDisplayNames = new Map([
+    ["advisor", "Cố vấn dịch vụ"],
+    ["accountant", "Kế toán"],
+    ["admin", "Quản Trị Viên"],
+    ["mechanic", "Kỹ Thuật Viên"],
+    ["customer", "Khách Hàng"],
+  ]);
+  const getRoleDisplayName = (role) => roleDisplayNames.get(role) || "Người dùng";
 
   // Nếu đã đăng nhập → redirect luôn
   const token = localStorage.getItem("token");

@@ -1,19 +1,5 @@
-/* Khoi dong portal theo tai khoan; quyen truy cap duoc API kiem tra lai. */
+/* Mở đúng portal theo tài khoản; API kiểm tra quyền truy cập cho từng yêu cầu. */
 document.addEventListener("DOMContentLoaded", async () => {
-  const routes = {
-    admin: "/admin",
-    advisor: "/advisor",
-    accountant: "/accountant",
-    mechanic: "/mechanic",
-    customer: "/customer",
-  };
-  const names = {
-    admin: "Quản trị viên",
-    advisor: "Cố vấn dịch vụ",
-    accountant: "Kế toán",
-    mechanic: "Kỹ thuật viên",
-    customer: "Khách hàng",
-  };
   const signOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -27,12 +13,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     signOut();
     return;
   }
-  if (!localStorage.getItem("token") || !user || !routes[user.role]) {
+  if (!localStorage.getItem("token") || !user || !Garage.isKnownRole(user.role)) {
     signOut();
     return;
   }
   if (user.role !== role) {
-    location.replace(routes[user.role]);
+    location.replace(Garage.portalPath(user.role));
     return;
   }
   Garage.initPortal(role);
@@ -43,14 +29,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     user = await Garage.permissionsReady;
     if (!user) return;
     if (user.role !== role) {
-      location.replace(routes[user.role] || "/login");
+      location.replace(Garage.portalPath(user.role));
       return;
     }
     const name = document.querySelector(".user-info h4");
     const label = document.querySelector(".user-info small");
     if (name) name.textContent = user.fullName || user.username;
-    if (label) label.textContent = names[user.role];
+    if (label) label.textContent = Garage.roleName(user.role);
   } catch {
-    // Loi xac thuc va ket noi duoc xu ly tai shared/access.js.
+    // shared/access.js đã xử lý lỗi xác thực và kết nối.
   }
 });

@@ -1,6 +1,7 @@
 /* Tăng CACHE khi đổi danh sách tệp. Chỉ cache tài nguyên tĩnh, luôn bỏ qua API và token. */
-const CACHE = "autopro-public-shell-v14";
+const CACHE = "autopro-public-shell-v15";
 const FILES = [
+  "/static/shared/forms.js",
   "/static/shared/icons.svg",
   "/static/shared/garage-illustration.svg",
   "/static/shared/public.css",

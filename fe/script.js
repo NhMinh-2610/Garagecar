@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch {
     /* The public page also works without a session. */
   }
+  const currencyFormatter = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" });
   async function loadServices() {
     const button = document.getElementById("reloadServices"),
       container = document.getElementById("servicePrices");
@@ -48,10 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         title.textContent = wage.name;
         const price = document.createElement("p");
         price.className = "service-price";
-        price.textContent = new Intl.NumberFormat("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        }).format(wage.price);
+        price.textContent = currencyFormatter.format(wage.price);
         const note = document.createElement("p");
         note.className = "muted";
         note.textContent = "Tiền công / hạng mục · chưa gồm vật tư";
