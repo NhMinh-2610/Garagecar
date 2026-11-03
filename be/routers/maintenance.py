@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.response import success_response
+from core.serialization import serialize_columns
 from core.time import utcnow
 from database.session import get_db
 from middleware.auth import get_current_user, require_permission
@@ -22,7 +23,6 @@ from models import (
 from schemas.garage_care import CareInput, ProfileInput, RecordInput
 from services.maintenance_service import (
     matches,
-    row_dict,
     scan_reminders,
     schedule,
     vehicle_access,
@@ -46,7 +46,7 @@ async def profiles(
     rows = await db.scalars(
         select(MaintenanceProfile).order_by(MaintenanceProfile.id.desc())
     )
-    return success_response([row_dict(r) for r in rows])
+    return success_response([serialize_columns(r) for r in rows])
 
 
 @router.post("/profiles", status_code=201)
@@ -66,7 +66,7 @@ async def create_profile(
     db.add(profile)
     await db.commit()
     return success_response(
-        row_dict(profile),
+        serialize_columns(profile),
         "Đã lưu bản nháp; cần kiểm tra đúng sách và phiên bản xe",
         201,
     )
@@ -97,7 +97,9 @@ async def approve(
     profile.approvedBy = user["id"]
     profile.approvedAt = utcnow()
     await db.commit()
-    return success_response(row_dict(profile), "Đã xác minh lịch theo tài liệu hãng")
+    return success_response(
+        serialize_columns(profile), "Đã xác minh lịch theo tài liệu hãng"
+    )
 
 
 @router.get("/vehicles")
@@ -242,7 +244,7 @@ async def record(
     await db.flush()
     await scan_reminders(db)
     await db.commit()
-    return success_response(row_dict(entry), "Đã ghi lịch sử bảo dưỡng", 201)
+    return success_response(serialize_columns(entry), "Đã ghi lịch sử bảo dưỡng", 201)
 
 
 @router.post("/scan")
@@ -280,7 +282,7 @@ async def reminders(
             )
         )
     rows = await db.scalars(query.order_by(MaintenanceReminder.id.desc()).limit(200))
-    return success_response([row_dict(r) for r in rows])
+    return success_response([serialize_columns(r) for r in rows])
 
 
 @router.post("/reminders/{reminder_id}/publish")
@@ -317,5 +319,5 @@ async def publish(
     reminder.publishedAt = utcnow()
     await db.commit()
     return success_response(
-        row_dict(reminder), "Khách hàng có thể xem thông báo trong ứng dụng"
+        serialize_columns(reminder), "Khách hàng có thể xem thông báo trong ứng dụng"
     )

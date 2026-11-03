@@ -7,12 +7,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.response import success_response
+from core.serialization import serialize_columns
 from core.time import utcnow
 from database.session import get_db
 from middleware.auth import get_current_user, require_permission
 from models import LeaveRequest, StaffCertificate, StaffShift, User
 from schemas.professional import CertificateInput, DecisionInput, LeaveInput, ShiftInput
-from services.maintenance_service import row_dict
 
 router = APIRouter(prefix="/api/hr", tags=["HR operations"])
 
@@ -43,7 +43,7 @@ async def operations(
         query = select(model).order_by(model.id.desc()).limit(1000)
         if "hr" not in user["permissions"]:
             query = query.where(model.userId == user["id"])
-        result[key] = [row_dict(r) for r in (await db.scalars(query)).all()]
+        result[key] = [serialize_columns(r) for r in (await db.scalars(query)).all()]
     return success_response(result)
 
 
@@ -78,7 +78,7 @@ async def create_shift(
     db.add(row)
     await db.commit()
     await db.refresh(row)
-    return success_response(row_dict(row), "Đã phân ca", 201)
+    return success_response(serialize_columns(row), "Đã phân ca", 201)
 
 
 @router.post("/shifts/{shift_id}/cancel")
@@ -110,7 +110,9 @@ async def create_certificate(
     db.add(row)
     await db.commit()
     await db.refresh(row)
-    return success_response(row_dict(row), "Đã lưu hồ sơ chứng chỉ được xác minh", 201)
+    return success_response(
+        serialize_columns(row), "Đã lưu hồ sơ chứng chỉ được xác minh", 201
+    )
 
 
 @router.post("/leave")
@@ -132,7 +134,7 @@ async def request_leave(
     db.add(row)
     await db.commit()
     await db.refresh(row)
-    return success_response(row_dict(row), "Đã gửi yêu cầu nghỉ", 201)
+    return success_response(serialize_columns(row), "Đã gửi yêu cầu nghỉ", 201)
 
 
 @router.post("/certificates/{certificate_id}/revoke")
@@ -192,4 +194,4 @@ async def decide_leave(
     row.status = "approved" if body.approved else "rejected"
     row.decidedBy, row.decidedAt, row.decisionNote = user["id"], utcnow(), body.note
     await db.commit()
-    return success_response(row_dict(row), "Đã xử lý yêu cầu nghỉ")
+    return success_response(serialize_columns(row), "Đã xử lý yêu cầu nghỉ")

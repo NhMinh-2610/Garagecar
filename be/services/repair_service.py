@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.time import utcnow
 from models import Inventory, Mechanic, RepairItem, RepairTicket, Vehicle
-from models.inventory_movement import InventoryMovement
+from services.inventory_service import add_stock_movement
 
 TRANSITIONS = {
     "draft": {"working"},
@@ -71,16 +71,10 @@ async def lock_ticket(db, ticket_id):
 
 
 async def replace_items(db, ticket, requested):
-    old = Counter()
-    for item in ticket.items:
-        if item.inventoryId:
-            old[item.inventoryId] += item.quantity
-    needed = Counter()
-    for item in requested:
-        if item.inventoryId:
-            needed[item.inventoryId] += item.quantity
+    previous_quantities = _inventory_quantities(ticket.items)
+    requested_quantities = _inventory_quantities(requested)
     # Hoàn lượng cũ rồi trừ lượng mới trong cùng giao dịch; khóa theo ID tăng dần.
-    ids = sorted(old.keys() | needed.keys())
+    ids = sorted(previous_quantities.keys() | requested_quantities.keys())
     stock = {}
     if ids:
         rows = (
@@ -96,7 +90,7 @@ async def replace_items(db, ticket, requested):
         part = stock.get(inventory_id)
         if part is None:
             raise HTTPException(400, "Vật tư không tồn tại")
-        if needed[inventory_id] and part.fitments:
+        if requested_quantities[inventory_id] and part.fitments:
             from models import VehicleCare
 
             care = await db.get(VehicleCare, ticket.vehicleId)
@@ -114,21 +108,13 @@ async def replace_items(db, ticket, requested):
                     409,
                     f"Vật tư {part.name} chưa có cấu hình tương thích khớp hồ sơ xe. Bổ sung năm/động cơ hoặc chọn đúng mã",
                 )
-        available = part.quantity + old[inventory_id]
-        if needed[inventory_id] > available:
+        available = part.quantity + previous_quantities[inventory_id]
+        if requested_quantities[inventory_id] > available:
             raise HTTPException(409, f"Không đủ tồn kho: {part.name} (còn {available})")
-        part.quantity = available - needed[inventory_id]
-        change = old[inventory_id] - needed[inventory_id]
+        part.quantity = available - requested_quantities[inventory_id]
+        change = previous_quantities[inventory_id] - requested_quantities[inventory_id]
         if change:
-            db.add(
-                InventoryMovement(
-                    inventoryId=inventory_id,
-                    quantityChange=change,
-                    balanceAfter=part.quantity,
-                    reason="repair",
-                    reference=f"repair:{ticket.id}",
-                )
-            )
+            add_stock_movement(db, part, change, "repair", f"repair:{ticket.id}")
     items = []
     for data in requested:
         part = stock.get(data.inventoryId)
@@ -154,6 +140,14 @@ async def replace_items(db, ticket, requested):
     ticket.totalAmount = sum((item.totalPrice for item in items), Decimal(0))
     if ticket.totalAmount >= Decimal("1000000000000"):
         raise HTTPException(400, "Tổng tiền vượt giới hạn")
+
+
+def _inventory_quantities(items):
+    quantities = Counter()
+    for item in items:
+        if item.inventoryId:
+            quantities[item.inventoryId] += item.quantity
+    return quantities
 
 
 async def sync_vehicle(db, vehicle):

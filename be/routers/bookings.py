@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.constants import Role
 from core.response import success_response
+from core.serialization import serialize_columns
 from core.time import utcnow
 from database.session import get_db
 from middleware.auth import require_role
@@ -54,15 +55,7 @@ async def list_bookings(
     rows = await db.scalars(
         select(Booking).order_by(Booking.createdAt.desc()).limit(500)
     )
-    return success_response(
-        [
-            {
-                column.name: getattr(row, column.name)
-                for column in Booking.__table__.columns
-            }
-            for row in rows
-        ]
-    )
+    return success_response([serialize_columns(booking) for booking in rows])
 
 
 @router.put("/{booking_id}")

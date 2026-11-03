@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.constants import STAFF_ROLES, Role
+from core.constants import ROLE_VALUES, STAFF_ROLES, Role
 from core.rate_limit import check_rate_limit, record_attempt
 from core.response import error_response, success_response
 from core.security import (
@@ -134,7 +134,7 @@ async def login(
     if (
         not user
         or not user.isActive
-        or user.role not in {role.value for role in Role}
+        or user.role not in ROLE_VALUES
         or not verify_password(body.password, user.password)
     ):
         # Record failure for both identifiers; always commit so counts are durable

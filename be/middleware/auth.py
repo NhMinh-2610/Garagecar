@@ -5,13 +5,21 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.constants import Role
+from core.constants import ROLE_VALUES, Role
 from core.permissions import permissions
 from core.security import decode_token
 from database.session import get_db
 from models.user import User
 
 _bearer = HTTPBearer(auto_error=False)
+_RESOURCE_PERMISSIONS = {
+    "vehicles": "reception",
+    "bookings": "reception",
+    "inventory": "catalog",
+    "settings": "catalog",
+    "reports": "reports",
+    "mechanics": "hr",
+}
 
 
 async def get_current_user(
@@ -31,7 +39,7 @@ async def get_current_user(
         if (
             user is None
             or not user.isActive
-            or user.role not in {role.value for role in Role}
+            or user.role not in ROLE_VALUES
             or payload.get("version", 0) != user.sessionVersion
         ):
             raise JWTError("Account no longer exists")
@@ -50,6 +58,33 @@ async def get_current_user(
         )
 
 
+def _request_permission(request, user):
+    """Chọn nhóm quyền theo endpoint; không thay kiểm tra sở hữu trong router."""
+    path = request.url.path.split("/")
+    if len(path) <= 2:
+        return None
+    resource = path[2]
+    role = user["role"]
+    if resource == "auth" and len(path) > 3 and path[3] in ("users", "register-staff"):
+        return "accounts"
+    if resource == "repairs":
+        if role == "accountant":
+            return "finance"
+        billing_action = (request.method == "GET" and len(path) == 3) or (
+            request.method == "PUT" and len(path) == 4
+        )
+        if role == "admin" and "workshop" not in user["permissions"] and billing_action:
+            return "finance"
+        return "workshop"
+    if (
+        resource in ("inventory", "mechanics")
+        and request.method == "GET"
+        and role in ("advisor", "mechanic")
+    ):
+        return "workshop"
+    return _RESOURCE_PERMISSIONS.get(resource)
+
+
 def require_role(*roles: Role) -> Callable:
     """
     Dependency factory for role-based access control.
@@ -60,50 +95,17 @@ def require_role(*roles: Role) -> Callable:
             ...
     """
 
+    allowed_roles = frozenset(role.value for role in roles)
+
     async def _checker(
         request: Request, current_user: dict = Depends(get_current_user)
     ) -> dict:
-        if current_user.get("role") not in [r.value for r in roles]:
+        if current_user.get("role") not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Bạn không có quyền truy cập chức năng này",
             )
-        domains = {
-            "vehicles": "reception",
-            "bookings": "reception",
-            "inventory": "catalog",
-            "settings": "catalog",
-            "reports": "reports",
-            "mechanics": "hr",
-        }
-        path = request.url.path.split("/")
-        domain = domains.get(path[2]) if len(path) > 2 else None
-        if len(path) > 2 and path[2] == "repairs":
-            domain = "finance" if current_user["role"] == "accountant" else "workshop"
-        if (
-            len(path) > 2
-            and path[2] == "repairs"
-            and (
-                (request.method == "GET" and len(path) == 3)
-                or (request.method == "PUT" and len(path) == 4)
-            )
-            and current_user["role"] == "admin"
-            and "workshop" not in current_user["permissions"]
-        ):
-            domain = "finance"
-        if (
-            len(path) > 2
-            and path[2] in ("inventory", "mechanics")
-            and request.method == "GET"
-            and current_user["role"] in ("advisor", "mechanic")
-        ):
-            domain = "workshop"
-        if (
-            len(path) > 3
-            and path[2] == "auth"
-            and path[3] in ("users", "register-staff")
-        ):
-            domain = "accounts"
+        domain = _request_permission(request, current_user)
         if (
             current_user["role"] != "customer"
             and domain

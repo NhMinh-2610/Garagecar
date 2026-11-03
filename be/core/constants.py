@@ -9,6 +9,9 @@ class Role(str, Enum):
     CUSTOMER = "customer"
 
 
+ROLE_VALUES = frozenset(role.value for role in Role)
+
+
 # Roles that can be created by admin via /auth/register-staff
 STAFF_ROLES = [Role.ADMIN, Role.MECHANIC, Role.ADVISOR, Role.ACCOUNTANT]
 

@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import lazyload
 
 from core.response import success_response
+from core.serialization import serialize_columns
 from core.time import utcnow
 from database.session import get_db
 from middleware.auth import get_current_user, require_permission
@@ -31,7 +32,6 @@ from schemas.garage_care import (
     VisitInput,
 )
 from schemas.repair import RepairItemCreate
-from services.maintenance_service import row_dict
 from services.repair_service import assigned_mechanic, replace_items, sync_vehicle
 
 router = APIRouter(prefix="/api/service", tags=["Service workflow"])
@@ -97,11 +97,11 @@ async def detail(db, visit):
 
 def visit_data(visit, vehicle, quotes, ticket):
     return {
-        **row_dict(visit),
+        **serialize_columns(visit),
         "licensePlate": vehicle.licensePlate,
         "vehicleStatus": vehicle.status,
         "customerId": vehicle.customerId,
-        "quotes": [row_dict(q) for q in quotes],
+        "quotes": [serialize_columns(q) for q in quotes],
         "ticketId": ticket.id if ticket else None,
         "ticketStatus": ticket.status if ticket else None,
     }
@@ -308,7 +308,7 @@ async def quote(
         visit.status = "awaiting_approval"
     await db.commit()
     return success_response(
-        row_dict(new), "Đã lưu phiên bản báo giá; chưa xuất kho", 201
+        serialize_columns(new), "Đã lưu phiên bản báo giá; chưa xuất kho", 201
     )
 
 

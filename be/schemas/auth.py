@@ -6,6 +6,12 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from schemas.common import Name, PositiveId
 
 
+def _validate_password_bytes(value):
+    if len(value.encode("utf-8")) > 72:
+        raise ValueError("Mật khẩu vượt giới hạn 72 byte")
+    return value
+
+
 # Request schemas
 class RegisterRequest(BaseModel):
     username: Name
@@ -16,9 +22,7 @@ class RegisterRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def password_byte_limit(cls, value):
-        if len(value.encode("utf-8")) > 72:
-            raise ValueError("Mật khẩu vượt giới hạn 72 byte")
-        return value
+        return _validate_password_bytes(value)
 
     @field_validator("email")
     @classmethod
@@ -53,11 +57,6 @@ class UserResponse(BaseModel):
     createdAt: Optional[datetime] = None
 
 
-class TokenResponse(BaseModel):
-    token: str
-    user: UserResponse
-
-
 class AccountCreate(RegisterRequest):
     model_config = ConfigDict(extra="forbid")
     role: Literal["admin", "mechanic", "customer", "advisor", "accountant"]
@@ -85,9 +84,7 @@ class PasswordReset(BaseModel):
     @field_validator("password")
     @classmethod
     def byte_limit(cls, value):
-        if len(value.encode("utf-8")) > 72:
-            raise ValueError("Mật khẩu vượt giới hạn 72 byte")
-        return value
+        return _validate_password_bytes(value)
 
 
 class PasswordChange(PasswordReset):

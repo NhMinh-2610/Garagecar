@@ -15,6 +15,7 @@ from schemas.inventory import (
     InventoryUpdate,
     StockReceipt,
 )
+from services.inventory_service import add_stock_movement
 
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
@@ -48,14 +49,7 @@ async def create_inventory(
     item = Inventory(**body.model_dump(mode="json"))
     db.add(item)
     await db.flush()
-    db.add(
-        InventoryMovement(
-            inventoryId=item.id,
-            quantityChange=item.quantity,
-            balanceAfter=item.quantity,
-            reason="opening",
-        )
-    )
+    add_stock_movement(db, item, item.quantity, "opening")
     await db.commit()
     await db.refresh(item)
     return success_response(
@@ -95,14 +89,7 @@ async def update_inventory(
             continue
         setattr(item, field, value)
     if item.quantity != old_quantity:
-        db.add(
-            InventoryMovement(
-                inventoryId=item.id,
-                quantityChange=item.quantity - old_quantity,
-                balanceAfter=item.quantity,
-                reason="adjustment",
-            )
-        )
+        add_stock_movement(db, item, item.quantity - old_quantity, "adjustment")
 
     await db.commit()
     await db.refresh(item)
@@ -142,14 +129,7 @@ async def receive_stock(
     item.quantity += body.quantity
     if body.unitPrice is not None:
         item.unitPrice = body.unitPrice
-    db.add(
-        InventoryMovement(
-            inventoryId=item.id,
-            quantityChange=body.quantity,
-            balanceAfter=item.quantity,
-            reason="receipt",
-        )
-    )
+    add_stock_movement(db, item, body.quantity, "receipt")
     await db.commit()
     await db.refresh(item)
     return success_response(
