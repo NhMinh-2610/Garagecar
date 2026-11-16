@@ -1,22 +1,19 @@
-"""
-core/rate_limit.py — Brute-force protection for login endpoints
-----------------------------------------------------------------
-Strategy: progressive lockout per identifier (email or IP).
-  - Window: 15 minutes
-  - Threshold: 5 failed attempts → HTTP 429
-  - No Redis required — uses the existing PostgreSQL database.
+"""Chặn đăng nhập khi một định danh có ít nhất 5 lần sai trong 15 phút.
+
+Lịch sử nằm trong PostgreSQL; đếm 15 phút gần nhất tại mỗi lần kiểm tra,
+không tăng thời gian khóa sau từng lần thử.
 """
 
 from datetime import timedelta
 
 from fastapi import HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.time import utcnow
 from models.login_attempt import LoginAttempt
 
-_WINDOW    = timedelta(minutes=15)
+_WINDOW = timedelta(minutes=15)
 _MAX_FAILS = 5
 
 
@@ -32,7 +29,7 @@ async def check_rate_limit(db: AsyncSession, identifier: str) -> None:
     fail_count: int = await db.scalar(
         select(func.count()).where(
             LoginAttempt.identifier == identifier,
-            LoginAttempt.success == False,        # noqa: E712
+            LoginAttempt.success == False,  # noqa: E712
             LoginAttempt.attempted_at >= since,
         )
     )

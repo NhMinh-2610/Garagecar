@@ -1,7 +1,8 @@
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from typing import Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Optional
+
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 
 def success_response(
@@ -9,11 +10,17 @@ def success_response(
     message: str = "Success",
     status_code: int = 200,
 ) -> JSONResponse:
-    """Return a standardised success JSON payload — mirrors Node.js sendSuccess()."""
+    """Trả JSON thống nhất cho frontend; thời gian thiếu múi giờ được hiểu là UTC."""
     return JSONResponse(
         status_code=status_code,
-        content=jsonable_encoder({"success": True, "data": data, "message": message},
-                                 custom_encoder={datetime: lambda value: value.replace(tzinfo=value.tzinfo or timezone.utc).isoformat()}),
+        content=jsonable_encoder(
+            {"success": True, "data": data, "message": message},
+            custom_encoder={
+                datetime: lambda value: value.replace(
+                    tzinfo=value.tzinfo or timezone.utc
+                ).isoformat()
+            },
+        ),
     )
 
 
@@ -22,7 +29,7 @@ def error_response(
     status_code: int = 400,
     error: Optional[str] = None,
 ) -> JSONResponse:
-    """Return a standardised error JSON payload — mirrors Node.js sendError()."""
+    """Trả lỗi theo cùng cấu trúc success/message để frontend hiển thị."""
     content: dict[str, Any] = {"success": False, "message": message}
     if error:
         content["error"] = error

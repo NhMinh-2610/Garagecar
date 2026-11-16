@@ -1,19 +1,20 @@
 """Validated inputs; source schedules are scoped to an exact vehicle variant."""
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Literal
+
 from pydantic import (
     BaseModel,
-    Field,
     ConfigDict,
+    Field,
     HttpUrl,
-    model_validator,
     field_validator,
+    model_validator,
 )
+
+from core.time import utcnow
 from schemas.common import Name, PositiveId
 from schemas.repair import RepairItemCreate
-from core.time import utcnow
-from datetime import timedelta
 
 
 def today():
@@ -148,4 +149,4 @@ class EmployeeInput(Input):
 
 
 class PermissionInput(Input):
-    disabledPermissions: list[str] = Field(max_length=8)
+    disabledPermissions: list[str] = Field(max_length=9)

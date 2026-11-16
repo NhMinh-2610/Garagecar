@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1060" viewBox="0 0 1120 1060" role="img" aria-labelledby="title"><title id="title">04-sequence-convert</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">04 · Tuần tự chuyển báo giá thành phiếu</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">POST /api/service/quotes/{quote_id}/convert — một giao dịch backend.</text>
+<rect x="15" y="115" width="170" height="50" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="100" y="146" text-anchor="middle" font-size="16" fill="#182d49">Cố vấn</text>
+<polyline points="100,165 100,890" fill="none" stroke="#526c8a" stroke-width="1.7"  stroke-dasharray="6 5"/>
+<rect x="240" y="115" width="170" height="50" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="325" y="146" text-anchor="middle" font-size="16" fill="#182d49">Web/PWA</text>
+<polyline points="325,165 325,890" fill="none" stroke="#526c8a" stroke-width="1.7"  stroke-dasharray="6 5"/>
+<rect x="495" y="115" width="170" height="50" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="580" y="146" text-anchor="middle" font-size="16" fill="#182d49">API / Service</text>
+<polyline points="580,165 580,890" fill="none" stroke="#526c8a" stroke-width="1.7"  stroke-dasharray="6 5"/>
+<rect x="855" y="115" width="170" height="50" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="940" y="146" text-anchor="middle" font-size="16" fill="#182d49">PostgreSQL</text>
+<polyline points="940,165 940,890" fill="none" stroke="#526c8a" stroke-width="1.7"  stroke-dasharray="6 5"/>
+<polyline points="100,215 325,215" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="325,215 316,211 316,219" fill="#526c8a"/>
+<text x="212.5" y="203" text-anchor="middle" font-size="14" fill="#182d49">Chọn thợ / Tạo phiếu</text>
+<polyline points="325,285 580,285" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="580,285 571,281 571,289" fill="#526c8a"/>
+<text x="452.5" y="273" text-anchor="middle" font-size="14" fill="#182d49">POST + token + mechanicId</text>
+<polyline points="580,355 940,355" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,355 931,351 931,359" fill="#526c8a"/>
+<text x="760" y="343" text-anchor="middle" font-size="14" fill="#182d49">Đọc tài khoản, quyền và phiên</text>
+<polyline points="940,410 580,410" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polygon points="580,410 589,414 589,406" fill="#526c8a"/>
+<text x="760" y="398" text-anchor="middle" font-size="14" fill="#182d49">Thông tin hiện tại</text>
+<polyline points="580,475 940,475" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,475 931,471 931,479" fill="#526c8a"/>
+<text x="760" y="463" text-anchor="middle" font-size="14" fill="#182d49">Khóa xe/lượt; đọc báo giá final approved</text>
+<polyline points="580,545 940,545" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,545 931,541 931,549" fill="#526c8a"/>
+<text x="760" y="533" text-anchor="middle" font-size="14" fill="#182d49">Kiểm tra thợ, giá, tương thích và tồn</text>
+<polyline points="580,615 940,615" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,615 931,611 931,619" fill="#526c8a"/>
+<text x="760" y="603" text-anchor="middle" font-size="14" fill="#182d49">Ghi phiếu + hạng mục + xuất kho</text>
+<polyline points="580,685 940,685" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="940,685 931,681 931,689" fill="#526c8a"/>
+<text x="760" y="673" text-anchor="middle" font-size="14" fill="#182d49">Đổi trạng thái báo giá/lượt; COMMIT</text>
+<polyline points="580,755 325,755" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polygon points="325,755 334,759 334,751" fill="#526c8a"/>
+<text x="452.5" y="743" text-anchor="middle" font-size="14" fill="#182d49">201 + ticketId</text>
+<polyline points="325,820 100,820" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<polygon points="100,820 109,824 109,816" fill="#526c8a"/>
+<text x="212.5" y="808" text-anchor="middle" font-size="14" fill="#182d49">Mở đúng phiếu / Cập nhật</text>
+<rect x="120" y="930" width="880" height="84" rx="12" fill="#fff3db" stroke="#8096b0" stroke-width="1.5" />
+<text x="560" y="966.5" text-anchor="middle" font-size="16" fill="#182d49">Nếu điều kiện không đạt: trả lỗi, rollback; không trừ kho hoặc tạo phiếu một phần.</text>
+<text x="560" y="989.7" text-anchor="middle" font-size="16" fill="#182d49">Gửi lại báo giá đã chuyển không được tạo thêm phiếu; UI giữ dữ liệu để xử lý lỗi.</text></g></svg>

@@ -3,43 +3,22 @@ window.Garage.permissionsReady = window.Garage.request("/auth/me")
   .then((me) => {
     const cached = JSON.parse(localStorage.getItem("user") || "{}");
     const user = me?.role ? me : cached;
-    const defaults = {
-      admin: [
-        "reception",
-        "workshop",
-        "maintenance",
-        "catalog",
-        "finance",
-        "reports",
-        "hr",
-        "accounts",
-      ],
-      advisor: ["reception", "workshop", "maintenance"],
-      accountant: ["finance", "reports"],
-      hr: ["hr"],
-      mechanic: ["workshop", "maintenance"],
-      customer: ["maintenance"],
-    };
     if (me?.role) localStorage.setItem("user", JSON.stringify(me));
     return {
       ...user,
-      permissions: (defaults[user.role] || []).filter(
-        (p) => !(user.disabledPermissions || []).includes(p),
-      ),
+      permissions: Garage.permissionsFor(user),
     };
   })
   .catch(() => ({ permissions: [] }));
 window.Garage.whenAllowed = async (domain) => {
   const me = await Garage.permissionsReady;
-  return (Array.isArray(domain) ? domain : [domain]).every((p) =>
-    me.permissions.includes(p),
-  );
+  return (Array.isArray(domain) ? domain : [domain]).every((p) => me.permissions.includes(p));
 };
 document.addEventListener("DOMContentLoaded", async () => {
   const me = await Garage.permissionsReady;
   if (!me.role) return;
   const adminDomains = {
-    dashboard: ["reception", "workshop", "finance"],
+    dashboard: [],
     reception: ["reception"],
     repair: ["workshop"],
     inventory: ["catalog"],
@@ -48,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     hr: ["hr"],
     service: ["workshop"],
     maintenance: ["maintenance"],
+    messages: ["messages"],
   };
   const domains =
     me.role === "admin"
@@ -60,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             maintenance: ["maintenance"],
           }
         : me.role === "customer"
-          ? { maintenance: ["maintenance"] }
+          ? { maintenance: ["maintenance"], messages: ["messages"] }
           : {};
   document.querySelectorAll(".nav-item").forEach((btn) => {
     const keys = domains[btn.dataset.target?.replace("-section", "")] || [];

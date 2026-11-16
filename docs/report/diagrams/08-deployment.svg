@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="670" viewBox="0 0 1120 670" role="img" aria-labelledby="title"><title id="title">08-deployment</title><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#526c8a"/></marker></defs><rect width="100%" height="100%" fill="white"/><g font-family="Segoe UI, Arial, sans-serif"><text x="40" y="43" text-anchor="start" font-size="26" fill="#182d49">08 · Triển khai Docker demo</text>
+<text x="40" y="75" text-anchor="start" font-size="15" fill="#53657a">Cấu hình tại docker-compose.yml; không biểu diễn kết quả triển khai production.</text>
+<rect x="50" y="150" width="290" height="100" rx="12" fill="#eaf2ff" stroke="#8096b0" stroke-width="1.5" />
+<text x="195" y="183" text-anchor="middle" font-size="16" fill="#182d49">Trình duyệt / PWA</text>
+<text x="195" y="206.2" text-anchor="middle" font-size="16" fill="#182d49">Máy tính hoặc điện thoại</text>
+<text x="195" y="229.4" text-anchor="middle" font-size="16" fill="#182d49">Web port mặc định 3000</text>
+<rect x="435" y="150" width="280" height="100" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="575" y="183" text-anchor="middle" font-size="16" fill="#182d49">Nginx · frontend</text>
+<text x="575" y="206.2" text-anchor="middle" font-size="16" fill="#182d49">Phục vụ fe/</text>
+<text x="575" y="229.4" text-anchor="middle" font-size="16" fill="#182d49">Proxy /api → backend</text>
+<rect x="815" y="150" width="270" height="100" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="950" y="183" text-anchor="middle" font-size="16" fill="#182d49">FastAPI · backend</text>
+<text x="950" y="206.2" text-anchor="middle" font-size="16" fill="#182d49">Uvicorn</text>
+<text x="950" y="229.4" text-anchor="middle" font-size="16" fill="#182d49">Migration → startup</text>
+<polyline points="340,200 435,200" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="435,200 426,196 426,204" fill="#526c8a"/>
+<text x="388" y="185" text-anchor="middle" font-size="14" fill="#182d49">HTTP(S)</text>
+<polyline points="715,200 815,200" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="815,200 806,196 806,204" fill="#526c8a"/>
+<text x="766" y="185" text-anchor="middle" font-size="14" fill="#182d49">/api</text>
+<rect x="815" y="390" width="270" height="100" rx="12" fill="#e7f7ee" stroke="#8096b0" stroke-width="1.5" />
+<text x="950" y="423" text-anchor="middle" font-size="16" fill="#182d49">PostgreSQL 16 · db</text>
+<text x="950" y="446.2" text-anchor="middle" font-size="16" fill="#182d49">db:5432 trong mạng Docker</text>
+<text x="950" y="469.4" text-anchor="middle" font-size="16" fill="#182d49">Volume pgdata</text>
+<polyline points="950,250 950,390" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="950,390 954,381 946,381" fill="#526c8a"/>
+<text x="997" y="327" text-anchor="middle" font-size="14" fill="#182d49">asyncpg</text>
+<rect x="435" y="390" width="280" height="100" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="575" y="423" text-anchor="middle" font-size="16" fill="#182d49">pgAdmin / pg_dump</text>
+<text x="575" y="446.2" text-anchor="middle" font-size="16" fill="#182d49">Cổng host loopback 5434</text>
+<text x="575" y="469.4" text-anchor="middle" font-size="16" fill="#182d49">Backup và kiểm tra dữ liệu</text>
+<polyline points="715,440 815,440" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="815,440 806,436 806,444" fill="#526c8a"/>
+<text x="766" y="425" text-anchor="middle" font-size="14" fill="#182d49">SQL</text>
+<rect x="50" y="390" width="290" height="100" rx="12" fill="#f0f3f7" stroke="#8096b0" stroke-width="1.5" />
+<text x="195" y="423" text-anchor="middle" font-size="16" fill="#182d49">Tài nguyên tĩnh</text>
+<text x="195" y="446.2" text-anchor="middle" font-size="16" fill="#182d49">Service worker / offline shell</text>
+<text x="195" y="469.4" text-anchor="middle" font-size="16" fill="#182d49">API không cache</text>
+<polyline points="195,250 195,390" fill="none" stroke="#526c8a" stroke-width="1.7" marker-end="url(#arrow)" />
+<polygon points="195,390 199,381 191,381" fill="#526c8a"/>
+<text x="254" y="327" text-anchor="middle" font-size="14" fill="#182d49">Cache tĩnh</text>
+<text x="50" y="560" text-anchor="start" font-size="16" fill="#182d49">API trực tiếp ở host 127.0.0.1:8001; DB host 127.0.0.1:5434. Biến cổng có thể thay đổi.</text>
+<text x="50" y="583.2" text-anchor="start" font-size="16" fill="#182d49">PWA/camera trên điện thoại cần HTTPS phù hợp. URL/thiết bị thật phải kiểm tra khi demo.</text>
+<text x="50" y="606.4" text-anchor="start" font-size="16" fill="#182d49">Database Docker độc lập với PostgreSQL Windows. Không xóa volume khi cần giữ dữ liệu.</text></g></svg>

@@ -1,116 +1,55 @@
-# Hướng Dẫn Đóng Góp cho GarageCar
+# Hướng dẫn đóng góp
 
-Cảm ơn bạn đã quan tâm đến việc đóng góp cho GarageCar! Hướng dẫn này giúp bạn bắt đầu nhanh chóng.
+Đọc [README](README.md), hoàn thành [cài đặt](docs/setup.md), sau đó tạo nhánh riêng cho phần việc. Project dùng tiếng Anh cho tên code/file và tiếng Việt cho giao diện, tài liệu. Chú thích có thể viết tiếng Việt không dấu; ưu tiên giải thích quy tắc nghiệp vụ hoặc lý do cần kiểm soát.
 
-## 1. Tìm issue hoặc đề xuất tính năng
+## Quy ước code
 
-Trước khi bắt đầu code, hãy tạo một Issue trên GitHub để thảo luận về bug hoặc tính năng bạn muốn thêm. Điều này giúp tránh trùng lặp công việc.
+- Đặt xử lý API trong `be/routers`, nghiệp vụ dùng lại trong `be/services`, kiểm tra đầu vào trong `be/schemas`.
+- Giữ nguyên tên trường API/database đang được sử dụng. Thay đổi schema qua migration mới; không sửa revision đã triển khai.
+- Cập nhật tồn kho, phiếu sửa, báo giá và thu tiền trong giao dịch. Quyền truy cập phải được kiểm tra ở API.
+- Frontend gọi `Garage.request` và dùng các module `fe/shared`; không sao chép xác thực, điều hướng hoặc HTTP client sang portal mới.
+- Dữ liệu nhập từ người dùng phải được escape hoặc gán bằng `textContent`. Tránh thay cả vùng giao diện khi đang có bản nháp.
+- Tên file tiếng Anh, ASCII; tài liệu dùng `kebab-case`. Không đổi tên model/cột chỉ để làm đẹp.
+- Không đưa `.env`, token, ảnh khách hàng, bản backup hoặc log chứa thông tin riêng vào Git.
 
-## 2. Fork & tạo branch
+## Cài công cụ kiểm tra
 
-Fork repository và tạo branch với tên mô tả rõ ràng:
+Chạy tại thư mục gốc:
 
-```bash
-# Ví dụ cho issue #42
-git checkout -b 42-them-tinh-nang-tim-kiem-xe
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r be/requirements-dev.txt
+npm.cmd ci
 ```
 
-## 3. Cài đặt môi trường phát triển
+Node.js phục vụ kiểm thử và định dạng code; ứng dụng không cần bước build frontend.
 
-```bash
-# Clone fork của bạn
-git clone https://github.com/<your-username>/Garagecar.git
-cd Garagecar
+## Kiểm tra trước khi commit
 
-# Cài đặt backend
-cd be
-pip install -r requirements.txt
-cp .env.example .env
+Trên Windows có thể chạy toàn bộ bằng `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1`. Script dừng ngay khi một bước lỗi. Chi tiết phạm vi tại [báo cáo kiểm tra](docs/verification.md).
 
-# Tạo dữ liệu mẫu
-python seed.py
-
-# Chạy backend (dev mode)
-uvicorn main:app --reload --port 8000
+```powershell
+.\.venv\Scripts\python.exe -m ruff check be scripts
+.\.venv\Scripts\python.exe -m ruff format --check be scripts
+.\.venv\Scripts\python.exe -m pytest -q
+npm.cmd run format:check
+npm.cmd run check:files
+npm.cmd test
 ```
 
-Frontend không cần cài đặt — mở `fe/login/index.html` bằng Live Server là dùng được.
+Các test backend dùng database/schema kiểm thử riêng theo fixture; không dùng lệnh seed để thay cho kiểm thử. Test frontend dùng jsdom, kiểm tra DOM và tương tác; chưa thay thế kiểm tra trực quan trên điện thoại/trình duyệt thật.
 
-## 4. Coding Style
+Định dạng lại khi cần:
 
-### Backend (Python/FastAPI)
-
-- Code theo chuẩn **PEP 8**, dùng type hints
-- Mọi route handler phải là `async def`
-- Dùng `success_response()` và `error_response()` từ `core/response.py`
-- Validation qua **Pydantic v2 schemas** trong `schemas/`
-- Không dùng raw SQL — chỉ dùng SQLAlchemy ORM
-
-```python
-# ✅ Đúng
-@router.get("/items")
-async def list_items(
-    db: AsyncSession = Depends(get_db),
-    _: dict = Depends(require_role(Role.ADMIN)),
-) -> JSONResponse:
-    result = await db.execute(select(Item))
-    items = result.scalars().all()
-    return success_response([ItemResponse.model_validate(i).model_dump() for i in items])
-
-# ❌ Sai — không dùng raw SQL, không return dict trực tiếp
+```powershell
+.\.venv\Scripts\python.exe -m ruff check be --fix
+.\.venv\Scripts\python.exe -m ruff format be
+npm.cmd run format
 ```
 
-### Frontend (Vanilla JS)
+Các revision trong `be/migrations/versions` được giữ nguyên định dạng lịch sử. File JSON nghiên cứu/danh mục và tài liệu Word được giữ riêng khỏi bộ định dạng code.
 
-- Không dùng framework — chỉ HTML/CSS/JS thuần
-- `API_URL` đã khai báo trong `app.js` của mỗi portal — không hardcode URL trong file khác
-- Dùng `showToast(message, type)` để hiển thị thông báo
-- Dùng `formatCurrency(amount)` và `formatDate(dateStr)` cho formatting
+## Commit và review
 
-### CSS
+Mỗi commit giải quyết một phần việc có thể hiểu và kiểm tra độc lập. Dùng câu tiếng Anh ngắn, ví dụ `Add support chat`, `Group workspace menus`, `Update setup guide`. Tránh đưa thay đổi nghiệp vụ không liên quan vào commit định dạng.
 
-- Dùng CSS Variables đã định nghĩa trong `:root {}` thay vì hardcode màu
-- Mỗi portal có file CSS riêng trong `css/`
-
-## 5. Commit Message
-
-Dùng format rõ ràng:
-
-```
-feat: Thêm tính năng tìm kiếm xe theo biển số
-fix: Sửa lỗi redirect khi token hết hạn
-docs: Cập nhật hướng dẫn cài đặt
-style: Sửa indent và whitespace
-refactor: Tách logic sidebar thành hàm riêng
-```
-
-## 6. Tạo Pull Request
-
-```bash
-# Đồng bộ với main trước khi push
-git remote add upstream https://github.com/NhMinh-2610/Garagecar.git
-git fetch upstream
-git rebase upstream/main
-
-# Push branch
-git push origin 42-them-tinh-nang-tim-kiem-xe
-```
-
-Sau đó vào GitHub và tạo Pull Request. Mô tả rõ:
-- Vấn đề đang giải quyết
-- Cách tiếp cận thực hiện
-- Cách test thủ công
-
-## 7. Review checklist
-
-Trước khi submit PR, hãy tự kiểm tra:
-
-- [ ] Code không hardcode port, URL hay secret
-- [ ] Mọi route mới đều có authentication (`require_role` hoặc `get_current_user`)
-- [ ] Response đều dùng `success_response()` / `error_response()`
-- [ ] Không commit file `.env` hay `database.sqlite`
-- [ ] Đã test thủ công với các vai trò khác nhau (admin, mechanic, customer)
-
----
-
-Cảm ơn bạn! 🚀
+Mô tả review nêu vấn đề, hành vi sau sửa và các kiểm tra đã chạy. Nếu có migration, ghi rõ yêu cầu backup, lệnh nâng cấp và giới hạn chuyển đổi dữ liệu. Xem [quy trình Git](GITHUB_GUIDE.md).

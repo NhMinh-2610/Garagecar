@@ -1,39 +1,323 @@
-<!DOCTYPE html>
-<html lang="vi"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AutoPro · Chăm sóc xe, an tâm mỗi ngày</title>
-<meta name="description" content="Đặt lịch chăm sóc xe, theo dõi tiến độ sửa chữa và tra cứu chi phí tại AutoPro.">
-<link rel="stylesheet" href="/static/shared/ui.css"><link rel="stylesheet" href="/static/shared/workspace.css"><link rel="stylesheet" href="/static/shared/portals.css"><link rel="stylesheet" href="/static/shared/public.css">
-<script src="/static/shared/core.js" defer></script><script src="/static/shared/booking.js" defer></script><script src="/static/script.js" defer></script>
-<script src="/static/shared/pwa.js" defer></script></head><body class="public-page">
-<header class="public-header">
-<a href="/" class="public-brand"><span class="brand-mark">A</span>AutoPro</a>
-<button class="btn-icon public-menu-toggle" aria-label="Mở menu" aria-controls="publicNav" aria-expanded="false">☰</button>
-<nav id="publicNav" class="public-nav" aria-label="Menu chính"><a href="#services">Dịch vụ</a><a href="#pricing">Tiền công</a><a href="#contact">Đặt lịch</a><a id="loginLink" class="btn btn-secondary" href="/login">Đăng nhập</a><a id="registerLink" class="btn btn-primary" href="/login?mode=register">Tạo tài khoản</a></nav>
-</header>
-<main class="public-main">
-<section id="home" class="hero">
-<div><p class="eyebrow">AUTOPRO · CHĂM SÓC & SỬA CHỮA Ô TÔ</p><h1>Chăm sóc xe.<br><span>An tâm mỗi ngày.</span></h1><p class="hero-description">Từ lúc tiếp nhận đến khi nhận lại xe, theo dõi từng hạng mục sửa chữa và nắm rõ chi phí trong cùng một nơi.</p><div class="actions"><a href="#contact" class="btn btn-primary">Đặt lịch dịch vụ ↗</a><a id="workspaceLink" href="/login" class="btn btn-secondary">Theo dõi xe của tôi</a></div><p class="hero-note">Gửi yêu cầu trực tuyến · Garage liên hệ xác nhận lịch</p></div>
-<div class="hero-visual"><div class="visual-heading"><span class="eyebrow">CHĂM SÓC CÓ KẾ HOẠCH</span><span class="visual-tag">AUTOPRO / GARAGE</span></div><h2>Chiếc xe của bạn.<br>Một hành trình rõ ràng.</h2><img class="garage-art" src="/static/shared/garage-illustration.svg" alt="Minh họa ô tô tại không gian chăm sóc xe AutoPro" width="640" height="330"><div class="visual-steps"><span><b>01</b> Tiếp nhận</span><span><b>02</b> Sửa chữa</span><span><b>03</b> Bàn giao</span></div><p class="visual-caption">Theo dõi tiến độ thực tế trong tài khoản của bạn.</p></div>
-</section>
-<section class="access-section" aria-labelledby="accessTitle"><div><p class="eyebrow">CÙNG MỘT HỆ THỐNG</p><h2 id="accessTitle">Không gian dành cho bạn</h2></div><div class="access-grid"><a class="access-card" href="/login?mode=register"><span class="access-icon" aria-hidden="true">01</span><div><h3>Khách hàng</h3><p>Đặt lịch, theo dõi xe và xem chi phí.</p><strong>Tạo tài khoản cá nhân ↗</strong></div></a><a class="access-card" href="/login"><span class="access-icon" aria-hidden="true">02</span><div><h3>Kỹ thuật viên</h3><p>Nhận phiếu, cập nhật công việc được giao.</p><strong>Đăng nhập tài khoản được cấp ↗</strong></div></a><a class="access-card" href="/login"><span class="access-icon" aria-hidden="true">03</span><div><h3>Quản trị viên</h3><p>Quản lý garage, nhân sự và tài khoản.</p><strong>Vào không gian quản lý ↗</strong></div></a></div></section>
-<section id="services" class="public-section">
-<p class="eyebrow">NHU CẦU CỦA BẠN</p><h2>Mỗi chiếc xe, một kế hoạch chăm sóc</h2>
-<div class="service-grid"><article class="card"><span class="service-number">01 / BẢO DƯỠNG</span><h3>Chăm sóc định kỳ</h3><p class="section-description">Trao đổi về thay dầu, kiểm tra phanh, lốp và các hạng mục theo tình trạng xe.</p><div class="actions"><button class="btn btn-sm" data-service="maintenance">Đặt lịch bảo dưỡng</button></div></article><article class="card"><span class="service-number">02 / SỬA CHỮA</span><h3>Kiểm tra dấu hiệu bất thường</h3><p class="section-description">Mô tả tiếng kêu, đèn cảnh báo hoặc vấn đề vận hành để garage chuẩn bị tiếp nhận.</p><div class="actions"><button class="btn btn-sm" data-service="repair">Đặt lịch kiểm tra</button></div></article><article class="card"><span class="service-number">03 / CHĂM SÓC XE</span><h3>Làm mới trải nghiệm lái</h3><p class="section-description">Gửi nhu cầu vệ sinh và chăm sóc xe để được tư vấn hạng mục phù hợp.</p><div class="actions"><button class="btn btn-sm" data-service="spa">Gửi nhu cầu chăm sóc</button></div></article></div>
-</section>
-<section id="pricing" class="public-section">
-<div class="section-heading"><div><p class="eyebrow">CHI PHÍ MINH BẠCH</p><h2>Danh mục tiền công</h2><p class="section-description">Tiền công tham khảo từ danh mục của garage. Vật tư và số lượng được tính riêng trong phiếu sửa chữa sau khi kiểm tra xe.</p></div><button id="reloadServices" class="btn btn-secondary">Tải lại danh mục</button></div>
-<div id="servicePrices" class="service-grid" aria-live="polite"><p class="muted">Đang tải danh mục…</p></div>
-</section>
-<section id="contact" class="public-section booking-layout">
-<div><p class="eyebrow">CHỦ ĐỘNG LÊN LỊCH</p><h2>Hẹn gặp bạn<br>tại garage.</h2><p class="section-description">Chọn ngày phù hợp và mô tả nhu cầu của bạn. Bộ phận tiếp nhận sẽ liên hệ qua số điện thoại để xác nhận.</p><ul class="flow-list"><li>Có thể đặt lịch mà chưa cần tài khoản.</li><li>Lưu mã yêu cầu sau khi gửi thành công.</li><li>Lịch hẹn chỉ được chốt khi garage xác nhận.</li></ul><a class="btn btn-secondary" href="/login?mode=register">Tạo tài khoản để theo dõi xe</a></div>
-<div class="card booking-card"><div class="booking-form-heading"><span class="eyebrow">YÊU CẦU LỊCH HẸN</span><h3>Garage có thể giúp gì cho bạn?</h3><p class="muted">Điền thông tin bên dưới để bộ phận tiếp nhận liên hệ.</p></div><form id="bookingForm">
-<div class="form-grid"><div class="form-group"><label for="bookingName">Họ và tên</label><input id="bookingName" name="customerName" autocomplete="name" maxlength="255" required></div><div class="form-group"><label for="bookingPhone">Số điện thoại liên hệ</label><input id="bookingPhone" name="phone" type="tel" autocomplete="tel" maxlength="30" required></div><div class="form-group"><label for="preferredDate">Ngày mong muốn</label><input id="preferredDate" name="preferredDate" type="date" required></div><div class="form-group"><label for="bookingService">Dịch vụ</label><select id="bookingService" name="service" required><option value="">Chọn nhu cầu</option><option value="maintenance">Bảo dưỡng</option><option value="repair">Sửa chữa</option><option value="spa">Chăm sóc xe</option><option value="other">Tư vấn khác</option></select></div></div>
-<div class="form-group"><label for="bookingNote">Biển số, tình trạng xe và ghi chú</label><textarea id="bookingNote" name="note" rows="4" maxlength="2000" placeholder="Ví dụ: 30A-123.45, xe phát tiếng kêu khi phanh…"></textarea></div>
-<p id="bookingResult" class="inline-message" role="status" hidden></p><button class="btn btn-primary" type="submit">Gửi yêu cầu đặt lịch</button>
-</form></div>
-</section>
-<section class="public-section faq-section" aria-labelledby="faqTitle"><div><p class="eyebrow">TRƯỚC KHI BẮT ĐẦU</p><h2 id="faqTitle">Một vài điều bạn cần biết</h2></div><div class="faq-list"><details><summary>Tôi đã có xe tại garage, làm sao xem lịch sử?</summary><p>Đăng ký bằng email của bạn, sau đó nhờ bộ phận tiếp nhận liên kết xe với tài khoản. Lịch sử sẽ xuất hiện trong mục Xe của tôi.</p></details><details><summary>Tôi là kỹ thuật viên, có cần tự đăng ký?</summary><p>Quản trị viên cấp tài khoản và liên kết với hồ sơ kỹ thuật viên. Dùng email được cấp để đăng nhập, sau đó đổi mật khẩu tại Tài khoản của tôi.</p></details><details><summary>Gửi yêu cầu có nghĩa là lịch đã được xác nhận?</summary><p>Garage sẽ liên hệ qua số điện thoại bạn cung cấp để xác nhận. Hãy lưu mã yêu cầu hiển thị sau khi gửi thành công.</p></details><details><summary>Tiền công đã bao gồm vật tư chưa?</summary><p>Danh mục hiển thị tiền công tham khảo cho từng hạng mục. Phiếu sửa chữa ghi riêng vật tư, số lượng và tiền công sau khi kiểm tra xe.</p></details></div></section>
-</main>
-<footer class="public-footer"><span>AutoPro · Chăm sóc xe và quản lý garage</span><a href="/login">Đăng nhập dành cho khách hàng & nhân viên ↗</a></footer>
-</body></html>
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AutoPro · Chăm sóc xe, an tâm mỗi ngày</title>
+    <meta
+      name="description"
+      content="Đặt lịch chăm sóc xe, theo dõi tiến độ sửa chữa và tra cứu chi phí tại AutoPro."
+    />
+    <link rel="stylesheet" href="/static/shared/ui.css" />
+    <link rel="stylesheet" href="/static/shared/workspace.css" />
+    <link rel="stylesheet" href="/static/shared/portals.css" />
+    <link rel="stylesheet" href="/static/shared/public.css" />
+    <script src="/static/shared/core.js" defer></script>
+    <script src="/static/shared/booking.js" defer></script>
+    <script src="/static/script.js" defer></script>
+    <script src="/static/shared/pwa.js" defer></script>
+  </head>
+  <body class="public-page">
+    <a class="skip-link" href="#mainContent">Chuyển đến nội dung chính</a>
+    <header class="public-header">
+      <a href="/" class="public-brand"
+        ><span class="brand-mark"
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#car"></use></svg></span
+        ><span>AutoPro<small>GARAGE & CAR CARE</small></span></a
+      >
+      <button
+        class="btn-icon public-menu-toggle"
+        aria-label="Mở menu"
+        aria-controls="publicNav"
+        aria-expanded="false"
+      >
+        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <use href="/static/shared/icons.svg#menu"></use>
+        </svg>
+      </button>
+      <nav id="publicNav" class="public-nav" aria-label="Menu chính">
+        <a href="#services">Dịch vụ</a><a href="#pricing">Tiền công</a
+        ><a href="#contact">Đặt lịch</a
+        ><a id="loginLink" class="btn btn-secondary" href="/login">Đăng nhập</a
+        ><a id="registerLink" class="btn btn-primary" href="/login?mode=register">Tạo tài khoản</a>
+      </nav>
+    </header>
+    <main id="mainContent" class="public-main" tabindex="-1">
+      <section id="home" class="hero">
+        <div>
+          <p class="hero-label">Chăm sóc xe có kế hoạch</p>
+          <h1>Chăm sóc xe.<br /><span>An tâm mỗi ngày.</span></h1>
+          <p class="hero-description">
+            Từ lúc tiếp nhận đến khi nhận lại xe, theo dõi từng hạng mục sửa chữa và nắm rõ chi phí
+            trong cùng một nơi.
+          </p>
+          <div class="actions">
+            <a href="#contact" class="btn btn-primary">Đặt lịch dịch vụ ↗</a
+            ><a id="workspaceLink" href="/login" class="btn btn-secondary">Theo dõi xe của tôi</a>
+          </div>
+          <p class="hero-note">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <use href="/static/shared/icons.svg#clock"></use>
+            </svg>
+            Gửi yêu cầu trực tuyến · Garage liên hệ xác nhận lịch
+          </p>
+        </div>
+        <div class="hero-visual">
+          <div class="visual-heading">
+            <span class="eyebrow">ĐỒNG HÀNH CÙNG CHIẾC XE</span
+            ><span class="visual-tag">AUTOPRO CAR CARE</span>
+          </div>
+          <h2>Hiểu chiếc xe.<br />Chủ động chăm sóc.</h2>
+          <img
+            class="garage-art"
+            src="/static/shared/garage-illustration.svg"
+            alt="Minh họa ô tô tại không gian chăm sóc xe AutoPro"
+            width="640"
+            height="330"
+          />
+          <div class="visual-steps">
+            <span><b>01</b> Tiếp nhận</span><span><b>02</b> Sửa chữa</span
+            ><span><b>03</b> Bàn giao</span>
+          </div>
+          <p class="visual-caption">Theo dõi tiến độ thực tế trong tài khoản của bạn.</p>
+        </div>
+      </section>
+      <div class="hero-assurances" aria-label="Trải nghiệm dịch vụ">
+        <span
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#clipboard"></use>
+          </svg>
+          Báo giá trước khi sửa</span
+        ><span
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#shield"></use>
+          </svg>
+          Theo dõi từng hạng mục</span
+        ><span
+          ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <use href="/static/shared/icons.svg#message"></use>
+          </svg>
+          Trao đổi trực tiếp với garage</span
+        >
+      </div>
+      <section class="access-section" aria-labelledby="accessTitle">
+        <div>
+          <p class="eyebrow">CÙNG MỘT HỆ THỐNG</p>
+          <h2 id="accessTitle">Không gian dành cho bạn</h2>
+        </div>
+        <div class="access-grid">
+          <a class="access-card" href="/login?mode=register"
+            ><span class="access-icon"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#user"></use></svg
+            ></span>
+            <div>
+              <h3>Khách hàng</h3>
+              <p>Đặt lịch, theo dõi xe và xem chi phí.</p>
+              <strong>Tạo tài khoản cá nhân ↗</strong>
+            </div></a
+          ><a class="access-card" href="/login"
+            ><span class="access-icon"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#tool"></use></svg
+            ></span>
+            <div>
+              <h3>Kỹ thuật viên</h3>
+              <p>Nhận phiếu, cập nhật công việc được giao.</p>
+              <strong>Đăng nhập tài khoản được cấp ↗</strong>
+            </div></a
+          ><a class="access-card" href="/login"
+            ><span class="access-icon"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#grid"></use></svg
+            ></span>
+            <div>
+              <h3>Quản trị viên</h3>
+              <p>Quản lý garage, nhân sự và tài khoản.</p>
+              <strong>Vào không gian quản lý ↗</strong>
+            </div></a
+          >
+        </div>
+      </section>
+      <section id="services" class="public-section">
+        <p class="eyebrow">NHU CẦU CỦA BẠN</p>
+        <h2>Mỗi chiếc xe, một kế hoạch chăm sóc</h2>
+        <div class="service-grid">
+          <article class="card">
+            <span class="service-number"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#shield"></use></svg
+              >BẢO DƯỠNG</span
+            >
+            <h3>Chăm sóc định kỳ</h3>
+            <p class="section-description">
+              Trao đổi về thay dầu, kiểm tra phanh, lốp và các hạng mục theo tình trạng xe.
+            </p>
+            <div class="actions">
+              <button class="btn btn-sm" data-service="maintenance">Đặt lịch bảo dưỡng</button>
+            </div>
+          </article>
+          <article class="card">
+            <span class="service-number"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#tool"></use></svg
+              >SỬA CHỮA</span
+            >
+            <h3>Kiểm tra dấu hiệu bất thường</h3>
+            <p class="section-description">
+              Mô tả tiếng kêu, đèn cảnh báo hoặc vấn đề vận hành để garage chuẩn bị tiếp nhận.
+            </p>
+            <div class="actions">
+              <button class="btn btn-sm" data-service="repair">Đặt lịch kiểm tra</button>
+            </div>
+          </article>
+          <article class="card">
+            <span class="service-number"
+              ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/static/shared/icons.svg#car"></use></svg
+              >CHĂM SÓC XE</span
+            >
+            <h3>Làm mới trải nghiệm lái</h3>
+            <p class="section-description">
+              Gửi nhu cầu vệ sinh và chăm sóc xe để được tư vấn hạng mục phù hợp.
+            </p>
+            <div class="actions">
+              <button class="btn btn-sm" data-service="spa">Gửi nhu cầu chăm sóc</button>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section id="pricing" class="public-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CHI PHÍ MINH BẠCH</p>
+            <h2>Danh mục tiền công</h2>
+            <p class="section-description">
+              Tiền công tham khảo từ danh mục của garage. Vật tư và số lượng được tính riêng trong
+              phiếu sửa chữa sau khi kiểm tra xe.
+            </p>
+          </div>
+          <button id="reloadServices" class="btn btn-secondary">Tải lại danh mục</button>
+        </div>
+        <div id="servicePrices" class="service-grid" aria-live="polite">
+          <p class="muted">Đang tải danh mục…</p>
+        </div>
+      </section>
+      <section id="contact" class="public-section booking-layout">
+        <div>
+          <p class="eyebrow">CHỦ ĐỘNG LÊN LỊCH</p>
+          <h2>Hẹn gặp bạn<br />tại garage.</h2>
+          <p class="section-description">
+            Chọn ngày phù hợp và mô tả nhu cầu của bạn. Bộ phận tiếp nhận sẽ liên hệ qua số điện
+            thoại để xác nhận.
+          </p>
+          <ul class="flow-list">
+            <li>Có thể đặt lịch mà chưa cần tài khoản.</li>
+            <li>Lưu mã yêu cầu sau khi gửi thành công.</li>
+            <li>Lịch hẹn chỉ được chốt khi garage xác nhận.</li>
+          </ul>
+          <a class="btn btn-secondary" href="/login?mode=register">Tạo tài khoản để theo dõi xe</a>
+        </div>
+        <div class="card booking-card">
+          <div class="booking-form-heading">
+            <span class="eyebrow">YÊU CẦU LỊCH HẸN</span>
+            <h3>Garage có thể giúp gì cho bạn?</h3>
+            <p class="muted">Điền thông tin bên dưới để bộ phận tiếp nhận liên hệ.</p>
+          </div>
+          <form id="bookingForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="bookingName">Họ và tên</label
+                ><input
+                  id="bookingName"
+                  name="customerName"
+                  autocomplete="name"
+                  maxlength="255"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="bookingPhone">Số điện thoại liên hệ</label
+                ><input
+                  id="bookingPhone"
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  maxlength="30"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="preferredDate">Ngày mong muốn</label
+                ><input id="preferredDate" name="preferredDate" type="date" required />
+              </div>
+              <div class="form-group">
+                <label for="bookingService">Dịch vụ</label
+                ><select id="bookingService" name="service" required>
+                  <option value="">Chọn nhu cầu</option>
+                  <option value="maintenance">Bảo dưỡng</option>
+                  <option value="repair">Sửa chữa</option>
+                  <option value="spa">Chăm sóc xe</option>
+                  <option value="other">Tư vấn khác</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="bookingNote">Biển số, tình trạng xe và ghi chú</label
+              ><textarea
+                id="bookingNote"
+                name="note"
+                rows="4"
+                maxlength="2000"
+                placeholder="Ví dụ: 30A-123.45, xe phát tiếng kêu khi phanh…"
+              ></textarea>
+            </div>
+            <p id="bookingResult" class="inline-message" role="status" hidden></p>
+            <button class="btn btn-primary" type="submit">Gửi yêu cầu đặt lịch</button>
+          </form>
+        </div>
+      </section>
+      <section class="public-section faq-section" aria-labelledby="faqTitle">
+        <div>
+          <p class="eyebrow">TRƯỚC KHI BẮT ĐẦU</p>
+          <h2 id="faqTitle">Một vài điều bạn cần biết</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Tôi đã có xe tại garage, làm sao xem lịch sử?</summary>
+            <p>
+              Đăng ký bằng email của bạn, sau đó nhờ bộ phận tiếp nhận liên kết xe với tài khoản.
+              Lịch sử sẽ xuất hiện trong mục Xe của tôi.
+            </p>
+          </details>
+          <details>
+            <summary>Tôi là kỹ thuật viên, có cần tự đăng ký?</summary>
+            <p>
+              Quản trị viên cấp tài khoản và liên kết với hồ sơ kỹ thuật viên. Dùng email được cấp
+              để đăng nhập, sau đó đổi mật khẩu tại Tài khoản của tôi.
+            </p>
+          </details>
+          <details>
+            <summary>Gửi yêu cầu có nghĩa là lịch đã được xác nhận?</summary>
+            <p>
+              Garage sẽ liên hệ qua số điện thoại bạn cung cấp để xác nhận. Hãy lưu mã yêu cầu hiển
+              thị sau khi gửi thành công.
+            </p>
+          </details>
+          <details>
+            <summary>Tiền công đã bao gồm vật tư chưa?</summary>
+            <p>
+              Danh mục hiển thị tiền công tham khảo cho từng hạng mục. Phiếu sửa chữa ghi riêng vật
+              tư, số lượng và tiền công sau khi kiểm tra xe.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <footer class="public-footer">
+      <span>AutoPro · Chăm sóc xe và quản lý garage</span
+      ><a href="/login">Đăng nhập dành cho khách hàng & nhân viên ↗</a>
+    </footer>
+  </body>
+</html>

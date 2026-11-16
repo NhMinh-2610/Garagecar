@@ -3,23 +3,22 @@
 import calendar
 from datetime import date, timedelta
 from hashlib import sha256
+
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from fastapi import HTTPException
+
+from core.serialization import serialize_columns
 from models import (
-    Vehicle,
-    Mechanic,
-    RepairTicket,
-    VehicleCare,
     MaintenanceProfile,
     MaintenanceRecord,
     MaintenanceReminder,
+    Mechanic,
+    RepairTicket,
+    Vehicle,
+    VehicleCare,
 )
 from schemas.garage_care import today
-
-
-def row_dict(row):
-    return {c.name: getattr(row, c.name) for c in row.__table__.columns}
 
 
 def add_months(day, months):
@@ -44,17 +43,17 @@ def matches(vehicle, care, scope):
 
 def calculate_due(care, rules, records, on=None):
     on = on or today()
+    # Chỉ cần lần cuối của từng bộ phận/thao tác, không sắp xếp lại cho mỗi quy tắc.
+    latest_records = {}
+    for record in records:
+        key = (record.component, record.action)
+        previous = latest_records.get(key)
+        if previous is None or _record_order(record) >= _record_order(previous):
+            latest_records[key] = record
+    odometer_stale = (on - care.observedOn).days > 90
     result = []
     for rule in rules:
-        history = sorted(
-            (
-                r
-                for r in records
-                if r.component == rule["component"] and r.action == rule["action"]
-            ),
-            key=lambda r: (r.performedOn, r.odometer, r.id or 0),
-        )
-        last = history[-1] if history else None
+        last = latest_records.get((rule["component"], rule["action"]))
         prefix = "repeat" if last else "first"
         km, months = rule.get(prefix + "Km"), rule.get(prefix + "Months")
         due_km = (last.odometer if last else 0) + km if km is not None else None
@@ -63,19 +62,21 @@ def calculate_due(care, rules, records, on=None):
             if months is not None
             else None
         )
-        stale = (on - care.observedOn).days > 90
         past_km = due_km is not None and care.odometer >= due_km
         past_date = due_date is not None and on >= due_date
-        soon_km = due_km is not None and not stale and care.odometer >= due_km - 1000
+        soon_km = (
+            due_km is not None and not odometer_stale and care.odometer >= due_km - 1000
+        )
         soon_date = due_date is not None and on >= due_date - timedelta(days=30)
         status = (
             "due" if past_km or past_date else "soon" if soon_km or soon_date else "ok"
         )
         if km is None and months is None:
             status = "needs_review"
-        if stale and due_date is None and not past_km:
+        if odometer_stale and due_date is None and not past_km:
             status = "needs_odometer"
-        # Cycle identifies the service event/initial baseline, never severity or today's date.
+        # Một chu kỳ gắn với lần bảo dưỡng/mốc ban đầu, không đổi theo ngày quét.
+        # Nhờ vậy worker chạy lại không tạo thêm nhắc hạn cho cùng một chu kỳ.
         anchor = (
             f"{last.id}:{last.performedOn}:{last.odometer}"
             if last
@@ -90,11 +91,15 @@ def calculate_due(care, rules, records, on=None):
                 "dueKm": due_km,
                 "dueDate": due_date.isoformat() if due_date else None,
                 "status": status,
-                "odometerStale": stale,
+                "odometerStale": odometer_stale,
                 "lastRecordId": last.id if last else None,
             }
         )
     return result
+
+
+def _record_order(record):
+    return record.performedOn, record.odometer, record.id or 0
 
 
 async def vehicle_access(db, vehicle_id, user, write=False):
@@ -150,13 +155,13 @@ async def schedule(db, vehicle):
     )
     return {
         "state": state,
-        "care": row_dict(care),
-        "profile": row_dict(profile) if profile else None,
+        "care": serialize_columns(care),
+        "profile": serialize_columns(profile) if profile else None,
         "rules": calculate_due(care, profile.rules, records)
         if state == "ready"
         else [],
         "records": [
-            row_dict(r)
+            serialize_columns(r)
             for r in sorted(records, key=lambda r: (r.performedOn, r.id), reverse=True)
         ],
     }
@@ -176,6 +181,10 @@ async def scan_reminders(db, vehicle_ids=None):
     for vehicle in vehicles:
         data = await schedule(db, vehicle)
         current = set()
+        rules_by_key = {}
+        for rule in data["rules"]:
+            # Giữ bản đầu tiên khi trùng key, tương đương next() trước đây.
+            rules_by_key.setdefault(rule["ruleKey"], rule)
         if data["state"] == "ready":
             for rule in data["rules"]:
                 if rule["status"] not in ("due", "soon"):
@@ -212,8 +221,6 @@ async def scan_reminders(db, vehicle_ids=None):
             else:
                 if reminder.status == "closed":
                     reminder.status = "published" if reminder.publishedAt else "pending"
-                rule = next(
-                    r for r in data["rules"] if r["ruleKey"] == reminder.ruleKey
-                )
+                rule = rules_by_key[reminder.ruleKey]
                 reminder.summary = {**reminder.summary, **rule}
     return generated

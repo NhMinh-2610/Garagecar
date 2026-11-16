@@ -3,12 +3,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.response import success_response
+from core.serialization import serialize_columns
 from database.session import get_db
 from middleware.auth import require_permission
-from models import ServiceVisit, ServiceFollowup, Vehicle, RepairTicket
+from models import RepairTicket, ServiceFollowup, ServiceVisit, Vehicle
 from schemas.professional import FollowupInput
-from services.maintenance_service import row_dict
 
 router = APIRouter(prefix="/api/advisor", tags=["Advisor follow-up"])
 
@@ -22,7 +23,7 @@ async def followups(
             select(ServiceFollowup).order_by(ServiceFollowup.id.desc()).limit(1000)
         )
     ).all()
-    return success_response([row_dict(r) for r in rows])
+    return success_response([serialize_columns(r) for r in rows])
 
 
 @router.post("/visits/{visit_id}/followup")
@@ -52,4 +53,4 @@ async def create_followup(
     db.add(row)
     await db.commit()
     await db.refresh(row)
-    return success_response(row_dict(row), "Đã ghi nhận chăm sóc khách", 201)
+    return success_response(serialize_columns(row), "Đã ghi nhận chăm sóc khách", 201)

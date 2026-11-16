@@ -4,10 +4,12 @@ import base64
 import binascii
 import io
 import warnings
+
 from fastapi import HTTPException
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy import select
-from models import RepairEvidence, Inventory, StaffCertificate
+
+from models import Inventory, RepairEvidence, StaffCertificate
 from schemas.garage_care import today
 
 MAX_IMAGE_BYTES = 3 * 1024 * 1024

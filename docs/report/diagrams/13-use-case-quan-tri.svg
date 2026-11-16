@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1032" width="1100" height="1032" role="img"><title>Sơ đồ use case 3 · Quản trị viên</title><style>text{fill:#19334e}.title{font-weight:bold}.muted{fill:#52667d}</style><rect width="1100" height="1032" fill="white"/>
+<text x="40" y="42" text-anchor="start" font-size="27" font-family="Segoe UI, Arial, sans-serif" class="title">Sơ đồ use case 3 · Quản trị viên</text>
+<text x="40" y="73" text-anchor="start" font-size="16" font-family="Segoe UI, Arial, sans-serif" class="muted">Quyền mặc định có thể bị khóa bớt cho từng tài khoản.</text>
+<rect x="240" y="100" width="620" height="782" rx="4" fill="#fff" stroke="#47617f" stroke-width="2"/>
+<text x="550" y="130" text-anchor="middle" font-size="20" font-family="Segoe UI, Arial, sans-serif" class="title">Hệ thống GarageCar</text>
+<line x1="129" y1="487" x2="350" y2="175" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="253" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="331" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="409" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="487" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="565" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="643" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="721" stroke="#42617d" stroke-width="1.5"/>
+<line x1="129" y1="487" x2="350" y2="799" stroke="#42617d" stroke-width="1.5"/>
+<g fill="none" stroke="#203f60" stroke-width="2.3"><circle cx="105" cy="449" r="13"/><path d="M105 462v45 M81 487h48 M105 507l-21 31 M105 507l21 31"/></g>
+<text x="105" y="561" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" class="">Quản trị viên</text>
+<ellipse cx="550" cy="175" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="182" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC01 · Quản lý tài khoản và quyền</text>
+<ellipse cx="550" cy="253" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="260" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC02b · Quản lý xe và tiếp nhận</text>
+<ellipse cx="550" cy="331" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="338" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC03b · Lập và theo dõi báo giá</text>
+<ellipse cx="550" cy="409" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="416" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC04a–07 · Điều phối, nghiệm thu và giao xe</text>
+<ellipse cx="550" cy="487" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="494" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC09 · Quản lý vật tư và danh mục</text>
+<ellipse cx="550" cy="565" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="572" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC08–10 · Thu tiền, duyệt chi và báo cáo</text>
+<ellipse cx="550" cy="643" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="650" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC11 · Quản lý nhân sự, ca và chứng chỉ</text>
+<ellipse cx="550" cy="721" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="728" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC12 · Quản lý lịch và nhắc bảo dưỡng</text>
+<ellipse cx="550" cy="799" rx="200" ry="30" fill="#edf4fd" stroke="#47617f" stroke-width="1.5"/>
+<text x="550" y="806" text-anchor="middle" font-size="19" font-family="Segoe UI, Arial, sans-serif" class="">UC13 · Phân công và trả lời hội thoại</text>
+<text x="40" y="924" text-anchor="start" font-size="15" font-family="Segoe UI, Arial, sans-serif" class="muted">Nhân sự là chức năng của quản trị viên, không phải một vai trò đăng nhập riêng.</text>
+<text x="40" y="948" text-anchor="start" font-size="15" font-family="Segoe UI, Arial, sans-serif" class="muted">Việc tự duyệt chi, nghỉ phép hoặc tự xác minh chứng chỉ bị giới hạn theo quy tắc nghiệp vụ.</text></svg>

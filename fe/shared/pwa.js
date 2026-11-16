@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.append(link);
     const meta = document.createElement("meta");
     meta.name = "theme-color";
-    meta.content = "#0f172a";
+    meta.content = "#142f40";
     document.head.append(meta);
   }
   const status = document.createElement("div");
@@ -36,11 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
   button.className = "btn btn-sm install-pwa";
   button.textContent = "Cài AutoPro";
   button.hidden = true;
-  (
-    document.querySelector(".topbar") ||
-    document.querySelector("header") ||
-    document.body
-  ).append(button);
+  const sidebarFooter = document.querySelector("#sidebar .sidebar-footer");
+  if (sidebarFooter) sidebarFooter.before(button);
+  else (document.querySelector("header") || document.body).append(button);
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     installEvent = event;
@@ -63,8 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     button.hidden = false;
     button.textContent = "Cài trên iPhone";
     button.onclick = () =>
-      window.Garage?.toast(
-        "Mở bằng Safari → Chia sẻ → Thêm vào Màn hình chính.",
-      );
+      window.Garage?.toast("Mở bằng Safari → Chia sẻ → Thêm vào Màn hình chính.");
   }
 });

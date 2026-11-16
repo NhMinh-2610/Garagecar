@@ -1,0 +1,53 @@
+.inventory-list-layout {
+  display: block;
+}
+.workspace-shell #sidebar > .install-pwa {
+  flex-shrink: 0;
+  width: 100%;
+  margin-block: 8px;
+}
+.record-pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+}
+.record-pager-label {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+#stockImportDialog {
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+}
+#stockImportDialog::backdrop {
+  background: #0c163780;
+  backdrop-filter: blur(3px);
+}
+#stockImportDialog form {
+  margin-bottom: 0;
+}
+.tab-content > .card:last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 600px) {
+  .record-pager {
+    gap: 6px;
+  }
+  #stockImportDialog {
+    width: calc(100vw - 32px);
+    padding: 20px;
+  }
+}
+@media print {
+  .record-pager {
+    display: none;
+  }
+  tr[data-page-hidden] {
+    display: table-row !important;
+  }
+}

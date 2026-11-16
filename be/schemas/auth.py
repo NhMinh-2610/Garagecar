@@ -1,13 +1,18 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
-from typing import Optional
 from datetime import datetime
-from pydantic import Field, field_validator
+from typing import Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
 from schemas.common import Name, PositiveId
-from typing import Literal
 
 
-# ── Request schemas ────────────────────────────────────────────────────────────
+def _validate_password_bytes(value):
+    if len(value.encode("utf-8")) > 72:
+        raise ValueError("Mật khẩu vượt giới hạn 72 byte")
+    return value
 
+
+# Request schemas
 class RegisterRequest(BaseModel):
     username: Name
     email: EmailStr
@@ -17,9 +22,7 @@ class RegisterRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def password_byte_limit(cls, value):
-        if len(value.encode("utf-8")) > 72:
-            raise ValueError("Mật khẩu vượt giới hạn 72 byte")
-        return value
+        return _validate_password_bytes(value)
 
     @field_validator("email")
     @classmethod
@@ -28,7 +31,8 @@ class RegisterRequest(BaseModel):
 
 
 class StaffRegisterRequest(RegisterRequest):
-    """Used by admin to create mechanic / admin accounts."""
+    """Quản trị viên cấp tài khoản nhân viên theo STAFF_ROLES."""
+
     role: str  # validated against STAFF_ROLES in the router
     mechanicId: Optional[PositiveId] = None
 
@@ -38,8 +42,7 @@ class LoginRequest(BaseModel):
     password: str
 
 
-# ── Response schemas ───────────────────────────────────────────────────────────
-
+# Response schemas
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -54,14 +57,9 @@ class UserResponse(BaseModel):
     createdAt: Optional[datetime] = None
 
 
-class TokenResponse(BaseModel):
-    token: str
-    user: UserResponse
-
-
 class AccountCreate(RegisterRequest):
     model_config = ConfigDict(extra="forbid")
-    role: Literal["admin", "mechanic", "customer", "advisor", "accountant", "hr"]
+    role: Literal["admin", "mechanic", "customer", "advisor", "accountant"]
     mechanicId: Optional[PositiveId] = None
     vehicleIds: list[PositiveId] = Field(default_factory=list, max_length=100)
 
@@ -86,9 +84,7 @@ class PasswordReset(BaseModel):
     @field_validator("password")
     @classmethod
     def byte_limit(cls, value):
-        if len(value.encode("utf-8")) > 72:
-            raise ValueError("Mật khẩu vượt giới hạn 72 byte")
-        return value
+        return _validate_password_bytes(value)
 
 
 class PasswordChange(PasswordReset):

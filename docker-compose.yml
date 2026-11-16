@@ -1,8 +1,7 @@
 services:
-  # ── PostgreSQL Database ──────────────────────────────────────────────────────
+  # PostgreSQL cho moi truong local/demo.
   db:
     image: postgres:16-alpine
-    container_name: garagecar_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: garagecar
@@ -11,45 +10,72 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U garagecar -d garagecar"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # ── FastAPI Backend ──────────────────────────────────────────────────────────
+  # Migration duoc chay truoc khi khoi dong API.
   backend:
     build:
-      context: ./be
-      dockerfile: Dockerfile
-    container_name: garagecar_backend
+      context: .
+      dockerfile: be/Dockerfile
     restart: unless-stopped
     env_file:
       - ./be/.env
     environment:
       DATABASE_URL: postgresql+asyncpg://garagecar:garagecar@db:5432/garagecar
-    command: sh -c "python -m alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: sh -c "python -m alembic upgrade head && exec python -m uvicorn main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"
     volumes:
       - ./fe:/fe:ro
     ports:
-      - "8000:8000"
+      - "127.0.0.1:${API_PORT:-8001}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       db:
         condition: service_healthy
 
-  # ── Nginx Frontend ───────────────────────────────────────────────────────────
+  # Frontend va API duoc phuc vu cung origin.
   frontend:
     image: nginx:alpine
-    container_name: garagecar_frontend
     restart: unless-stopped
     volumes:
       - ./fe:/usr/share/nginx/html:ro
       - ./be/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "3000:80"
+      - "${WEB_PORT:-3000}:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/api/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   pgdata:
