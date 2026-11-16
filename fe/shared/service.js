@@ -92,11 +92,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `<div class="table-responsive"><table><thead><tr><th>Công việc / Vật tư</th><th>SL</th><th>Đơn giá</th><th>Tiền công</th><th>Thành tiền</th></tr></thead><tbody>${q.items.map((r) => `<tr><td>${esc(r.taskName)}<small>${esc(r.partName)}</small></td><td>${r.quantity}</td><td>${money(r.partPrice)}</td><td>${money(r.laborPrice)}</td><td>${money(r.totalPrice)}</td></tr>`).join("")}</tbody></table></div>`;
   }
   async function load(context = {}) {
+    Garage.pager?.("/service/visits", host, load);
     const guard = Garage.refreshGuard(context);
     try {
       const values = await Promise.all([
         Garage.request("/service/visits"),
-        advisor ? Garage.request("/service/resources") : Promise.resolve({}),
+        advisor ? (context.background ? Promise.resolve({vehicles,mechanics,inventory:stock}) : (Garage.requestResources || Garage.request)("/service/resources")) : Promise.resolve({}),
         advisor
           ? Garage.request("/maintenance/catalog")
           : Promise.resolve(null),

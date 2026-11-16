@@ -1,4 +1,4 @@
-﻿/* Vehicle registration and ownership: account links are always explicit IDs. */
+/* Vehicle registration and ownership: account links are always explicit IDs. */
 document.addEventListener('DOMContentLoaded', async () => {
     if (!await Garage.whenAllowed("reception")) return;
     const byId = id => document.getElementById(id);
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const labels = {waiting:'Chờ sửa',repairing:'Đang sửa',completed:'Chờ giao xe',delivered:'Đã giao xe'};
         byId('receptionTable').querySelector('tbody').innerHTML = vehicles.filter(v =>
             [v.licensePlate,v.customerName,v.phone,v.carBrand].join(' ').toLowerCase().includes(search)).map(v => {
-            const unpaid = v.repairTickets.some(t => t.status !== 'paid');
+            const unpaid = v.hasUnpaid ?? v.repairTickets.some(t => t.status !== 'paid');
             return `<tr><td>${esc(v.licensePlate)}</td><td>${esc(v.customerName)}<br><small>${esc(v.phone)} · ${v.customerId ? 'Đã liên kết tài khoản' : 'Khách vãng lai / chưa liên kết'}</small></td>
                 <td>${esc(v.carBrand)} ${esc(v.carModel || '')}</td><td>${Garage.date(v.receivedDate)?.toLocaleDateString('vi-VN') || '—'}</td>
                 <td><span class="badge badge-${v.status === 'repairing' ? 'working' : 'pending'}">${v.status === 'completed' && unpaid ? 'Chờ thanh toán' : labels[v.status]}</span></td>
@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${v.status === 'completed' && !unpaid ? `<button class="btn btn-sm btn-success" data-action="deliver" data-id="${v.id}">Giao xe</button>` : ''}
                 ${v.status === 'delivered' ? `<button class="btn btn-sm btn-success" data-action="receive" data-id="${v.id}">Tiếp nhận lại</button>` : ''}
                 <button class="btn btn-sm btn-secondary" data-action="edit" data-id="${v.id}">Sửa thông tin</button>
-                ${!v.repairTickets.length ? `<button class="btn btn-sm btn-quiet-danger" data-action="delete" data-id="${v.id}" aria-label="Xóa xe ${esc(v.licensePlate)}">Xóa</button>` : ''}</div></td>
-                <td><button class="btn btn-sm" data-action="history" data-id="${v.id}">Lịch sử (${v.repairTickets.length})</button></td></tr>
+                ${!(v.ticketCount ?? v.repairTickets.length) ? `<button class="btn btn-sm btn-quiet-danger" data-action="delete" data-id="${v.id}" aria-label="Xóa xe ${esc(v.licensePlate)}">Xóa</button>` : ''}</div></td>
+                <td><button class="btn btn-sm" data-action="history" data-id="${v.id}">Lịch sử (${v.ticketCount ?? v.repairTickets.length})</button></td></tr>
                 <tr id="vehicle-history-${v.id}" hidden><td colspan="7">${v.repairTickets.map(t => `<p>#${t.id} · ${esc(t.mechanicName)} · ${{draft:'Chờ sửa',working:'Đang sửa',completed:'Chờ thanh toán',paid:'Đã thanh toán'}[t.status]} · ${formatCurrency(t.totalAmount)}</p>`).join('') || 'Chưa có lịch sử sửa chữa.'}</td></tr>`;
         }).join('') || '<tr><td colspan="7" class="empty-state">Không có xe phù hợp</td></tr>';
     }
@@ -100,7 +100,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!button) return;
         const vehicle = vehicles.find(v => v.id === Number(button.dataset.id));
         const action = button.dataset.action;
-        if (action === 'history') { const row = byId('vehicle-history-' + vehicle.id); row.hidden = !row.hidden; return; }
+        if (action === 'history') {
+            const row = byId('vehicle-history-' + vehicle.id);
+            row.hidden = !row.hidden;
+            if (!row.hidden && vehicle.ticketCount != null) {
+                const tickets = await (Garage.requestAll || Garage.request)('/repairs?vehicleId=' + vehicle.id);
+                row.querySelector('td').innerHTML = tickets.map(t => `<p>#${t.id} · ${esc(t.mechanicName)} · ${esc(t.status)} · ${formatCurrency(t.totalAmount)}</p>`).join('') || 'Chưa có lịch sử sửa chữa.';
+            }
+            return;
+        }
         try {
             if (action === 'edit') {
                 await choices(vehicle);
@@ -115,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showToast('Đã cập nhật xe.','success'); await load();
         } catch (error) { showToast(error.message,'error'); }
     };
+    Garage.pager?.('/vehicles', '#receptionTable', load, {search:'#vehicleSearch'});
     Garage.subscribe(load);
     load();
 });

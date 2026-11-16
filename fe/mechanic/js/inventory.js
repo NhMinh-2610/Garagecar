@@ -19,6 +19,7 @@
     if (!await Garage.whenAllowed('workshop')) return;
         ['inventorySearch','stockFilter'].forEach(id => $(id).addEventListener('input',render));
         $('refreshTasks').addEventListener('click',load);
+        Garage.pager?.('/inventory', '#inventoryTable', load, {search:'#inventorySearch'});
         load(); Garage.subscribe(load);
     });
 })();

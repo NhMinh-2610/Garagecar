@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         byId('invPrice').value = item?.unitPrice || 0;
     };
     function render() {
-        byId('inventorySku').textContent = inventoryItems.length;
-        byId('inventoryUnits').textContent = inventoryItems.reduce((sum,i) => sum + i.quantity,0);
-        byId('inventoryValue').textContent = formatCurrency(inventoryItems.reduce((sum,i) => sum + i.quantity * i.unitPrice,0));
-        byId('inventoryLow').textContent = inventoryItems.filter(i => i.quantity <= 5).length;
+        byId('inventorySku').textContent = inventoryItems.summary?.skuCount ?? inventoryItems.length;
+        byId('inventoryUnits').textContent = inventoryItems.summary?.units ?? inventoryItems.reduce((sum,i) => sum + i.quantity,0);
+        byId('inventoryValue').textContent = formatCurrency(inventoryItems.summary?.value ?? inventoryItems.reduce((sum,i) => sum + i.quantity * i.unitPrice,0));
+        byId('inventoryLow').textContent = inventoryItems.summary?.low ?? inventoryItems.filter(i => i.quantity <= 5).length;
         const search = byId('inventorySearch').value.toLowerCase();
         const filter = byId('inventoryFilter').value;
         const items = inventoryItems.filter(i => (i.name + ' ' + i.id + ' ' + (i.sku || '') + ' ' + (i.barcode || '')).toLowerCase().includes(search) && (!filter || (filter === 'empty' ? i.quantity === 0 : i.quantity > 0 && i.quantity <= 5)));
@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         finally { button.disabled=false; }
     };
     Garage.subscribe(loadInventoryList); Garage.subscribe(loadSettings);
+    Garage.pager?.('/inventory', '#inventoryTable', loadInventoryList, {search:'#inventorySearch'});
     loadInventoryList(); loadSettings();
     // --- Settings Logic ---
     async function loadSettings(context = {}) {

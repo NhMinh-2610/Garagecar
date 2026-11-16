@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
     if (!await Garage.whenAllowed("finance")) return;
     const byId = id => document.getElementById(id);
     const select = byId('paymentSelect');
@@ -14,6 +14,7 @@
     let all = [], visits = [], selectedId = null;
     const esc = Garage.escape;
     function preview(ticket = null) {
+        if (ticket?.billingSnapshot) ticket = {...ticket, vehicle: ticket.billingSnapshot.vehicle, items: ticket.billingSnapshot.items, totalAmount: Number(ticket.billingSnapshot.totalAmount)};
         button.disabled = !ticket || ticket.status === 'paid' || (ticket.serviceVisitId && !ticket.qcAt && !visits.some(v=>v.id===ticket.serviceVisitId&&v.qcAt));
         print.disabled = !ticket;
         details.innerHTML = ticket ? `<div class="summary-row"><span>Phiếu sửa</span><strong>#${ticket.id}</strong></div>
@@ -38,18 +39,18 @@
     async function load(context = {}) {
         const canRender = Garage.refreshGuard(context);
         try {
-            const [data,serviceVisits] = await Promise.all([Garage.request('/repairs'),Garage.request('/service/visits')]);
+            const [data,serviceVisits] = await Promise.all([Garage.request('/repairs',{pageView:'finance'}),Garage.request('/service/visits')]);
             visits = Array.isArray(serviceVisits)?serviceVisits:[];
             if (!canRender()) return;
-            all = data;
+            all = data.map(r => r.billingSnapshot ? {...r, vehicle:r.billingSnapshot.vehicle} : r);
             const pending = all.filter(r => r.status === 'completed');
             const paid = all.filter(r => r.status === 'paid');
             const now = new Date();
             const monthKey = date => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit'}).format(date);
-            byId('financePending').textContent = pending.length;
-            byId('financeOutstanding').textContent = formatCurrency(pending.reduce((s,r) => s + r.totalAmount,0));
-            byId('financePaidCount').textContent = paid.length;
-            byId('financeMonth').textContent = formatCurrency(paid.filter(r => r.paidAt && monthKey(Garage.date(r.paidAt)) === monthKey(now)).reduce((s,r) => s+r.totalAmount,0));
+            byId('financePending').textContent = data.summary?.counts?.completed ?? pending.length;
+            byId('financeOutstanding').textContent = formatCurrency(data.summary?.amounts?.completed ?? pending.reduce((s,r) => s + r.totalAmount,0));
+            byId('financePaidCount').textContent = data.summary?.counts?.paid ?? paid.length;
+            byId('financeMonth').textContent = formatCurrency(data.summary?.monthRevenue ?? paid.filter(r => r.paidAt && monthKey(Garage.date(r.paidAt)) === monthKey(now)).reduce((s,r) => s+r.totalAmount,0));
             const value = select.value;
             select.replaceChildren(new Option(pending.length ? '-- Chọn phiếu chờ thu --':'Không có phiếu chờ thu',''),
                 ...pending.map(r => new Option('#'+r.id+' — '+r.vehicle.licensePlate+' — '+formatCurrency(r.totalAmount),r.id)));
@@ -88,5 +89,6 @@
             showToast('Đã ghi nhận thu tiền.','success'); await load();
         } catch(error) { showToast(error.message,'error'); button.disabled=false; }
     };
+    Garage.pager?.('/repairs', '#paymentHistory', load, {view:'finance',search:'#paymentSearch'});
     Garage.subscribe(load); preview(); load();
 });

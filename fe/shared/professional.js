@@ -198,6 +198,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   }
   async function load(context = {}) {
+    for (const [path, host] of [["/hr/operations", hosts.hrOps || hosts.myWork], ["/finance/expenses", hosts.financeOps], ["/finance/receipts", hosts.financeOps], ["/advisor/followups", hosts.advisorOps]]) {
+      if (host) Garage.pager?.(path, host, load);
+    }
     const guard = Garage.refreshGuard(context);
     if (busy) return;
     busy = true;

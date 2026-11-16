@@ -24,10 +24,10 @@
             loaded = true;
             repairs.sort((a,b) => b.id - a.id);
             $('loadError').hidden = true;
-            $('statVehicles').textContent = vehicles.length;
-            $('statActiveRepairs').textContent = repairs.filter(r => ['draft','working'].includes(r.status)).length;
-            $('statOutstanding').textContent = formatCurrency(sum('completed'));
-            $('statPaid').textContent = formatCurrency(sum('paid'));
+            $('statVehicles').textContent = vehicles.summary?.total ?? vehicles.length;
+            $('statActiveRepairs').textContent = repairs.summary ? (repairs.summary.counts.draft || 0) + (repairs.summary.counts.working || 0) : repairs.filter(r => ['draft','working'].includes(r.status)).length;
+            $('statOutstanding').textContent = formatCurrency(repairs.summary?.amounts?.completed ?? sum('completed'));
+            $('statPaid').textContent = formatCurrency(repairs.summary?.amounts?.paid ?? sum('paid'));
             $('recentRepairs').innerHTML = repairs.slice(0,5).map(r => `<li><div><strong>${e(r.vehicle?.licensePlate || 'Xe')} · Phiếu #${r.id}</strong><small>${formatDate(r.createdAt)} · ${e(r.mechanicName || 'Chưa phân công')}</small>${progress(r)}</div><div class="actions">${badge(r.status)}<button class="btn btn-sm" data-detail="${r.id}">Chi tiết</button></div></li>`).join('') || '<li class="empty-state">Chưa có phiếu sửa chữa. Bạn có thể đặt lịch để garage tiếp nhận xe.</li>';
             const selected = $('repairVehicle').value;
             $('repairVehicle').innerHTML = '<option value="">Tất cả xe</option>' + vehicles.map(v => `<option value="${v.id}">${e(v.licensePlate)}</option>`).join('');
@@ -61,7 +61,8 @@
         if (!quiet) $('repairDetailContent').textContent = 'Đang tải chi tiết…';
         if (!dialog.open) dialog.showModal();
         try {
-            const r = await Garage.request(`/repairs/${id}`);
+            const record = await Garage.request(`/repairs/${id}`);
+            const r = record.billingSnapshot ? {...record, vehicle:record.billingSnapshot.vehicle, items:record.billingSnapshot.items, totalAmount:Number(record.billingSnapshot.totalAmount)} : record;
             if (version !== detailVersion || !dialog.open) return;
             const current = Object.keys(statuses).indexOf(r.status);
             const dates = [r.createdAt,r.startedAt,r.completedAt,r.paidAt];
@@ -84,6 +85,8 @@
             }
         });
         $('closeRepairDetail').addEventListener('click', () => $('repairDetailModal').close());
+        Garage.pager?.('/vehicles/my-vehicles', '#vehiclesTable', load);
+        Garage.pager?.('/repairs/my-repairs', '#repairsTable', load);
         load(); Garage.subscribe(load);
     });
 })();

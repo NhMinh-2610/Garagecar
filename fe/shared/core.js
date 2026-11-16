@@ -88,15 +88,104 @@ window.Garage = (() => {
         }
         return response;
     }
-    async function request(path, options = {}) {
-        const response = await apiFetch(`${base}${path}`, {
+    const pendingOperations = new Map(), pageViews = new Map();
+    function pageLabel(state) {
+        for (const nav of state.nodes) {
+            nav.hidden = !state.meta?.hasMore && !state.previous.length;
+            nav.querySelector('[data-page-label]').textContent = state.label + ' · Trang ' + (state.previous.length + 1);
+            nav.querySelector('[data-page-prev]').disabled = !state.previous.length || state.loading;
+            nav.querySelector('[data-page-next]').disabled = !state.meta?.hasMore || state.loading;
+        }
+    }
+    function pager(path, host, load, {view = 'default', search = null} = {}) {
+        host = typeof host === 'string' ? document.querySelector(host) : host;
+        if (!host) return;
+        const key = path + '|' + view;
+        const labels = {'/vehicles':'Xe','/repairs':'Phiếu sửa','/inventory':'Kho','/bookings':'Lịch hẹn','/finance/expenses':'Đề nghị chi','/finance/receipts':'Phiếu thu','/hr/operations':'Lịch nhân viên','/advisor/followups':'Chăm sóc','/service/visits':'Lượt dịch vụ','/maintenance/reminders':'Nhắc bảo dưỡng','/vehicles/my-vehicles':'Xe của tôi','/repairs/my-repairs':'Lịch sử sửa'};
+        if (!pageViews.has(key)) pageViews.set(key, {cursor:null, offset:0, previous:[], nodes:new Set(), revision:0, q:'', label:labels[path] || 'Danh sách'});
+        const state = pageViews.get(key);
+        if ([...state.nodes].some(node => node.isConnected && node.dataset.host === host.id)) return;
+        const nav = document.createElement('nav');
+        nav.className = 'server-pagination'; nav.setAttribute('aria-label','Phân trang danh sách'); nav.dataset.host = host.id;
+        nav.innerHTML = '<button type="button" class="btn btn-sm" data-page-prev>Trang trước</button><span data-page-label aria-live="polite"></span><button type="button" class="btn btn-sm" data-page-next>Trang tiếp</button>';
+        (host.closest('.table-responsive') || host).after(nav);
+        state.nodes.add(nav);
+        const move = async forward => {
+            if (state.loading) return;
+            const old = {cursor:state.cursor,offset:state.offset,previous:[...state.previous]}, revision = state.revision;
+            if (forward) { state.previous.push({cursor:state.cursor,offset:state.offset}); state.cursor = state.meta.nextCursor; state.offset = state.meta.nextOffset || 0; }
+            else Object.assign(state, state.previous.pop());
+            state.loading = true; pageLabel(state);
+            try { await load(); }
+            finally { if (state.revision === revision) Object.assign(state, old); state.loading = false; pageLabel(state); }
+        };
+        nav.querySelector('[data-page-prev]').onclick = () => move(false);
+        nav.querySelector('[data-page-next]').onclick = () => move(true);
+        const input = typeof search === 'string' ? document.querySelector(search) : search;
+        if (input) {
+            let debounce;
+            input.addEventListener('input', () => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {state.q = input.value;state.cursor = null;state.offset = 0;state.previous = [];load();}, 250);
+            });
+        }
+        pageLabel(state);
+    }
+    async function requestPage(path, options = {}) {
+        const state = options.pageView === false ? null : pageViews.get(path.split('?')[0] + '|' + (options.pageView || 'default'));
+        const target = new URL(`${base}${path}`);
+        if (state) {
+            if (state.cursor && !target.searchParams.has('cursor')) target.searchParams.set('cursor',state.cursor);
+            if (state.offset && !target.searchParams.has('offset')) target.searchParams.set('offset',state.offset);
+            if (state.q && !target.searchParams.has('q')) target.searchParams.set('q',state.q);
+        }
+        const protectedWrite = options.method === 'POST' && (/^\/inventory\/\d+\/receive$/.test(path) || /^\/workshop\/tickets\/\d+\/items\/\d+\/evidence$/.test(path));
+        const identity = protectedWrite ? path + ':' + JSON.stringify(options.body) : null;
+        if (identity && !pendingOperations.has(identity)) {
+            pendingOperations.set(identity, crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), x => x.toString(16).padStart(2, '0')).join(''));
+        }
+        const response = await apiFetch(target.href, {
             ...options,
-            headers: { 'Content-Type': 'application/json', ...options.headers },
+            headers: { 'Content-Type': 'application/json', ...(identity ? {'Idempotency-Key': pendingOperations.get(identity)} : {}), ...options.headers },
             body: options.body === undefined ? undefined : JSON.stringify(options.body),
         });
-        const result = await response.json();
+        const result = await response.json().catch(() => null);
+        if (!result) throw new Error('Máy chủ chưa trả kết quả hợp lệ. Vui lòng thử lại.');
         if (!response.ok || !result.success) throw new Error(result.message || 'Không thể tải dữ liệu');
-        return result.data;
+        if (identity) pendingOperations.delete(identity);
+        if (Array.isArray(result.data) && result.summary) Object.defineProperty(result.data,'summary',{value:result.summary});
+        if (state) { state.meta = result; state.revision++; pageLabel(state); }
+        return result;
+    }
+    async function request(path, options = {}) { return (await requestPage(path, options)).data; }
+    async function requestAll(path) {
+        const items = [], seen = new Set(); let next = path, summary;
+        while (true) {
+            const page = await requestPage(next, {pageView:false});
+            items.push(...page.data); summary ??= page.summary;
+            if (!page.hasMore) { if (summary) Object.defineProperty(items,'summary',{value:summary}); return items; }
+            const url = new URL(path, location.origin);
+            const marker = page.nextCursor ?? page.nextOffset;
+            if (marker == null || seen.has(marker)) throw new Error('Không thể tải trang tiếp theo. Vui lòng thử lại.');
+            seen.add(marker); url.searchParams.set(page.nextCursor != null ? 'cursor':'offset', marker);
+            next = url.pathname + url.search;
+        }
+    }
+    async function requestResources(path) {
+        const result = {vehicles:[],mechanics:[],inventory:[]}, done = new Set(), cursors = {};
+        const fields = {vehicles:'vehicleCursor',mechanics:'mechanicCursor',inventory:'inventoryCursor'};
+        while (done.size < 3) {
+            const query = new URLSearchParams({limit:'200',...cursors});
+            const data = await request(path + '?' + query, {pageView:false});
+            if (!data.pages) return data;
+            for (const key of Object.keys(result)) {
+                if (done.has(key)) continue;
+                result[key].push(...data[key]);
+                if (data.pages[key].hasMore) cursors[fields[key]] = data.pages[key].nextCursor;
+                else done.add(key);
+            }
+        }
+        return result;
     }
     function subscribe(fn) { listeners.add(fn); }
     function date(value) {
@@ -118,6 +207,6 @@ window.Garage = (() => {
             if (event.key === 'Escape') document.querySelectorAll('.modal').forEach(modal => { modal.style.display = 'none'; });
         });
     });
-    return { base, apiFetch, request, subscribe, changed, escape, date, toast, refreshGuard, refresh };
+    return { base, apiFetch, request, requestPage, requestAll, requestResources, pager, subscribe, changed, escape, date, toast, refreshGuard, refresh };
 })();
 window.escapeHtml = Garage.escape;

@@ -22,5 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         finally { await load(); }
     };
     Garage.subscribe(load);
+    Garage.pager?.('/bookings', '#bookingsTable', load);
     load();
 });

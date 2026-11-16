@@ -24,3 +24,4 @@ dialog form { display: inline-block; margin: 12px 0; }
     .invoice-box { position: absolute; inset: 0; width: 100%; box-shadow: none; }
     .invoice-actions { display: none; }
 }
+:root .server-pagination { display:flex; align-items:center; justify-content:flex-end; gap:12px; padding:12px 0; }

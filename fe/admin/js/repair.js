@@ -1,4 +1,4 @@
-﻿/* Repair editor and workflow; prices and transitions are validated by the API. */
+/* Repair editor and workflow; prices and transitions are validated by the API. */
 document.addEventListener('DOMContentLoaded', async () => {
     if (!await Garage.whenAllowed("workshop")) return;
     const byId = id => document.getElementById(id);
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!canRender()) return;
             tickets = data;
             for (const [id,status] of [['repairWaiting','draft'],['repairWorking','working'],['repairCompleted','completed'],['repairPaid','paid']]) {
-                byId(id).textContent = tickets.filter(t => t.status === status).length;
+                byId(id).textContent = tickets.summary?.counts?.[status] ?? tickets.filter(t => t.status === status).length;
             }
             const search = (byId('globalRepairSearch').value || '').toLowerCase();
             const mechanic = byId('filterMechanic').value;
@@ -67,12 +67,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function open(vehicleId = null, ticket = null) {
         try {
             const [vehicles, mechanics, parts, wages] = await Promise.all([
-                Garage.request('/vehicles'), loadMechanics(), Garage.request('/inventory'), Garage.request('/settings/wages'),
+                (Garage.requestAll || Garage.request)('/vehicles'), loadMechanics(), (Garage.requestAll || Garage.request)('/inventory'), Garage.request('/settings/wages'),
             ]);
             editingId = ticket?.id || null;
             inventory = parts;
             items = ticket ? ticket.items.map(i => ({...i})) : [];
-            const selectable = vehicles.filter(v => v.id === ticket?.vehicleId || (v.status !== 'delivered' && !v.repairTickets.some(t => t.status !== 'paid')));
+            const selectable = vehicles.filter(v => v.id === ticket?.vehicleId || (v.status !== 'delivered' && !(v.hasUnpaid ?? v.repairTickets.some(t => t.status !== 'paid'))));
             byId('repairVehicleSelect').replaceChildren(new Option('-- Chọn xe --',''), ...selectable.map(v => new Option(v.licensePlate + ' — ' + v.customerName, v.id)));
             byId('repairVehicleSelect').value = ticket?.vehicleId || vehicleId || '';
             byId('repairVehicleSelect').disabled = Boolean(ticket);
@@ -196,6 +196,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     byId('filterMechanic').onchange = load;
     Garage.subscribe(load);
     loadMechanics().catch(error => showToast(error.message,'error'));
+    Garage.pager?.('/repairs', '#waitingTable', load, {search:'#globalRepairSearch'});
+    Garage.pager?.('/repairs', '#workingTable', load);
+    Garage.pager?.('/repairs', '#completedTable', load);
     load();
 });
 

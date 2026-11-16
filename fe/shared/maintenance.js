@@ -164,6 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     host.querySelector("#careVehiclePanel").innerHTML = vehiclePanel();
   }
   async function load(context = {}) {
+    Garage.pager?.("/maintenance/reminders", host, load);
     const canRender = Garage.refreshGuard(context);
     try {
       const values = await Promise.all([
