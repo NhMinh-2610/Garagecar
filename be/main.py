@@ -136,15 +136,18 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.cors_origin] if settings.cors_origin != "*" else ["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "Idempotency-Key"],
 )
 
 
 @app.exception_handler(StarletteHTTPException)
 async def http_error(request, exc):
-    return error_response(str(exc.detail), exc.status_code)
+    response = error_response(str(exc.detail), exc.status_code)
+    if exc.headers:
+        response.headers.update(exc.headers)
+    return response
 
 
 @app.exception_handler(RequestValidationError)

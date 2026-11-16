@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.garage_care import PermissionInput
 from core.constants import Role
 from core.response import success_response
-from core.security import hash_password, verify_password
+from core.security import async_hash_password, async_verify_password
 from database.session import get_db
 from middleware.auth import get_current_user, require_role
 from models import User, Mechanic, Vehicle
@@ -77,7 +77,7 @@ async def create_account(
         fullName=body.fullName,
         email=body.email,
         role=body.role,
-        password=hash_password(body.password),
+        password=await async_hash_password(body.password),
     )
     db.add(user)
     await db.flush()
@@ -136,7 +136,7 @@ async def reset_password(
     user = await db.scalar(select(User).where(User.id == user_id).with_for_update())
     if not user:
         raise HTTPException(404, "Không tìm thấy tài khoản")
-    user.password = hash_password(body.password)
+    user.password = await async_hash_password(body.password)
     user.sessionVersion += 1
     await db.commit()
     return success_response(
@@ -161,11 +161,11 @@ async def change_password(
     user = await db.scalar(
         select(User).where(User.id == current["id"]).with_for_update()
     )
-    if not verify_password(body.currentPassword, user.password):
+    if not await async_verify_password(body.currentPassword, user.password):
         raise HTTPException(400, "Mật khẩu hiện tại không đúng")
     if body.currentPassword == body.password:
         raise HTTPException(400, "Mật khẩu mới phải khác mật khẩu hiện tại")
-    user.password = hash_password(body.password)
+    user.password = await async_hash_password(body.password)
     user.sessionVersion += 1
     await db.commit()
     return success_response(None, "Đã đổi mật khẩu. Vui lòng đăng nhập lại")

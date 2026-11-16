@@ -11,7 +11,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    networks: [database]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U garagecar -d garagecar"]
       interval: 10s
@@ -29,11 +30,13 @@ services:
       - ./be/.env
     environment:
       DATABASE_URL: postgresql+asyncpg://garagecar:garagecar@db:5432/garagecar
-    command: sh -c "python -m alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+      FORWARDED_ALLOW_IPS: ${TRUSTED_PROXY_CIDR:-172.30.0.0/24}
+    command: sh -c "python -m alembic upgrade head && exec python -m uvicorn main:app --host 0.0.0.0 --port 8000 --proxy-headers"
     volumes:
       - ./fe:/fe:ro
     ports:
-      - "8000:8000"
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    networks: [proxy, database]
     depends_on:
       db:
         condition: service_healthy
@@ -50,6 +53,15 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks: [proxy]
 
 volumes:
   pgdata:
+
+networks:
+  database:
+    internal: true
+  proxy:
+    ipam:
+      config:
+        - subnet: ${TRUSTED_PROXY_CIDR:-172.30.0.0/24}

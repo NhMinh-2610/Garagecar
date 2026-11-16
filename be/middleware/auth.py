@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError
+from jwt import InvalidTokenError as JWTError
 from typing import Callable
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.session import get_db
@@ -14,6 +14,7 @@ _bearer = HTTPBearer()
 
 
 async def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
@@ -30,6 +31,8 @@ async def get_current_user(
             or payload.get("version", 0) != user.sessionVersion
         ):
             raise JWTError("Account no longer exists")
+        db.info["actor_id"] = user.id
+        db.info["request_id"] = request.headers.get("Idempotency-Key")
         return {
             "id": user.id,
             "email": user.email,

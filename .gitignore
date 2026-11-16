@@ -70,6 +70,7 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+.venv-security/
 venv/
 env/
 ENV/
@@ -84,3 +85,6 @@ htmlcov/
 .coverage
 .backups/
 .env.docker
+
+# Local verification artifacts
+/outputs/

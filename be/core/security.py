@@ -16,10 +16,12 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
+import anyio
+import bcrypt
+import jwt
+from anyio.to_thread import run_sync
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError, InvalidHashError
-from jose import jwt
-
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from config.settings import settings
 
 # ── Argon2id parameters (OWASP recommended minimums) ─────────────────────────
@@ -48,10 +50,9 @@ def verify_password(plain: str, hashed: str) -> bool:
     if _BCRYPT_PREFIX.match(hashed):
         # Legacy bcrypt path — kept for backward compatibility
         try:
-            from passlib.context import CryptContext
-            _bcrypt_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
-            return _bcrypt_ctx.verify(plain, hashed)
-        except Exception:
+            # Legacy bcrypt compared the first 72 bytes, including UTF-8 passwords.
+            return bcrypt.checkpw(plain.encode("utf-8")[:72], hashed.encode("ascii"))
+        except (ValueError, UnicodeError):
             return False
 
     try:
@@ -74,6 +75,17 @@ def needs_rehash(hashed: str) -> bool:
         return False
 
 
+_password_limiter = anyio.CapacityLimiter(settings.password_workers)
+
+
+async def async_hash_password(plain):
+    return await run_sync(hash_password, plain, limiter=_password_limiter)
+
+
+async def async_verify_password(plain, hashed):
+    return await run_sync(verify_password, plain, hashed, limiter=_password_limiter)
+
+
 # ── JWT helpers ───────────────────────────────────────────────────────────────
 
 def create_access_token(data: dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
@@ -94,4 +106,7 @@ def decode_token(token: str) -> dict[str, Any]:
     Decode and validate a JWT token.
     Raises jose.JWTError if token is invalid or expired.
     """
-    return jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+    payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"], options={"require": ["exp", "id"]})
+    if not isinstance(payload["id"], int) or isinstance(payload["id"], bool) or payload["id"] <= 0:
+        raise jwt.InvalidTokenError("Invalid account identity")
+    return payload

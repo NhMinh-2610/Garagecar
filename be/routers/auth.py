@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, func
 
 from database.session import get_db
 from models.user import User
 from models.mechanic import Mechanic
-from schemas.auth import RegisterRequest, StaffRegisterRequest, LoginRequest, UserResponse, TokenResponse
-from core.security import hash_password, verify_password, create_access_token, needs_rehash
+from schemas.auth import RegisterRequest, StaffRegisterRequest, LoginRequest, UserResponse
+from core.security import async_hash_password, async_verify_password, create_access_token, needs_rehash
 from core.rate_limit import check_rate_limit, record_attempt
 from core.constants import Role, STAFF_ROLES
 from core.response import success_response, error_response
-from middleware.auth import get_current_user, require_role
+from middleware.auth import require_role
 from core.time import utcnow
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
 @router.post("/register", summary="Customer self-registration")
-async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(body: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """
     Public endpoint — creates a Customer account.
     Staff accounts must be created by an admin via /register-staff.
@@ -30,7 +30,7 @@ async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
     user = User(
         username=body.username,
         email=body.email,
-        password=hash_password(body.password),
+        password=await async_hash_password(body.password),
         fullName=body.fullName,
         role=Role.CUSTOMER.value,
     )
@@ -66,7 +66,7 @@ async def register_staff(
     user = User(
         username=body.username,
         email=body.email,
-        password=hash_password(body.password),
+        password=await async_hash_password(body.password),
         fullName=body.fullName,
         role=body.role,
     )
@@ -111,7 +111,7 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
     # ── Credential check ───────────────────────────────────────────────────────
     user = await db.scalar(select(User).where(func.lower(User.email) == email))
 
-    if not user or not user.isActive or not verify_password(body.password, user.password):
+    if not user or not user.isActive or not await async_verify_password(body.password, user.password):
         # Record failure for both identifiers; always commit so counts are durable
         await record_attempt(db, f"ip:{ip}",       success=False)
         await record_attempt(db, f"email:{email}", success=False)
@@ -121,7 +121,7 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
 
     # ── Auto-upgrade legacy bcrypt → Argon2id on successful login ─────────────
     if needs_rehash(user.password):
-        user.password = hash_password(body.password)
+        user.password = await async_hash_password(body.password)
 
     await record_attempt(db, f"email:{email}", success=True)
     user.lastLoginAt = utcnow()
