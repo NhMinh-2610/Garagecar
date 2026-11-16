@@ -7,7 +7,8 @@ from models.user import User
 from models.mechanic import Mechanic
 from schemas.auth import RegisterRequest, StaffRegisterRequest, LoginRequest, UserResponse
 from core.security import async_hash_password, async_verify_password, create_access_token, needs_rehash
-from core.rate_limit import check_rate_limit, record_attempt
+from core.rate_limit import check_rate_limit, record_attempt, request_budget
+from config.settings import settings
 from core.constants import Role, STAFF_ROLES
 from core.response import success_response, error_response
 from middleware.auth import require_role
@@ -22,6 +23,7 @@ async def register(body: RegisterRequest, request: Request, db: AsyncSession = D
     Public endpoint — creates a Customer account.
     Staff accounts must be created by an admin via /register-staff.
     """
+    await request_budget(db, request, "register", settings.register_requests_per_minute)
     stmt = select(User).where(or_(User.email == body.email, User.username == body.username))
     result = await db.execute(stmt)
     if result.scalars().first():
@@ -103,6 +105,7 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
     """
     ip    = request.client.host if request.client else "unknown"
     email = body.email.lower()
+    await request_budget(db, request, "login", settings.login_requests_per_minute)
 
     # ── Rate limiting (check BEFORE hitting the DB for credentials) ────────────
     await check_rate_limit(db, f"ip:{ip}")

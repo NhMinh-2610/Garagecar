@@ -15,6 +15,10 @@ from models.repair_item import RepairItem
 from core.constants import Role
 from core.response import success_response, error_response
 from middleware.auth import require_role
+from services.idempotency import OperationKey, reserve, finish
+from core.pagination import Page
+from services.maintenance_service import row_dict
+from services.inventory_service import add_stock_movement
 
 router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
@@ -23,13 +27,14 @@ router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 async def list_inventory(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN, Role.MECHANIC, Role.ADVISOR)),
+    page: Page = Depends(),
 ):
     stmt = select(Inventory).order_by(Inventory.name.asc())
-    result = await db.execute(stmt)
-    items = result.scalars().all()
-    return success_response(
-        [InventoryResponse.model_validate(i).model_dump() for i in items]
-    )
+    if page.q:
+        stmt = stmt.where(Inventory.name.icontains(page.q, autoescape=True) | Inventory.sku.icontains(page.q, autoescape=True))
+    counts = (await db.execute(select(func.count(Inventory.id), func.coalesce(func.sum(Inventory.quantity), 0), func.coalesce(func.sum(Inventory.quantity * Inventory.unitPrice), 0), func.count(Inventory.id).filter(Inventory.quantity <= 5)))).one()
+    summary = dict(zip(("skuCount", "units", "value", "low"), counts))
+    return await page.fetch(db, stmt, Inventory.id, lambda i: InventoryResponse.model_validate(i).model_dump(), summary)
 
 
 @router.post("", summary="Add an inventory item (admin only)")
@@ -48,14 +53,7 @@ async def create_inventory(
     item = Inventory(**body.model_dump(mode="json"))
     db.add(item)
     await db.flush()
-    db.add(
-        InventoryMovement(
-            inventoryId=item.id,
-            quantityChange=item.quantity,
-            balanceAfter=item.quantity,
-            reason="opening",
-        )
-    )
+    add_stock_movement(db, item, item.quantity, "opening")
     await db.commit()
     await db.refresh(item)
     return success_response(
@@ -77,6 +75,8 @@ async def update_inventory(
         return error_response("Không tìm thấy vật tư", 404)
 
     old_quantity = item.quantity
+    if body.quantity is not None and body.quantity != old_quantity and not (body.adjustmentReason or "").strip():
+        raise HTTPException(422, "Cần ghi lý do điều chỉnh tồn kho")
     if (
         "sku" in body.model_fields_set
         and body.sku != item.sku
@@ -91,18 +91,13 @@ async def update_inventory(
             "Mã SKU đã có trên phiếu sửa chữa. Tạo mã vật tư riêng để giữ lịch sử nhận dạng",
         )
     for field, value in body.model_dump(exclude_unset=True, mode="json").items():
+        if field == "adjustmentReason":
+            continue
         if value is None and field not in ("sku", "barcode"):
             continue
         setattr(item, field, value)
     if item.quantity != old_quantity:
-        db.add(
-            InventoryMovement(
-                inventoryId=item.id,
-                quantityChange=item.quantity - old_quantity,
-                balanceAfter=item.quantity,
-                reason="adjustment",
-            )
-        )
+        add_stock_movement(db, item, item.quantity - old_quantity, "adjustment", detail=body.adjustmentReason.strip())
 
     await db.commit()
     await db.refresh(item)
@@ -131,30 +126,30 @@ async def delete_inventory(
 async def receive_stock(
     item_id: int,
     body: StockReceipt,
+    operation_key: OperationKey,
     db: AsyncSession = Depends(get_db),
-    _: dict = Depends(require_role(Role.ADMIN)),
+    user: dict = Depends(require_role(Role.ADMIN)),
 ):
+    operation, replay = await reserve(db, user["id"], f"stock:{item_id}", operation_key, body.model_dump(mode="json"))
+    if replay is not None:
+        return replay
     item = await db.scalar(
         select(Inventory).where(Inventory.id == item_id).with_for_update()
     )
     if not item:
         return error_response("Không tìm thấy vật tư", 404)
+    if item.quantity + body.quantity > 2147483647:
+        raise HTTPException(422, "Số lượng tồn vượt giới hạn")
     item.quantity += body.quantity
     if body.unitPrice is not None:
         item.unitPrice = body.unitPrice
-    db.add(
-        InventoryMovement(
-            inventoryId=item.id,
-            quantityChange=body.quantity,
-            balanceAfter=item.quantity,
-            reason="receipt",
-        )
-    )
-    await db.commit()
-    await db.refresh(item)
-    return success_response(
+    add_stock_movement(db, item, body.quantity, "receipt")
+    response = success_response(
         InventoryResponse.model_validate(item).model_dump(), "Đã nhập thêm vật tư"
     )
+    finish(operation, response)
+    await db.commit()
+    return response
 
 
 @router.get("/{item_id}/movements")
@@ -162,23 +157,6 @@ async def stock_history(
     item_id: int,
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN)),
+    page: Page = Depends(),
 ):
-    rows = await db.scalars(
-        select(InventoryMovement)
-        .where(InventoryMovement.inventoryId == item_id)
-        .order_by(InventoryMovement.id.desc())
-        .limit(200)
-    )
-    return success_response(
-        [
-            {
-                "id": r.id,
-                "quantityChange": r.quantityChange,
-                "balanceAfter": r.balanceAfter,
-                "reason": r.reason,
-                "reference": r.reference,
-                "createdAt": r.createdAt,
-            }
-            for r in rows
-        ]
-    )
+    return await page.fetch(db, select(InventoryMovement).where(InventoryMovement.inventoryId == item_id), InventoryMovement.id, row_dict)

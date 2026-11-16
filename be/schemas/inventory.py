@@ -42,11 +42,12 @@ class PartIdentity(BaseModel):
 
 class InventoryCreate(PartIdentity):
     name: Name
-    quantity: int = Field(default=0, ge=0)
+    quantity: int = Field(default=0, ge=0, le=2147483647)
     unitPrice: Money = 0
 
 
 class InventoryUpdate(BaseModel):
+    adjustmentReason: str | None = Field(default=None, min_length=3, max_length=2000)
     sku: str | None = Field(default=None, max_length=100)
     barcode: str | None = Field(default=None, max_length=100)
     manufacturer: str | None = Field(default=None, max_length=200)
@@ -54,12 +55,12 @@ class InventoryUpdate(BaseModel):
     highVoltage: bool | None = None
     normalize_code = field_validator("sku", "barcode")(PartIdentity.code.__func__)
     name: Optional[Name] = None
-    quantity: Optional[int] = Field(default=None, ge=0)
+    quantity: Optional[int] = Field(default=None, ge=0, le=2147483647)
     unitPrice: Optional[Money] = None
 
 
 class StockReceipt(BaseModel):
-    quantity: int = Field(gt=0)
+    quantity: int = Field(gt=0, le=2147483647)
     unitPrice: Optional[Money] = None
 
 

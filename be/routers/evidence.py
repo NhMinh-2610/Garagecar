@@ -2,7 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-from starlette.concurrency import run_in_threadpool
+import anyio
+from anyio.to_thread import run_sync
+from config.settings import settings
 from sqlalchemy import select
 from sqlalchemy.orm import defer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +14,7 @@ from middleware.auth import get_current_user
 from models import RepairEvidence, RepairTicket, Inventory
 from schemas.professional import EvidenceInput
 from services.repair_service import authorize_ticket, lock_ticket
+from services.idempotency import OperationKey, reserve, finish
 from services.evidence_service import (
     sanitize_image,
     evidence_metadata,
@@ -20,6 +23,7 @@ from services.evidence_service import (
 import hashlib
 
 router = APIRouter(prefix="/api/workshop", tags=["Workshop evidence"])
+_image_limiter = anyio.CapacityLimiter(settings.image_workers)
 
 
 async def access(db, ticket, user, write=False):
@@ -70,9 +74,17 @@ async def upload(
     ticket_id: int,
     item_id: int,
     body: EvidenceInput,
+    operation_key: OperationKey,
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user),
 ):
+    if user["role"] not in ("admin", "mechanic") or "workshop" not in user["permissions"]:
+        raise HTTPException(403, "Không có quyền gửi bằng chứng")
+    operation, replay = await reserve(db, user["id"], f"evidence:{ticket_id}:{item_id}", operation_key, body.model_dump(mode="json"))
+    if replay is not None:
+        return replay
+    # Decode CPU-heavy images before taking vehicle/ticket/stock locks.
+    image = await run_sync(sanitize_image, body.image, limiter=_image_limiter)
     ticket = await lock_ticket(db, ticket_id)
     await access(db, ticket, user, write=True)
     item = next((i for i in ticket.items if i.id == item_id), None)
@@ -118,10 +130,13 @@ async def upload(
             raise HTTPException(422, "Cần nhập mã trên bao bì")
         if item.partCode is None:
             item.partCode = expected
-    image = await run_in_threadpool(sanitize_image, body.image)
+    slots = set((await db.scalars(select(RepairEvidence.slot).where(
+        RepairEvidence.itemId == item_id, RepairEvidence.round == item.evidenceRound
+    ))).all())
     row = RepairEvidence(
         itemId=item.id,
         round=item.evidenceRound,
+        slot=next(slot for slot in range(1, 13) if slot not in slots),
         kind=body.kind,
         productCode=body.productCode.strip().upper() if body.productCode else None,
         expectedCode=expected if body.kind == "package" else None,
@@ -132,9 +147,11 @@ async def upload(
         createdBy=user["id"],
     )
     db.add(row)
+    await db.flush()
+    response = success_response(evidence_metadata(row), "Đã lưu bằng chứng", 201)
+    finish(operation, response)
     await db.commit()
-    await db.refresh(row)
-    return success_response(evidence_metadata(row), "Đã lưu bằng chứng", 201)
+    return response
 
 
 @router.get("/evidence/{evidence_id}/image")
@@ -143,13 +160,13 @@ async def photo(
 ):
     from models import RepairItem
 
-    row = await db.get(RepairEvidence, evidence_id)
+    row = await db.scalar(select(RepairEvidence).options(defer(RepairEvidence.image)).where(RepairEvidence.id == evidence_id))
     if not row:
         raise HTTPException(404, "Không tìm thấy ảnh")
     item = await db.get(RepairItem, row.itemId)
     await access(db, await db.get(RepairTicket, item.repairTicketId), user)
     return Response(
-        row.image,
+        await db.scalar(select(RepairEvidence.image).where(RepairEvidence.id == evidence_id)),
         media_type="image/jpeg",
         headers={
             "Cache-Control": "private, no-store",

@@ -1,6 +1,8 @@
 """Separate job records and immutable workshop evidence."""
 
 from sqlalchemy import (
+    JSON,
+    text,
     Column,
     Integer,
     String,
@@ -26,6 +28,7 @@ class RepairEvidence(Base):
         index=True,
     )
     round = Column(Integer, nullable=False)
+    slot = Column(Integer, nullable=True)
     kind = Column(String(20), nullable=False)
     productCode = Column(String(100))
     expectedCode = Column(String(100))
@@ -37,6 +40,11 @@ class RepairEvidence(Base):
         Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
     createdAt = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("itemId", "round", "slot", name="uq_evidence_slot"),
+        CheckConstraint("slot BETWEEN 1 AND 12", name="evidence_slot_range"),
+    )
 
 
 class PaymentReceipt(Base):
@@ -51,6 +59,7 @@ class PaymentReceipt(Base):
     amount = Column(Numeric(14, 2), nullable=False)
     method = Column(String(20), nullable=False)
     reference = Column(String(100), nullable=False)
+    snapshot = Column(JSON, nullable=False, server_default=text("'{}'"))
     receivedBy = Column(
         Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
     )
@@ -77,6 +86,13 @@ class Expense(Base):
     reference = Column(String(100))
     createdAt = Column(DateTime, server_default=func.now())
     __table_args__ = (CheckConstraint("amount > 0", name="expense_positive"),)
+
+
+class ExpenseDocument(Base):
+    """One canonical document identity; legacy duplicate rows remain untouched."""
+    __tablename__ = "expense_documents"
+    normalized = Column(String(100), primary_key=True)
+    expenseId = Column(Integer, ForeignKey("expenses.id", ondelete="RESTRICT"), nullable=False, unique=True)
 
 
 class StaffShift(Base):

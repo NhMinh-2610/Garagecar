@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from core.rate_limit import request_budget
+from config.settings import settings
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +13,8 @@ from database.session import get_db
 from middleware.auth import require_role
 from models.booking import Booking
 from schemas.common import Name
+from core.pagination import Page
+from services.maintenance_service import row_dict
 
 router = APIRouter(prefix="/api/bookings", tags=["Bookings"])
 
@@ -35,7 +39,8 @@ class BookingUpdate(BaseModel):
 
 
 @router.post("")
-async def create_booking(body: BookingCreate, db: AsyncSession = Depends(get_db)):
+async def create_booking(body: BookingCreate, request: Request, db: AsyncSession = Depends(get_db)):
+    await request_budget(db, request, "booking", settings.booking_requests_per_minute)
     booking = Booking(**body.model_dump())
     db.add(booking)
     await db.commit()
@@ -43,9 +48,11 @@ async def create_booking(body: BookingCreate, db: AsyncSession = Depends(get_db)
 
 
 @router.get("")
-async def list_bookings(db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR))):
-    rows = await db.scalars(select(Booking).order_by(Booking.createdAt.desc()).limit(500))
-    return success_response([{column.name: getattr(row, column.name) for column in Booking.__table__.columns} for row in rows])
+async def list_bookings(db: AsyncSession = Depends(get_db), _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR)), page: Page = Depends()):
+    query = select(Booking)
+    if page.q:
+        query = query.where(Booking.customerName.icontains(page.q, autoescape=True) | Booking.phone.icontains(page.q, autoescape=True))
+    return await page.fetch(db, query, Booking.id, row_dict)
 
 
 @router.put("/{booking_id}")

@@ -14,14 +14,13 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from config.settings import settings
 from core.security import create_access_token, hash_password
-from database.engine import Base
 from database.session import get_db
 from main import app
 from models import User, Mechanic, Vehicle, Inventory
 
 
 def migrate(connection):
-    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py", "004_garage_care.py", "005_professional_workflow.py", "006_car_brands.py"]:
+    for filename in ["001_relational_workflow.py", "002_login_attempts.py", "003_account_management.py", "004_garage_care.py", "005_professional_workflow.py", "006_car_brands.py", "007_request_integrity.py", "008_financial_audit.py"]:
         spec = importlib.util.spec_from_file_location("migration", Path(__file__).parents[1] / "migrations/versions" / filename)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -58,7 +57,7 @@ async def api():
         app.dependency_overrides[get_db] = session
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
             def auth(role):
-                return {"Authorization": "Bearer " + create_access_token({"id": ids[role]})}
+                return {"Authorization": "Bearer " + create_access_token({"id": ids[role]}), "Idempotency-Key": str(uuid4())}
             yield client, auth, ids, factory, engine
     finally:
         app.dependency_overrides.clear()
@@ -129,7 +128,8 @@ async def test_account_creation_links_existing_profiles_atomically(api):
     async with factory() as db:
         customer_vehicle = Vehicle(licensePlate='NEW-01',customerName='Owner',phone='0901234567',carBrand='Toyota')
         staff = Mechanic(fullName='New Mechanic')
-        db.add_all([customer_vehicle,staff]); await db.commit()
+        db.add_all([customer_vehicle,staff])
+        await db.commit()
         vid, mid = customer_vehicle.id, staff.id
     body = {'username':'owner','email':'owner@example.com','fullName':'Owner','password':'initial123','role':'customer','vehicleIds':[vid]}
     created = await client.post('/api/auth/users',headers=auth('admin'),json=body)
@@ -246,6 +246,9 @@ async def test_legacy_migration_keeps_rows_without_guessing_accounts(api):
     client, auth, ids, _, engine = api
     vid = await vehicle(client, auth, ids)
     async with engine.begin() as conn:
+        # Reconstruct pre-007 tables: these assignment guards did not exist then.
+        await conn.execute(text("DROP TRIGGER IF EXISTS assignment_guard ON repair_tickets"))
+        await conn.execute(text("DROP TRIGGER IF EXISTS assignment_guard ON service_visits"))
         for table, column in [("vehicles", "customerId"), ("mechanics", "userId"), ("repair_tickets", "mechanicId"), ("repair_items", "inventoryId")]:
             await conn.execute(text(f'ALTER TABLE "{table}" DROP COLUMN "{column}"'))
         await conn.run_sync(migrate)

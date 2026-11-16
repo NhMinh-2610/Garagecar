@@ -7,6 +7,7 @@ import warnings
 from fastapi import HTTPException
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy import select
+from sqlalchemy.orm import defer
 from models import RepairEvidence, Inventory, StaffCertificate
 from schemas.garage_care import today
 
@@ -71,7 +72,7 @@ async def require_item_evidence(db, item):
             select(RepairEvidence).where(
                 RepairEvidence.itemId == item.id,
                 RepairEvidence.round == item.evidenceRound,
-            )
+            ).options(defer(RepairEvidence.image))
         )
     ).all()
     if not any(r.kind == "completion" for r in rows):

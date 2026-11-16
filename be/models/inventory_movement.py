@@ -12,4 +12,7 @@ class InventoryMovement(Base):
     balanceAfter = Column(Integer, nullable=False)
     reason = Column(String, nullable=False)
     reference = Column(String, nullable=True)
+    actorId = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=True)
+    requestId = Column(String(128), nullable=True)
+    detail = Column(String(2000), nullable=True)
     createdAt = Column(DateTime, server_default=func.now(), nullable=False)

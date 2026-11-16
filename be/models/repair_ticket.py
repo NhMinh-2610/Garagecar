@@ -47,6 +47,11 @@ class RepairTicket(Base):
     # Relationships
     vehicle = relationship("Vehicle", back_populates="repairTickets", lazy="selectin")
     serviceVisit = relationship("ServiceVisit", lazy="selectin")
+    receipt = relationship("PaymentReceipt", uselist=False, lazy="selectin")
+
+    @property
+    def billingSnapshot(self):
+        return self.receipt.snapshot if self.receipt else None
 
     @property
     def qcAt(self):

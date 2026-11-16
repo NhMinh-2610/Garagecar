@@ -8,11 +8,12 @@ def success_response(
     data: Any = None,
     message: str = "Success",
     status_code: int = 200,
+    pagination: dict | None = None,
 ) -> JSONResponse:
     """Return a standardised success JSON payload — mirrors Node.js sendSuccess()."""
     return JSONResponse(
         status_code=status_code,
-        content=jsonable_encoder({"success": True, "data": data, "message": message},
+        content=jsonable_encoder({"success": True, "data": data, "message": message, **(pagination or {})},
                                  custom_encoder={datetime: lambda value: value.replace(tzinfo=value.tzinfo or timezone.utc).isoformat()}),
     )
 

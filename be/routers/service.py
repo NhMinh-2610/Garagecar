@@ -1,7 +1,7 @@
 """Intake → preliminary consent → diagnosis → final approval → workshop → QC."""
 
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.session import get_db
@@ -27,6 +27,9 @@ from schemas.garage_care import (
 from schemas.repair import RepairItemCreate
 from services.maintenance_service import row_dict
 from services.repair_service import assigned_mechanic, replace_items, sync_vehicle
+from core.pagination import Page
+from sqlalchemy.orm import lazyload
+from models import User
 
 router = APIRouter(prefix="/api/service", tags=["Service workflow"])
 
@@ -98,7 +101,7 @@ async def detail(db, visit):
 
 
 @router.get("/visits")
-async def visits(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
+async def visits(db: AsyncSession = Depends(get_db), user=Depends(get_current_user), page: Page = Depends()):
     query = select(ServiceVisit).join(Vehicle, Vehicle.id == ServiceVisit.vehicleId)
     if user["role"] == "customer":
         query = query.where(Vehicle.customerId == user["id"])
@@ -110,8 +113,19 @@ async def visits(db: AsyncSession = Depends(get_db), user=Depends(get_current_us
         pass
     else:
         advisor(user)
-    rows = (await db.scalars(query.order_by(ServiceVisit.id.desc()).limit(100))).all()
-    result = [await detail(db, r) for r in rows]
+    rows, more = await page.load(db, query, ServiceVisit.id)
+    vehicles = {v.id: v for v in await db.scalars(select(Vehicle).options(lazyload(Vehicle.repairTickets)).where(Vehicle.id.in_([r.vehicleId for r in rows])))} if rows else {}
+    quotes, tickets = {}, {}
+    if rows:
+        ids = [r.id for r in rows]
+        for quote in await db.scalars(select(ServiceQuote).where(ServiceQuote.visitId.in_(ids)).order_by(ServiceQuote.revision)):
+            quotes.setdefault(quote.visitId, []).append(row_dict(quote))
+        for ticket in await db.execute(select(RepairTicket.serviceVisitId, RepairTicket.id, RepairTicket.status).where(RepairTicket.serviceVisitId.in_(ids))):
+            tickets[ticket.serviceVisitId] = ticket
+    result = [{**row_dict(r), "licensePlate": vehicles[r.vehicleId].licensePlate,
+        "vehicleStatus": vehicles[r.vehicleId].status, "customerId": vehicles[r.vehicleId].customerId,
+        "quotes": quotes.get(r.id, []), "ticketId": tickets[r.id].id if r.id in tickets else None,
+        "ticketStatus": tickets[r.id].status if r.id in tickets else None} for r in rows]
     if user["role"] == "accountant":
         keys = (
             "id",
@@ -123,7 +137,7 @@ async def visits(db: AsyncSession = Depends(get_db), user=Depends(get_current_us
             "status",
         )
         result = [{key: row[key] for key in keys} for row in result]
-    return success_response(result)
+    return page.response(result, rows, more)
 
 
 @router.post("/visits", status_code=201)
@@ -452,16 +466,32 @@ async def cancel(
 
 @router.get("/resources")
 async def resources(
-    db: AsyncSession = Depends(get_db), user=Depends(require_permission("workshop"))
+    db: AsyncSession = Depends(get_db), user=Depends(require_permission("workshop")),
+    limit: int = Query(default=100, ge=1, le=200),
+    vehicleCursor: int | None = Query(default=None, gt=0),
+    mechanicCursor: int | None = Query(default=None, gt=0),
+    inventoryCursor: int | None = Query(default=None, gt=0),
 ):
     advisor(user)
-    vehicles = await db.scalars(select(Vehicle).order_by(Vehicle.id.desc()))
-    mechanics = await db.scalars(
-        select(Mechanic).where(Mechanic.status == "active").order_by(Mechanic.fullName)
-    )
-    parts = await db.scalars(select(Inventory).order_by(Inventory.name))
+    from sqlalchemy import cast
+    from sqlalchemy.dialects.postgresql import JSONB
+    pages = {}
+    async def group(query, model, cursor, name):
+        if cursor:
+            query = query.where(model.id < cursor)
+        rows = list((await db.scalars(query.order_by(model.id.desc()).limit(limit + 1))).all())
+        more = len(rows) > limit
+        rows = rows[:limit]
+        pages[name] = {"hasMore": more, "nextCursor": rows[-1].id if more else None}
+        return rows
+    vehicles = await group(select(Vehicle).options(lazyload(Vehicle.repairTickets)), Vehicle, vehicleCursor, "vehicles")
+    mechanics = await group(select(Mechanic).join(User, User.id == Mechanic.userId).where(
+        Mechanic.status == "active", User.isActive.is_(True), User.role == "mechanic",
+        ~cast(User.disabledPermissions, JSONB).contains(["workshop"])), Mechanic, mechanicCursor, "mechanics")
+    parts = await group(select(Inventory), Inventory, inventoryCursor, "inventory")
     return success_response(
         {
+            "pages": pages,
             "vehicles": [
                 {
                     "id": v.id,

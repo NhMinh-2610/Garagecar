@@ -82,6 +82,7 @@ async def lifespan(app: FastAPI):
             "staff_certificates",
             "leave_requests",
             "service_followups",
+            "request_replays", "request_budgets", "expense_documents",
         }.issubset(
             await conn.run_sync(lambda sync: set(inspect(sync).get_table_names()))
         ):
@@ -89,6 +90,9 @@ async def lifespan(app: FastAPI):
                 "Database needs professional workflow migration: python be/manage.py upgrade"
             )
         for table, expected in {
+            "repair_evidence": {"slot"},
+            "payment_receipts": {"snapshot"},
+            "inventory_movements": {"actorId", "requestId", "detail"},
             "inventories": {"sku", "barcode", "fitments", "highVoltage"},
             "repair_items": {"evidenceRound", "partCode"},
             "staff_certificates": {"status", "revokedBy", "revokedAt", "revokeReason"},

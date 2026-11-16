@@ -46,6 +46,7 @@ class VehicleInRepair(BaseModel):
 
 
 class RepairTicketCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     vehicleId: PositiveId
     mechanicId: Optional[PositiveId] = None
     items: list[RepairItemCreate] = Field(min_length=1, max_length=100)
@@ -78,3 +79,4 @@ class RepairTicketResponse(BaseModel):
     createdAt: Optional[datetime]
     items: list[RepairItemResponse] = Field(default_factory=list)
     vehicle: Optional[VehicleInRepair] = None
+    billingSnapshot: Optional[dict] = None

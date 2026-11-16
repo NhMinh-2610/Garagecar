@@ -10,36 +10,27 @@ from middleware.auth import require_permission
 from models import Expense, PaymentReceipt
 from schemas.professional import ExpenseInput, PaymentInput
 from services.maintenance_service import row_dict
+from core.pagination import Page
+from models.professional import ExpenseDocument
 
 router = APIRouter(prefix="/api/finance", tags=["Accounting operations"])
 
 
 @router.get("/receipts")
 async def receipts(
-    db: AsyncSession = Depends(get_db), user=Depends(require_permission("finance"))
+    db: AsyncSession = Depends(get_db), user=Depends(require_permission("finance")), page: Page = Depends()
 ):
-    rows = (
-        await db.scalars(
-            select(PaymentReceipt).order_by(PaymentReceipt.id.desc()).limit(1000)
-        )
-    ).all()
-    return success_response([row_dict(r) for r in rows])
+    return await page.fetch(db, select(PaymentReceipt), PaymentReceipt.id, row_dict)
 
 
 @router.get("/expenses")
 async def expenses(
-    db: AsyncSession = Depends(get_db), user=Depends(require_permission("finance"))
+    db: AsyncSession = Depends(get_db), user=Depends(require_permission("finance")), page: Page = Depends()
 ):
-    return success_response(
-        [
-            row_dict(r)
-            for r in (
-                await db.scalars(
-                    select(Expense).order_by(Expense.id.desc()).limit(1000)
-                )
-            ).all()
-        ]
-    )
+    query = select(Expense)
+    if page.q:
+        query = query.where(Expense.documentNumber.icontains(page.q, autoescape=True))
+    return await page.fetch(db, query, Expense.id, row_dict)
 
 
 @router.post("/expenses")
@@ -48,6 +39,8 @@ async def create_expense(
     db: AsyncSession = Depends(get_db),
     user=Depends(require_permission("finance")),
 ):
+    if await db.get(ExpenseDocument, body.documentNumber.lower()):
+        raise HTTPException(409, "Số chứng từ đã được sử dụng")
     row = Expense(**body.model_dump(), createdBy=user["id"])
     db.add(row)
     await db.commit()

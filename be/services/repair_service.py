@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.time import utcnow
 
 from models import Inventory, Mechanic, RepairItem, RepairTicket, Vehicle
-from models.inventory_movement import InventoryMovement
+from services.inventory_service import add_stock_movement
 
 TRANSITIONS = {
     "draft": {"working"},
@@ -28,8 +28,8 @@ async def assigned_mechanic(db: AsyncSession, mechanic_id: int | None):
     if mechanic and mechanic.userId:
         from models import User
 
-        account = await db.get(User, mechanic.userId)
-        if not account or not account.isActive or account.role != "mechanic":
+        account = await db.scalar(select(User).where(User.id == mechanic.userId).with_for_update(read=True))
+        if not account or not account.isActive or account.role != "mechanic" or "workshop" in (account.disabledPermissions or []):
             raise HTTPException(409, "Tài khoản thợ đã bị khóa hoặc không hợp lệ")
     if not mechanic or mechanic.status != "active":
         raise HTTPException(400, "Thợ không tồn tại hoặc đã ngừng hoạt động")
@@ -119,15 +119,7 @@ async def replace_items(db, ticket, requested):
         part.quantity = available - needed[inventory_id]
         change = old[inventory_id] - needed[inventory_id]
         if change:
-            db.add(
-                InventoryMovement(
-                    inventoryId=inventory_id,
-                    quantityChange=change,
-                    balanceAfter=part.quantity,
-                    reason="repair",
-                    reference=f"repair:{ticket.id}",
-                )
-            )
+            add_stock_movement(db, part, change, "repair", f"repair:{ticket.id}")
     items = []
     for data in requested:
         part = stock.get(data.inventoryId)

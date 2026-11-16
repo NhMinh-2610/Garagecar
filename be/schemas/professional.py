@@ -30,6 +30,13 @@ class ExpenseInput(Input):
     category: Literal["parts", "tools", "rent", "utilities", "other"]
     payee: Name
     documentNumber: str = Field(min_length=3, max_length=100)
+    @field_validator("documentNumber")
+    @classmethod
+    def document_number(cls, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise ValueError("Số chứng từ cần ít nhất 3 ký tự không trắng")
+        return value
     amount: Money
     note: str = Field(min_length=3, max_length=2000)
 
