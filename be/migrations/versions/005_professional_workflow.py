@@ -2,8 +2,7 @@
 
 from alembic import op
 import sqlalchemy as sa
-from database.engine import Base
-import models  # noqa: F401
+from migrations.legacy_schema import create_legacy_tables
 
 revision = "005_professional_workflow"
 down_revision = "004_garage_care"
@@ -55,7 +54,7 @@ def upgrade():
         "leave_requests",
         "service_followups",
     ):
-        Base.metadata.tables[name].create(bind, checkfirst=True)
+        create_legacy_tables(bind, [name])
 
 
 def downgrade():

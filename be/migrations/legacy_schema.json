@@ -1,0 +1,177 @@
+[
+  {
+    "name": "bookings",
+    "table": "\nCREATE TABLE IF NOT EXISTS bookings (\n\tid SERIAL NOT NULL, \n\t\"customerName\" VARCHAR NOT NULL, \n\tphone VARCHAR NOT NULL, \n\tservice VARCHAR NOT NULL, \n\tnote VARCHAR NOT NULL, \n\t\"preferredDate\" DATE NOT NULL, \n\tstatus VARCHAR NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now() NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "brands",
+    "table": "\nCREATE TABLE IF NOT EXISTS brands (\n\tid SERIAL NOT NULL, \n\tname VARCHAR NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n",
+    "indexes": [
+      "CREATE UNIQUE INDEX ix_brands_name ON brands (name)",
+      "CREATE INDEX ix_brands_id ON brands (id)"
+    ]
+  },
+  {
+    "name": "inventories",
+    "table": "\nCREATE TABLE IF NOT EXISTS inventories (\n\tid SERIAL NOT NULL, \n\tname VARCHAR NOT NULL, \n\tsku VARCHAR(100), \n\tbarcode VARCHAR(100), \n\tmanufacturer VARCHAR(200) DEFAULT '' NOT NULL, \n\tfitments JSON DEFAULT '[]' NOT NULL, \n\t\"highVoltage\" BOOLEAN DEFAULT 'false' NOT NULL, \n\tquantity INTEGER NOT NULL, \n\t\"unitPrice\" NUMERIC(14, 2) NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tUNIQUE (sku), \n\tUNIQUE (barcode)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_inventories_name ON inventories (name)"
+    ]
+  },
+  {
+    "name": "login_attempts",
+    "table": "\nCREATE TABLE IF NOT EXISTS login_attempts (\n\tid SERIAL NOT NULL, \n\tidentifier VARCHAR(255) NOT NULL, \n\tsuccess BOOLEAN NOT NULL, \n\tattempted_at TIMESTAMP WITHOUT TIME ZONE NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_login_attempts_identifier ON login_attempts (identifier)"
+    ]
+  },
+  {
+    "name": "system_parameters",
+    "table": "\nCREATE TABLE IF NOT EXISTS system_parameters (\n\tid SERIAL NOT NULL, \n\tkey VARCHAR NOT NULL, \n\tvalue VARCHAR NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_system_parameters_id ON system_parameters (id)",
+      "CREATE UNIQUE INDEX ix_system_parameters_key ON system_parameters (key)"
+    ]
+  },
+  {
+    "name": "users",
+    "table": "\nCREATE TABLE IF NOT EXISTS users (\n\tid SERIAL NOT NULL, \n\tusername VARCHAR NOT NULL, \n\temail VARCHAR NOT NULL, \n\tpassword VARCHAR NOT NULL, \n\t\"fullName\" VARCHAR NOT NULL, \n\trole VARCHAR NOT NULL, \n\t\"isActive\" BOOLEAN DEFAULT true NOT NULL, \n\t\"sessionVersion\" INTEGER DEFAULT '0' NOT NULL, \n\t\"disabledPermissions\" JSON DEFAULT '[]' NOT NULL, \n\t\"lastLoginAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id)\n)\n\n",
+    "indexes": [
+      "CREATE UNIQUE INDEX ix_users_email ON users (email)",
+      "CREATE UNIQUE INDEX ix_users_username ON users (username)"
+    ]
+  },
+  {
+    "name": "wages",
+    "table": "\nCREATE TABLE IF NOT EXISTS wages (\n\tid SERIAL NOT NULL, \n\tname VARCHAR NOT NULL, \n\tprice NUMERIC(14, 2) NOT NULL, \n\tPRIMARY KEY (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_wages_id ON wages (id)",
+      "CREATE UNIQUE INDEX ix_wages_name ON wages (name)"
+    ]
+  },
+  {
+    "name": "employee_profiles",
+    "table": "\nCREATE TABLE IF NOT EXISTS employee_profiles (\n\t\"userId\" INTEGER NOT NULL, \n\tphone VARCHAR(30) NOT NULL, \n\tdepartment VARCHAR(100) NOT NULL, \n\t\"jobTitle\" VARCHAR(100) NOT NULL, \n\t\"startDate\" DATE NOT NULL, \n\tnote VARCHAR(2000) NOT NULL, \n\t\"updatedBy\" INTEGER NOT NULL, \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (\"userId\"), \n\tFOREIGN KEY(\"userId\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"updatedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "expenses",
+    "table": "\nCREATE TABLE IF NOT EXISTS expenses (\n\tid SERIAL NOT NULL, \n\tcategory VARCHAR(40) NOT NULL, \n\tpayee VARCHAR(200) NOT NULL, \n\t\"documentNumber\" VARCHAR(100) NOT NULL, \n\tamount NUMERIC(14, 2) NOT NULL, \n\tnote VARCHAR(2000) NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\t\"createdBy\" INTEGER NOT NULL, \n\t\"approvedBy\" INTEGER, \n\t\"approvedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"paidBy\" INTEGER, \n\t\"paidAt\" TIMESTAMP WITHOUT TIME ZONE, \n\tmethod VARCHAR(20), \n\treference VARCHAR(100), \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tCONSTRAINT expense_positive CHECK (amount > 0), \n\tUNIQUE (\"documentNumber\"), \n\tFOREIGN KEY(\"createdBy\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"approvedBy\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"paidBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "inventory_movements",
+    "table": "\nCREATE TABLE IF NOT EXISTS inventory_movements (\n\tid SERIAL NOT NULL, \n\t\"inventoryId\" INTEGER NOT NULL, \n\t\"quantityChange\" INTEGER NOT NULL, \n\t\"balanceAfter\" INTEGER NOT NULL, \n\treason VARCHAR NOT NULL, \n\treference VARCHAR, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now() NOT NULL, \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"inventoryId\") REFERENCES inventories (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_inventory_movements_inventoryId\" ON inventory_movements (\"inventoryId\")"
+    ]
+  },
+  {
+    "name": "leave_requests",
+    "table": "\nCREATE TABLE IF NOT EXISTS leave_requests (\n\tid SERIAL NOT NULL, \n\t\"userId\" INTEGER NOT NULL, \n\t\"fromDate\" DATE NOT NULL, \n\t\"toDate\" DATE NOT NULL, \n\treason VARCHAR(2000) NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\t\"decidedBy\" INTEGER, \n\t\"decisionNote\" VARCHAR(2000), \n\t\"decidedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"userId\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"decidedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_leave_requests_userId\" ON leave_requests (\"userId\")"
+    ]
+  },
+  {
+    "name": "maintenance_profiles",
+    "table": "\nCREATE TABLE IF NOT EXISTS maintenance_profiles (\n\tid SERIAL NOT NULL, \n\ttitle VARCHAR(255) NOT NULL, \n\tscope JSON NOT NULL, \n\trules JSON NOT NULL, \n\t\"sourceUrl\" VARCHAR(2000) NOT NULL, \n\t\"sourcePage\" VARCHAR(255) NOT NULL, \n\tversion VARCHAR(100) NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\t\"approvedBy\" INTEGER, \n\t\"approvedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"approvedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "mechanics",
+    "table": "\nCREATE TABLE IF NOT EXISTS mechanics (\n\tid SERIAL NOT NULL, \n\t\"userId\" INTEGER, \n\t\"fullName\" VARCHAR NOT NULL, \n\tphone VARCHAR, \n\tspecialty VARCHAR, \n\tstatus VARCHAR NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tUNIQUE (\"userId\"), \n\tFOREIGN KEY(\"userId\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "staff_certificates",
+    "table": "\nCREATE TABLE IF NOT EXISTS staff_certificates (\n\tid SERIAL NOT NULL, \n\t\"userId\" INTEGER NOT NULL, \n\tkind VARCHAR(30) NOT NULL, \n\tissuer VARCHAR(200) NOT NULL, \n\t\"certificateNumber\" VARCHAR(100) NOT NULL, \n\t\"validFrom\" DATE NOT NULL, \n\t\"validUntil\" DATE NOT NULL, \n\t\"verifiedBy\" INTEGER NOT NULL, \n\tstatus VARCHAR(20) DEFAULT 'verified' NOT NULL, \n\t\"revokedBy\" INTEGER, \n\t\"revokedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"revokeReason\" VARCHAR(2000), \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tCONSTRAINT uq_staff_certificate UNIQUE (\"userId\", issuer, \"certificateNumber\"), \n\tFOREIGN KEY(\"userId\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"verifiedBy\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"revokedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_staff_certificates_userId\" ON staff_certificates (\"userId\")"
+    ]
+  },
+  {
+    "name": "staff_shifts",
+    "table": "\nCREATE TABLE IF NOT EXISTS staff_shifts (\n\tid SERIAL NOT NULL, \n\t\"userId\" INTEGER NOT NULL, \n\t\"startsAt\" TIMESTAMP WITHOUT TIME ZONE NOT NULL, \n\t\"endsAt\" TIMESTAMP WITHOUT TIME ZONE NOT NULL, \n\tbay VARCHAR(100) NOT NULL, \n\tnote VARCHAR(2000) NOT NULL, \n\t\"createdBy\" INTEGER NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tCONSTRAINT shift_order CHECK (\"endsAt\" > \"startsAt\"), \n\tFOREIGN KEY(\"userId\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"createdBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_staff_shifts_userId\" ON staff_shifts (\"userId\")"
+    ]
+  },
+  {
+    "name": "vehicles",
+    "table": "\nCREATE TABLE IF NOT EXISTS vehicles (\n\tid SERIAL NOT NULL, \n\t\"customerId\" INTEGER, \n\t\"licensePlate\" VARCHAR NOT NULL, \n\t\"customerName\" VARCHAR NOT NULL, \n\tphone VARCHAR NOT NULL, \n\taddress VARCHAR, \n\t\"carBrand\" VARCHAR NOT NULL, \n\t\"carModel\" VARCHAR, \n\tstatus VARCHAR NOT NULL, \n\t\"receivedDate\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"customerId\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_vehicles_customerId\" ON vehicles (\"customerId\")",
+      "CREATE UNIQUE INDEX \"ix_vehicles_licensePlate\" ON vehicles (\"licensePlate\")"
+    ]
+  },
+  {
+    "name": "maintenance_reminders",
+    "table": "\nCREATE TABLE IF NOT EXISTS maintenance_reminders (\n\tid SERIAL NOT NULL, \n\t\"vehicleId\" INTEGER NOT NULL, \n\t\"profileId\" INTEGER NOT NULL, \n\t\"ruleKey\" VARCHAR(100) NOT NULL, \n\t\"cycleKey\" VARCHAR(100) NOT NULL, \n\tsummary JSON NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\t\"publishedBy\" INTEGER, \n\t\"publishedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tCONSTRAINT uq_maintenance_cycle UNIQUE (\"vehicleId\", \"profileId\", \"ruleKey\", \"cycleKey\"), \n\tFOREIGN KEY(\"vehicleId\") REFERENCES vehicles (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"profileId\") REFERENCES maintenance_profiles (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"publishedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_maintenance_reminders_vehicleId\" ON maintenance_reminders (\"vehicleId\")"
+    ]
+  },
+  {
+    "name": "service_visits",
+    "table": "\nCREATE TABLE IF NOT EXISTS service_visits (\n\tid SERIAL NOT NULL, \n\t\"vehicleId\" INTEGER NOT NULL, \n\t\"advisorId\" INTEGER NOT NULL, \n\t\"mechanicId\" INTEGER, \n\tconcern VARCHAR(2000) NOT NULL, \n\t\"initialInspection\" VARCHAR(4000) NOT NULL, \n\tdiagnosis VARCHAR(4000), \n\tstatus VARCHAR(30) NOT NULL, \n\tqc JSON, \n\t\"qcBy\" INTEGER, \n\t\"qcAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"vehicleId\") REFERENCES vehicles (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"advisorId\") REFERENCES users (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"mechanicId\") REFERENCES mechanics (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"qcBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_service_visits_vehicleId\" ON service_visits (\"vehicleId\")"
+    ]
+  },
+  {
+    "name": "vehicle_care",
+    "table": "\nCREATE TABLE IF NOT EXISTS vehicle_care (\n\t\"vehicleId\" INTEGER NOT NULL, \n\t\"profileId\" INTEGER, \n\tvin VARCHAR(17), \n\t\"modelYear\" INTEGER NOT NULL, \n\tengine VARCHAR(100) NOT NULL, \n\tgearbox VARCHAR(100) NOT NULL, \n\tmarket VARCHAR(20) NOT NULL, \n\tusage VARCHAR(20) NOT NULL, \n\t\"firstUseDate\" DATE NOT NULL, \n\todometer INTEGER NOT NULL, \n\t\"observedOn\" DATE NOT NULL, \n\t\"updatedBy\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"vehicleId\"), \n\tCONSTRAINT care_odometer_nonnegative CHECK (odometer >= 0), \n\tFOREIGN KEY(\"vehicleId\") REFERENCES vehicles (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"profileId\") REFERENCES maintenance_profiles (id) ON DELETE RESTRICT, \n\tUNIQUE (vin), \n\tFOREIGN KEY(\"updatedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "repair_tickets",
+    "table": "\nCREATE TABLE IF NOT EXISTS repair_tickets (\n\tid SERIAL NOT NULL, \n\t\"mechanicId\" INTEGER, \n\t\"serviceVisitId\" INTEGER, \n\t\"vehicleId\" INTEGER NOT NULL, \n\t\"totalAmount\" NUMERIC(14, 2) NOT NULL, \n\t\"mechanicName\" VARCHAR, \n\tstatus VARCHAR NOT NULL, \n\t\"startedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"completedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"paidAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"mechanicId\") REFERENCES mechanics (id) ON DELETE RESTRICT, \n\tUNIQUE (\"serviceVisitId\"), \n\tFOREIGN KEY(\"serviceVisitId\") REFERENCES service_visits (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"vehicleId\") REFERENCES vehicles (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_repair_tickets_mechanicId\" ON repair_tickets (\"mechanicId\")",
+      "CREATE INDEX \"ix_repair_tickets_vehicleId\" ON repair_tickets (\"vehicleId\")"
+    ]
+  },
+  {
+    "name": "service_followups",
+    "table": "\nCREATE TABLE IF NOT EXISTS service_followups (\n\tid SERIAL NOT NULL, \n\t\"visitId\" INTEGER NOT NULL, \n\toutcome VARCHAR(30) NOT NULL, \n\trating INTEGER, \n\tnote VARCHAR(2000) NOT NULL, \n\t\"nextContactOn\" DATE, \n\t\"createdBy\" INTEGER NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"visitId\") REFERENCES service_visits (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"createdBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_service_followups_visitId\" ON service_followups (\"visitId\")"
+    ]
+  },
+  {
+    "name": "service_quotes",
+    "table": "\nCREATE TABLE IF NOT EXISTS service_quotes (\n\tid SERIAL NOT NULL, \n\t\"visitId\" INTEGER NOT NULL, \n\trevision INTEGER NOT NULL, \n\tstage VARCHAR(20) NOT NULL, \n\titems JSON NOT NULL, \n\t\"totalAmount\" NUMERIC(14, 2) NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\t\"decidedBy\" INTEGER, \n\t\"decisionNote\" VARCHAR(2000), \n\t\"decidedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tCONSTRAINT uq_visit_revision UNIQUE (\"visitId\", revision), \n\tFOREIGN KEY(\"visitId\") REFERENCES service_visits (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"decidedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_service_quotes_visitId\" ON service_quotes (\"visitId\")"
+    ]
+  },
+  {
+    "name": "maintenance_records",
+    "table": "\nCREATE TABLE IF NOT EXISTS maintenance_records (\n\tid SERIAL NOT NULL, \n\t\"vehicleId\" INTEGER NOT NULL, \n\tcomponent VARCHAR(80) NOT NULL, \n\taction VARCHAR(20) NOT NULL, \n\t\"performedOn\" DATE NOT NULL, \n\todometer INTEGER NOT NULL, \n\t\"ticketId\" INTEGER, \n\tnote VARCHAR(2000) NOT NULL, \n\t\"createdBy\" INTEGER NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tCONSTRAINT uq_maintenance_record UNIQUE (\"vehicleId\", component, action, \"performedOn\", odometer), \n\tFOREIGN KEY(\"vehicleId\") REFERENCES vehicles (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"ticketId\") REFERENCES repair_tickets (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"createdBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_maintenance_records_vehicleId\" ON maintenance_records (\"vehicleId\")"
+    ]
+  },
+  {
+    "name": "payment_receipts",
+    "table": "\nCREATE TABLE IF NOT EXISTS payment_receipts (\n\tid SERIAL NOT NULL, \n\t\"ticketId\" INTEGER NOT NULL, \n\tamount NUMERIC(14, 2) NOT NULL, \n\tmethod VARCHAR(20) NOT NULL, \n\treference VARCHAR(100) NOT NULL, \n\t\"receivedBy\" INTEGER NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tUNIQUE (\"ticketId\"), \n\tFOREIGN KEY(\"ticketId\") REFERENCES repair_tickets (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"receivedBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": []
+  },
+  {
+    "name": "repair_items",
+    "table": "\nCREATE TABLE IF NOT EXISTS repair_items (\n\tid SERIAL NOT NULL, \n\t\"inventoryId\" INTEGER, \n\t\"repairTicketId\" INTEGER NOT NULL, \n\t\"taskName\" VARCHAR NOT NULL, \n\t\"partName\" VARCHAR, \n\tquantity INTEGER NOT NULL, \n\t\"partPrice\" NUMERIC(14, 2) NOT NULL, \n\t\"laborPrice\" NUMERIC(14, 2) NOT NULL, \n\t\"totalPrice\" NUMERIC(14, 2) NOT NULL, \n\t\"isCompleted\" BOOLEAN NOT NULL, \n\t\"evidenceRound\" INTEGER DEFAULT '1' NOT NULL, \n\t\"partCode\" VARCHAR(100), \n\t\"completedAt\" TIMESTAMP WITHOUT TIME ZONE, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\t\"updatedAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"inventoryId\") REFERENCES inventories (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"repairTicketId\") REFERENCES repair_tickets (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_repair_items_inventoryId\" ON repair_items (\"inventoryId\")",
+      "CREATE INDEX \"ix_repair_items_repairTicketId\" ON repair_items (\"repairTicketId\")"
+    ]
+  },
+  {
+    "name": "repair_evidence",
+    "table": "\nCREATE TABLE IF NOT EXISTS repair_evidence (\n\tid SERIAL NOT NULL, \n\t\"itemId\" INTEGER NOT NULL, \n\tround INTEGER NOT NULL, \n\tkind VARCHAR(20) NOT NULL, \n\t\"productCode\" VARCHAR(100), \n\t\"expectedCode\" VARCHAR(100), \n\t\"lotNumber\" VARCHAR(100), \n\tnote VARCHAR(2000) NOT NULL, \n\timage BYTEA NOT NULL, \n\tsha256 VARCHAR(64) NOT NULL, \n\t\"createdBy\" INTEGER NOT NULL, \n\t\"createdAt\" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(), \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(\"itemId\") REFERENCES repair_items (id) ON DELETE RESTRICT, \n\tFOREIGN KEY(\"createdBy\") REFERENCES users (id) ON DELETE RESTRICT\n)\n\n",
+    "indexes": [
+      "CREATE INDEX \"ix_repair_evidence_itemId\" ON repair_evidence (\"itemId\")"
+    ]
+  }
+]

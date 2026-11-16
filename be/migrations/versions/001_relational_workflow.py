@@ -5,8 +5,7 @@ deducted retroactively. The entire migration is transactional on PostgreSQL.
 """
 from alembic import op
 import sqlalchemy as sa
-from database.engine import Base
-import models  # noqa: F401
+from migrations.legacy_schema import create_legacy_tables
 
 revision = "001_relational_workflow"
 down_revision = None
@@ -16,7 +15,7 @@ depends_on = None
 
 def upgrade():
     connection = op.get_bind()
-    Base.metadata.create_all(connection)
+    create_legacy_tables(connection)
     links = [
         ("vehicles", "customerId", "users", False),
         ("mechanics", "userId", "users", True),

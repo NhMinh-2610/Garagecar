@@ -2,8 +2,7 @@
 
 from alembic import op
 import sqlalchemy as sa
-from database.engine import Base
-import models
+from migrations.legacy_schema import create_legacy_tables
 
 revision = "004_garage_care"
 down_revision = "003_account_management"
@@ -33,7 +32,7 @@ def upgrade():
         "service_quotes",
         "employee_profiles",
     ]:
-        Base.metadata.tables[name].create(bind, checkfirst=True)
+        create_legacy_tables(bind, [name])
     columns = {c["name"] for c in sa.inspect(bind).get_columns("repair_tickets")}
     if "serviceVisitId" not in columns:
         op.add_column(
