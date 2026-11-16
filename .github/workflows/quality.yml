@@ -1,0 +1,46 @@
+name: Security and integrity regression
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: garagecar
+          POSTGRES_PASSWORD: garagecar_test_only
+          POSTGRES_DB: garagecar_test
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U garagecar -d garagecar_test" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://garagecar:garagecar_test_only@127.0.0.1:5432/garagecar_test
+      JWT_SECRET: garagecar-ci-only-signing-secret-at-least-32-bytes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: python -m pip install pip==26.3 && python -m pip install -r be/requirements-dev.txt
+      - run: python -m ruff check be
+      - run: python -m pytest -q --junitxml=outputs/backend.xml
+      - run: python -m pip_audit
+      - run: npm ci && npm test
+      - run: docker build --target runtime -t garagecar-clean be
+      - name: Clean container legacy authentication
+        run: >-
+          docker run --rm --network host --user 0
+          -e DATABASE_URL -e JWT_SECRET -e PYTHONPATH=/app:/app/tests
+          -v "$PWD/be/tests:/app/tests:ro"
+          -v "$PWD/scripts/clean_runtime_check.py:/verify/clean_runtime_check.py:ro" garagecar-clean
+          python /verify/clean_runtime_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-results
+          path: outputs/backend.xml

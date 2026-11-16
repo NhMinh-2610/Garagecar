@@ -2,15 +2,10 @@ from fastapi import APIRouter, Depends
 
 from schemas.ai import (
     DiagnoseRequest,
-    DiagnoseResponse,
     CostEstimateRequest,
-    CostEstimateResponse,
     SummarizeRepairRequest,
-    SummarizeResponse,
     MaintenanceAdviceRequest,
-    MaintenanceAdviceResponse,
     ChatRequest,
-    ChatResponse,
 )
 from services.ai_service import ai_service
 from core.response import success_response

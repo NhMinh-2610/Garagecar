@@ -9,7 +9,7 @@ from sqlalchemy import update
 from schemas.settings import (
     BrandCreate, BrandResponse,
     WageCreate, WageResponse,
-    SystemParameterCreate, SystemParameterResponse
+    SystemParameterCreate
 )
 from core.constants import Role
 from core.response import success_response, error_response
