@@ -2,6 +2,8 @@
 
 FastAPI + SQLAlchemy async + PostgreSQL; frontend HTML/CSS/JavaScript thuần và PWA cho quản trị, cố vấn dịch vụ, kế toán, nhân sự, thợ và khách hàng.
 
+Bản vá ngày 16/11/2026: migration `007`/`008`, retry an toàn, phân trang API và cấu hình proxy. Xem [thay đổi, kết quả kiểm thử và cách nâng cấp](docs/SECURITY_HARDENING_20261116.md). `JWT_SECRET` hiện bắt buộc là khóa riêng hợp lệ; không dùng giá trị mẫu.
+
 ## Yêu cầu
 
 - Python 3.11+
@@ -28,7 +30,7 @@ Nội dung sau được lưu **trong file `be/.env`**, không dán vào PowerShe
 
 ```dotenv
 DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@localhost:5432/garagecar
-JWT_SECRET=replace-with-a-long-random-secret
+JWT_SECRET=
 PORT=8000
 AI_PROVIDER=mock
 ```
