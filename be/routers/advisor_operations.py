@@ -9,20 +9,16 @@ from middleware.auth import require_permission
 from models import ServiceVisit, ServiceFollowup, Vehicle, RepairTicket
 from schemas.professional import FollowupInput
 from services.maintenance_service import row_dict
+from core.pagination import Page
 
 router = APIRouter(prefix="/api/advisor", tags=["Advisor follow-up"])
 
 
 @router.get("/followups")
 async def followups(
-    db: AsyncSession = Depends(get_db), user=Depends(require_permission("reception"))
+    db: AsyncSession = Depends(get_db), user=Depends(require_permission("reception")), page: Page = Depends()
 ):
-    rows = (
-        await db.scalars(
-            select(ServiceFollowup).order_by(ServiceFollowup.id.desc()).limit(1000)
-        )
-    ).all()
-    return success_response([row_dict(r) for r in rows])
+    return await page.fetch(db, select(ServiceFollowup), ServiceFollowup.id, row_dict)
 
 
 @router.post("/visits/{visit_id}/followup")

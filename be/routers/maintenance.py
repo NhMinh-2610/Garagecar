@@ -25,6 +25,8 @@ from services.maintenance_service import (
 )
 from core.response import success_response
 from core.time import utcnow
+from core.pagination import Page
+from services.maintenance_service import scan_all_reminders
 
 router = APIRouter(prefix="/api/maintenance", tags=["Maintenance"])
 CATALOG = Path(__file__).resolve().parents[1] / "data" / "maintenance_catalog.json"
@@ -238,7 +240,7 @@ async def record(
     )
     db.add(entry)
     await db.flush()
-    await scan_reminders(db)
+    await scan_reminders(db, [vehicle_id])
     await db.commit()
     return success_response(row_dict(entry), "Đã ghi lịch sử bảo dưỡng", 201)
 
@@ -249,14 +251,14 @@ async def scan(
 ):
     if user["role"] not in ("admin", "advisor"):
         raise HTTPException(403, "Không có quyền quét nhắc hạn")
-    count = await scan_reminders(db)
+    count = await scan_all_reminders(db)
     await db.commit()
     return success_response({"evaluatedRules": count}, "Đã kiểm tra hạn bảo dưỡng")
 
 
 @router.get("/reminders")
 async def reminders(
-    db: AsyncSession = Depends(get_db), user=Depends(require_permission("maintenance"))
+    db: AsyncSession = Depends(get_db), user=Depends(require_permission("maintenance")), page: Page = Depends()
 ):
     query = (
         select(MaintenanceReminder)
@@ -277,8 +279,7 @@ async def reminders(
                 .where(Mechanic.userId == user["id"], Mechanic.status == "active")
             )
         )
-    rows = await db.scalars(query.order_by(MaintenanceReminder.id.desc()).limit(200))
-    return success_response([row_dict(r) for r in rows])
+    return await page.fetch(db, query, MaintenanceReminder.id, row_dict)
 
 
 @router.post("/reminders/{reminder_id}/publish")

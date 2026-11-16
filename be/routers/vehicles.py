@@ -13,6 +13,25 @@ from schemas.vehicle import VehicleCreate, VehicleUpdate, VehicleResponse
 from core.constants import Role
 from core.response import success_response, error_response
 from middleware.auth import get_current_user, require_role
+from core.pagination import Page
+from sqlalchemy.orm import lazyload
+from models import RepairTicket
+
+
+async def vehicle_page(db, page, query):
+    if page.status:
+        if page.status not in {"waiting", "repairing", "completed", "delivered"}:
+            raise HTTPException(422, "Trạng thái xe không hợp lệ")
+        query = query.where(Vehicle.status == page.status)
+    total = await db.scalar(select(func.count()).select_from(query.order_by(None).subquery()))
+    rows, more = await page.load(db, query.options(lazyload(Vehicle.repairTickets)), Vehicle.id)
+    counts = {}
+    if rows:
+        for vid, count, unpaid in await db.execute(select(RepairTicket.vehicleId, func.count(), func.bool_or(RepairTicket.status != "paid")).where(RepairTicket.vehicleId.in_([v.id for v in rows])).group_by(RepairTicket.vehicleId)):
+            counts[vid] = (count, unpaid)
+    data = [{**{c.name: getattr(v, c.name) for c in Vehicle.__table__.columns},
+        "repairTickets": [], "ticketCount": counts.get(v.id, (0, False))[0], "hasUnpaid": counts.get(v.id, (0, False))[1]} for v in rows]
+    return page.response(data, rows, more, {"total": total})
 
 router = APIRouter(prefix="/api/vehicles", tags=["Vehicles"])
 
@@ -21,26 +40,23 @@ router = APIRouter(prefix="/api/vehicles", tags=["Vehicles"])
 async def my_vehicles(
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
+    page: Page = Depends(),
 ):
     """Ownership is based exclusively on the linked account ID."""
     stmt = select(Vehicle).where(Vehicle.customerId == current_user["id"])
-    result = await db.execute(stmt)
-    vehicles = result.scalars().all()
-    data = [VehicleResponse.model_validate(v).model_dump() for v in vehicles]
-    return success_response(data)
+    return await vehicle_page(db, page, stmt)
 
 
 @router.get("", summary="List all vehicles (admin only)")
 async def list_vehicles(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR)),
+    page: Page = Depends(),
 ):
     stmt = select(Vehicle).order_by(Vehicle.receivedDate.desc())
-    result = await db.execute(stmt)
-    vehicles = result.scalars().all()
-    return success_response(
-        [VehicleResponse.model_validate(v).model_dump() for v in vehicles]
-    )
+    if page.q:
+        stmt = stmt.where(Vehicle.licensePlate.icontains(page.q, autoescape=True) | Vehicle.customerName.icontains(page.q, autoescape=True) | Vehicle.phone.icontains(page.q, autoescape=True) | Vehicle.carBrand.icontains(page.q, autoescape=True))
+    return await vehicle_page(db, page, stmt)
 
 
 @router.get("/{vehicle_id}", summary="Get a single vehicle (admin only)")

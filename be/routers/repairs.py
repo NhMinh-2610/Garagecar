@@ -1,12 +1,14 @@
 from core.time import utcnow
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.constants import Role
 from core.response import success_response
 from database.session import get_db
 from middleware.auth import require_role
+from core.pagination import Page
 from models import Mechanic, RepairTicket, Vehicle, ServiceVisit
 from schemas.repair import (
     RepairItemToggle,
@@ -30,43 +32,70 @@ def serialize(ticket):
     return RepairTicketResponse.model_validate(ticket).model_dump()
 
 
+async def repair_page(db, page, query):
+    if page.vehicle_id:
+        query = query.where(RepairTicket.vehicleId == page.vehicle_id)
+    if page.mechanic_id:
+        query = query.where(RepairTicket.mechanicId == page.mechanic_id)
+    base = query.order_by(None).subquery()
+    rows = await db.execute(select(base.c.status, func.count(), func.sum(base.c.totalAmount)).group_by(base.c.status))
+    counts, amounts = {}, {}
+    for status, count, amount in rows:
+        counts[status], amounts[status] = count, float(amount or 0)
+    from datetime import datetime, timedelta
+    local = utcnow() + timedelta(hours=7)
+    start = datetime(local.year, local.month, 1) - timedelta(hours=7)
+    end = datetime(local.year + (local.month == 12), 1 if local.month == 12 else local.month + 1, 1) - timedelta(hours=7)
+    month = await db.scalar(select(func.coalesce(func.sum(base.c.totalAmount), 0)).where(base.c.status == "paid", base.c.paidAt >= start, base.c.paidAt < end))
+    if page.q:
+        query = query.where(RepairTicket.vehicle.has(Vehicle.licensePlate.icontains(page.q, autoescape=True) | Vehicle.customerName.icontains(page.q, autoescape=True)) | RepairTicket.mechanicName.icontains(page.q, autoescape=True))
+    query = query.options(selectinload(RepairTicket.vehicle).lazyload(Vehicle.repairTickets))
+    if page.status:
+        statuses = page.status.split(",")
+        if set(statuses) - {"draft", "working", "completed", "paid"}:
+            raise HTTPException(422, "Trạng thái phiếu không hợp lệ")
+        query = query.where(RepairTicket.status.in_(statuses))
+    return await page.fetch(db, query, RepairTicket.id, serialize, {"counts": counts, "amounts": amounts, "monthRevenue": float(month)})
+
+
 @router.get("/my-tasks")
 async def my_tasks(
     db: AsyncSession = Depends(get_db),
     user: dict = Depends(require_role(Role.MECHANIC, Role.ADMIN)),
+    page: Page = Depends(),
 ):
-    tickets = await db.scalars(
+    query = (
         select(RepairTicket)
         .join(Mechanic, RepairTicket.mechanicId == Mechanic.id)
         .where(Mechanic.userId == user["id"], Mechanic.status == "active")
         .order_by(RepairTicket.createdAt.desc())
     )
-    return success_response([serialize(t) for t in tickets])
+    return await repair_page(db, page, query)
 
 
 @router.get("/my-repairs")
 async def my_repairs(
     db: AsyncSession = Depends(get_db),
     user: dict = Depends(require_role(Role.CUSTOMER)),
+    page: Page = Depends(),
 ):
-    tickets = await db.scalars(
+    query = (
         select(RepairTicket)
         .join(Vehicle)
         .where(Vehicle.customerId == user["id"])
         .order_by(RepairTicket.createdAt.desc())
     )
-    return success_response([serialize(t) for t in tickets])
+    return await repair_page(db, page, query)
 
 
 @router.get("")
 async def list_repairs(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_role(Role.ADMIN, Role.ADVISOR, Role.ACCOUNTANT)),
+    page: Page = Depends(),
 ):
-    tickets = await db.scalars(
-        select(RepairTicket).order_by(RepairTicket.createdAt.desc())
-    )
-    return success_response([serialize(t) for t in tickets])
+    query = select(RepairTicket)
+    return await repair_page(db, page, query)
 
 
 @router.get("/{ticket_id}")

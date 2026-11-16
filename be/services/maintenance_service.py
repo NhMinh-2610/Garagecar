@@ -162,12 +162,12 @@ async def schedule(db, vehicle):
     }
 
 
-async def scan_reminders(db, vehicle_ids=None):
+async def scan_reminders(db, vehicle_ids=None, skip_locked=False):
     query = (
         select(Vehicle)
         .join(VehicleCare, VehicleCare.vehicleId == Vehicle.id)
         .order_by(Vehicle.id)
-        .with_for_update(of=Vehicle)
+        .with_for_update(of=Vehicle, skip_locked=skip_locked or vehicle_ids is None)
     )
     if vehicle_ids is not None:
         query = query.where(Vehicle.id.in_(vehicle_ids))
@@ -217,3 +217,15 @@ async def scan_reminders(db, vehicle_ids=None):
                 )
                 reminder.summary = {**reminder.summary, **rule}
     return generated
+
+
+async def scan_all_reminders(db):
+    """Only for a standalone scan, never inside a vehicle mutation transaction."""
+    cursor, count = 0, 0
+    while True:
+        ids = list((await db.scalars(select(VehicleCare.vehicleId).where(VehicleCare.vehicleId > cursor).order_by(VehicleCare.vehicleId).limit(50))).all())
+        if not ids:
+            return count
+        count += await scan_reminders(db, ids, skip_locked=True)
+        await db.commit()
+        cursor = ids[-1]

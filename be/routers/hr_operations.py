@@ -1,7 +1,7 @@
 """HR scheduling, verified qualifications and leave decisions."""
 
 from datetime import datetime, time, timedelta
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.response import success_response
@@ -31,20 +31,24 @@ async def employee(db, user_id):
 
 @router.get("/operations")
 async def operations(
-    db: AsyncSession = Depends(get_db), user=Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), user=Depends(get_current_user),
+    limit: int = Query(default=100, ge=1, le=200), offset: int = Query(default=0, ge=0)
 ):
     staff(user)
     result = {}
+    more = False
     for key, model in (
         ("shifts", StaffShift),
         ("certificates", StaffCertificate),
         ("leave", LeaveRequest),
     ):
-        query = select(model).order_by(model.id.desc()).limit(1000)
+        query = select(model).order_by(model.id.desc()).offset(offset).limit(limit + 1)
         if "hr" not in user["permissions"]:
             query = query.where(model.userId == user["id"])
-        result[key] = [row_dict(r) for r in (await db.scalars(query)).all()]
-    return success_response(result)
+        rows = list((await db.scalars(query)).all())
+        more = more or len(rows) > limit
+        result[key] = [row_dict(r) for r in rows[:limit]]
+    return success_response(result, pagination={"hasMore": more, "nextOffset": offset + limit if more else None, "pageSize": limit})
 
 
 @router.post("/shifts")
